@@ -22,7 +22,7 @@ for(const item of entries){
   assert.ok(logo.pathname.startsWith('/wiki/Special:FilePath/'),'expected Commons file URL '+item.code);
   assert.equal(credit.hostname,'commons.wikimedia.org');
   assert.ok(credit.pathname.startsWith('/wiki/File:'),'Commons credit URL '+item.code);
-  assert.equal(decodeURIComponent(logo.pathname.split('/').pop()),decodeURIComponent(credit.pathname.split('/').pop()),'image attribution matches file: '+item.code);
+  assert.equal(decodeURIComponent(logo.pathname.split('/').pop()),decodeURIComponent(credit.pathname.split('/').pop()).replace(/^File:/,''),'image attribution matches file: '+item.code);
  }
 }
 assert.equal(entries.filter(x=>x.logo).length,26,'logo references documented');
