@@ -381,6 +381,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
  .mobile-bottom-nav a.is-current{background:#1b526c;color:#fff;box-shadow:inset 0 3px 0 #f2c76d}
  .mobile-bottom-nav a[aria-current="location"] span:last-child{font-weight:900}
 }
+
+/* Only indicate a matching airline after an actual syntactically valid flight number. */
+.flight-airline-chip.is-matched{background:#d4f1e5;color:#155240;border-color:#2d9473;box-shadow:inset 0 0 0 1px #2d9473}
+.flight-airline-chip.is-matched:before{content:'✓ ';font-weight:900}
+@media(forced-colors:active){.flight-airline-chip[aria-pressed="true"]{border:2px solid Highlight}}
 </style></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
@@ -480,9 +485,17 @@ function renderFlightAirlineShortcuts(){
  $('flightAirlineShortcutTitle').textContent=words.title;$('flightAirlineShortcutNote').textContent=words.note;root.setAttribute('aria-label',words.title);
  for(const airline of airlineDirectory){
   const button=document.createElement('button');button.type='button';button.className='flight-airline-chip';button.dataset.airline=airline.code;
-  button.textContent=airline.code+' · '+airline.name;button.setAttribute('aria-label',words.pick+': '+airline.name+' ('+airline.code+')');
+  button.textContent=airline.code+' · '+airline.name;button.setAttribute('aria-label',words.pick+': '+airline.name+' ('+airline.code+')');button.setAttribute('aria-pressed','false');
   button.addEventListener('click',()=>{$('flight').placeholder=airline.code+' 1234';$('flight').scrollIntoView({block:'center',behavior:'smooth'});$('flight').focus({preventScroll:true});});
   root.append(button);
+ }
+}
+function updateSelectedAirlineChip(){
+ const number=flightNumberValue(),prefix=isFlightNumber(number)?number.slice(0,2):'';
+ for(const button of document.querySelectorAll('#flightAirlineShortcutButtons button')){
+  const matches=Boolean(prefix)&&button.dataset.airline===prefix;
+  button.classList.toggle('is-matched',matches);
+  button.setAttribute('aria-pressed',String(matches));
  }
 }
 function updateAirlineSuggestion(){
@@ -517,7 +530,7 @@ function updateFlightSearch(){
  $('flightError').hidden=state!=='invalid';
  $('flightSearchPreview').dataset.state=state;
  $('flightSearchHint').textContent=state==='ready'?msg.ready.replace('{flight}',number):msg[state];
- updateAirlineSuggestion();$('clearFlight').hidden=state==='empty';$('clearFlight').setAttribute('aria-label',msg.clear);
+ updateAirlineSuggestion();updateSelectedAirlineChip();$('clearFlight').hidden=state==='empty';$('clearFlight').setAttribute('aria-label',msg.clear);
  $('track').setAttribute('aria-disabled',String(state!=='ready'));
  if(state==='ready'){$('track').href='https://www.flightradar24.com/data/flights/'+encodeURIComponent(number.toLowerCase());$('track').target='_blank';}
  else{$('track').removeAttribute('href');}
