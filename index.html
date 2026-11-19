@@ -343,6 +343,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 .flight-airline-shortcuts p{margin:10px 0 0;color:#516e80;font-size:12px;line-height:1.55}
 @media(max-width:540px){.flight-airline-shortcuts{padding:13px}.flight-airline-chip-list{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:3px}.flight-airline-chip{flex:0 0 auto;white-space:nowrap}}
 
+.airline-more-toggle{border-style:dashed;background:#deeff8;color:#084b70}
+@media(max-width:540px){.flight-airline-chip-list:has(.airline-more-toggle[aria-expanded="true"]){flex-wrap:wrap;overflow-x:visible}}
+
 /* Demo board status filter: explicitly sample-only, keyboard and mobile friendly */
 .board-controls #boardStatusFilter{min-width:155px;max-width:220px}
 @media(max-width:680px){.board-controls #boardStatusFilter{max-width:none;min-width:0}}
@@ -471,7 +474,30 @@ const airlineDirectory=[
 {code:'AA',name:'American Airlines',url:'https://www.aa.com/homePage.do?locale=en_US',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/AAirlines.png',credit:'https://commons.wikimedia.org/wiki/File:AAirlines.png'},
 // Air Canada requires prior authorization for use of its logo. Brand name/code only pending permission.
 {code:'AC',name:'Air Canada',url:'https://www.aircanada.com/home/ca/en/aco/flight-status'}
-];
+,
+{code:'DM',name:'Arajet',url:'https://www.arajet.com/'},
+{code:'CM',name:'Copa Airlines',url:'https://www.copaair.com/'},
+{code:'DL',name:'Delta Air Lines',url:'https://www.delta.com/flight-status/'},
+{code:'UA',name:'United Airlines',url:'https://www.united.com/en/us/flightstatus'},
+{code:'TS',name:'Air Transat',url:'https://www.airtransat.com/'},
+{code:'UX',name:'Air Europa',url:'https://www.aireuropa.com/'},
+{code:'4Y',name:'Discover Airlines',url:'https://www.discover-airlines.com/'},
+{code:'AV',name:'avianca',url:'https://www.avianca.com/'},
+{code:'AF',name:'Air France',url:'https://www.airfrance.com/'},
+{code:'BA',name:'British Airways',url:'https://www.britishairways.com/'},
+{code:'F9',name:'Frontier Airlines',url:'https://www.flyfrontier.com/'},
+{code:'WN',name:'Southwest Airlines',url:'https://www.southwest.com/'},
+{code:'WS',name:'WestJet',url:'https://www.westjet.com/'},
+{code:'NK',name:'Spirit Airlines',url:'https://www.spirit.com/'},
+{code:'AR',name:'Aerolíneas Argentinas',url:'https://www.aerolineas.com.ar/'},
+{code:'AM',name:'Aeroméxico',url:'https://www.aeromexico.com/'},
+{code:'LA',name:'LATAM Airlines',url:'https://www.latamairlines.com/'},
+{code:'2W',name:'World2Fly',url:'https://www.w2fly.es/'},
+{code:'E9',name:'Iberojet',url:'https://www.iberojet.com/'},
+{code:'P5',name:'Wingo',url:'https://www.wingo.com/'},
+{code:'H2',name:'SKY Airline',url:'https://www.skyairline.com/'},
+{code:'G3',name:'GOL',url:'https://www.voegol.com.br/'},
+{code:'SY',name:'Sun Country Airlines',url:'https://www.suncountry.com/'}];
 const airlineWords={
 es:{heading:'Consulta con tu aerolínea',intro:'Comprueba horarios, cambios y cancelaciones en las páginas oficiales. Son enlaces externos; VuelosRD no importa datos de vuelos.',badge:'Fuentes oficiales externas',note:'El prefijo de vuelo no confirma la aerolínea operadora. Verifica siempre el operador, la fecha y el número.',link:'Consultar estado oficial ↗',hint:'Prefijo {code}: posiblemente {name}. Comprueba la aerolínea operadora.',match:'Página oficial ↗',description:'Consulta de vuelos en la web de la aerolínea.',search:'Buscar un vuelo ↗'},
 en:{heading:'Check with your airline',intro:'Verify schedules, changes and cancellations on the official airline pages. These are external links; VuelosRD does not import flight data.',badge:'External official sources',note:'A flight prefix does not prove which airline operates the flight. Always verify the operating carrier, date and number.',link:'Official flight information ↗',hint:'Prefix {code}: possibly {name}. Confirm the operating airline.',match:'Official website ↗',description:'Flight information on the airline website.',search:'Find a flight ↗'},
@@ -530,15 +556,27 @@ de:{title:'Flug mit Airline-Code suchen',note:'Der Code hilft bei der Eingabe, b
 fr:{title:'Rechercher par compagnie',note:'Le code facilite la saisie, sans confirmer la compagnie exploitante.',pick:'Préparer une recherche'},
 ht:{title:'Chèche vòl selon konpayi',note:'Kòd la ede ekri nimewo vòl la, li pa konfime konpayi ki opere vòl la.',pick:'Prepare rechèch vòl'}
 };
+const airlineMoreWords={
+ es:['Más aerolíneas','Menos aerolíneas'],en:['More airlines','Fewer airlines'],de:['Weitere Airlines','Weniger Airlines'],fr:['Autres compagnies','Moins de compagnies'],ht:['Plis konpayi avyon','Mwens konpayi avyon']
+};
+let showAllAirlineShortcuts=false;
 function renderFlightAirlineShortcuts(){
  const words=flightAirlineShortcutWords[current],root=$('flightAirlineShortcutButtons');root.replaceChildren();
  $('flightAirlineShortcutTitle').textContent=words.title;$('flightAirlineShortcutNote').textContent=words.note;root.setAttribute('aria-label',words.title);
- for(const airline of airlineDirectory){
+ const visible=showAllAirlineShortcuts?airlineDirectory:airlineDirectory.slice(0,5);
+ for(const airline of visible){
   const button=document.createElement('button');button.type='button';button.className='flight-airline-chip';button.dataset.airline=airline.code;
   button.textContent=airline.code+' · '+airline.name;button.setAttribute('aria-label',words.pick+': '+airline.name+' ('+airline.code+')');button.setAttribute('aria-pressed','false');
-  button.addEventListener('click',()=>{$('flight').placeholder=airline.code+' 1234';$('flight').scrollIntoView({block:'center',behavior:'smooth'});$('flight').focus({preventScroll:true});});
+  button.addEventListener('click',()=>{$('flight').placeholder=airline.code+' 1234';$('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('flight').focus({preventScroll:true});});
   root.append(button);
  }
+ if(airlineDirectory.length>5){
+  const more=document.createElement('button');more.type='button';more.className='flight-airline-chip airline-more-toggle';more.setAttribute('aria-expanded',String(showAllAirlineShortcuts));
+  const labels=airlineMoreWords[current];more.textContent=showAllAirlineShortcuts?labels[1]:labels[0]+' (+'+(airlineDirectory.length-5)+')';
+  more.addEventListener('click',()=>{showAllAirlineShortcuts=!showAllAirlineShortcuts;renderFlightAirlineShortcuts();const toggle=root.querySelector('.airline-more-toggle');if(toggle)toggle.focus();updateSelectedAirlineChip();});
+  root.append(more);
+ }
+ updateSelectedAirlineChip();
 }
 function updateSelectedAirlineChip(){
  const number=flightNumberValue(),prefix=isFlightNumber(number)?number.slice(0,2):'';
