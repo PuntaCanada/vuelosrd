@@ -55,6 +55,7 @@ jobs:
           assert 'id="statusAirlineSuggestion"' in s and 'statusAirlineHint' in s, 'DEPLOYMENT STALE: airline status source missing'
           assert 'const statusSourceWords=' in s and 'id="statusAirportOfficialLink"' in s, 'DEPLOYMENT STALE: official airport source guidance missing'
           assert 'id="flightAirlineShortcutButtons"' in s and 'board-route-country' in s and "clear.id='boardEmptyReset'" in s, 'DEPLOYMENT STALE: route labels / airline chips / recovery missing'
+          assert 'id="boardActiveFilters"' in s and 'function renderActiveBoardFilters()' in s, 'DEPLOYMENT STALE: accessible filter chips missing'
           assert 'id="boardStatusFilter"' in s and "url.searchParams.set('status'" in s, 'DEPLOYMENT STALE: demo status filtering missing'
           assert 'function normalizeFlightInput(value)' in s, 'DEPLOYMENT STALE: flight input normalization missing'
           assert 'completamente ficticios' in s, 'Airport demo warning absent'
