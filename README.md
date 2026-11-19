@@ -66,3 +66,8 @@ No new paid services, hosted image accounts, trackers, or third-party scripts we
 ## Country flags on the demonstration flight board
 
 The five locally hosted SVGs under `assets/flags/` (Germany `de`, United States `us`, Spain `es`, Canada `ca`, Dominican Republic `do`) are from [lipis/flag-icons](https://github.com/lipis/flag-icons), version retrieved from its public main branch. These files are MIT licensed; the complete license notice is retained in `assets/flags/LICENSE` (copyright Panayiotis Lipiridis). Their use introduces **no new API, tracking, or recurring costs**. City-to-country mappings are manually curated for the **fictional example destinations only**, and do not represent real routes, schedules, or flight operating information.
+
+
+## Airline directory update (2026-11-19)
+
+The airline directory now contains 28 airline code/name entries, and all 28 shortcuts are shown by default (the toggle can collapse to the first five). 26 entries reference source-documented airline marks hosted on Wikimedia Commons; for Sun Country Airlines and Air Canada, text/code fallbacks remain. Air Canada brand permission is not assumed. Availability, trademark notices and artwork may change; any failed external image automatically falls back to the airline code. Logos identify airlines only and do **not** imply a verified present route, partnership, live flight feed or airline endorsement. Sources for added marks are linked through each airline's `credit` field in `index.html`. No new paid APIs or subscriptions have been introduced.
