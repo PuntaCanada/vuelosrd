@@ -108,7 +108,35 @@
 .airport-detail-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
 .airport-detail-meta span{font-size:12px;background:#eaf6f8;color:#24576a;padding:7px 10px;border-radius:8px}
 @media(max-width:700px){.airport-quick{grid-template-columns:1fr}.airport-quick a{justify-content:flex-start}}
-.airport-card-info{display:inline-block;font-size:13px;font-weight:700;color:#0d6682;text-decoration:underline;text-underline-offset:3px;margin-top:2px}.airport-card-info:hover{color:#083f59}</style></head>
+.airport-card-info{display:inline-block;font-size:13px;font-weight:700;color:#0d6682;text-decoration:underline;text-underline-offset:3px;margin-top:2px}.airport-card-info:hover{color:#083f59}
+/* Airport destination cards: responsive, typographic and lightweight without paid images. */
+.cards{gap:18px}
+.airport-card{padding:0;gap:0;overflow:hidden;border:1px solid #d6e4ea;border-radius:18px;box-shadow:0 8px 26px #14334a0a;transition:transform .2s ease,box-shadow .2s ease}
+.airport-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px #102e471c}
+.airport-card-visual{position:relative;overflow:hidden;isolation:isolate;width:100%;height:136px;flex:none;background:linear-gradient(145deg,#123851 0%,#287c90 58%,#bed5c4 100%)}
+.airport-card-visual:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 74% 22%,#fff6 0 26px,transparent 27px),linear-gradient(172deg,transparent 68%,#0c3145b8 69% 78%,#0a273a 79%);opacity:.8}
+.airport-card-horizon{position:absolute;bottom:15px;left:-8%;width:116%;height:36px;background:repeating-linear-gradient(90deg,#f8fffd30 0 3px,transparent 3px 26px);transform:skewY(-5deg);opacity:.45}
+.airport-card-plane{position:absolute;right:22px;top:19px;font-size:38px;color:#fff;transform:rotate(-20deg);text-shadow:0 4px 12px #0a22394f}
+.airport-card-code{position:absolute;left:18px;bottom:14px;color:#fff;font-size:40px;font-weight:900;letter-spacing:2px;line-height:1;text-shadow:0 3px 14px #092a4180}
+.airport-card-sdq .airport-card-visual{background:linear-gradient(135deg,#112d49,#3b6f8e 60%,#e0b68f)}
+.airport-card-sti .airport-card-visual{background:linear-gradient(135deg,#102e3f,#3d857a 60%,#bfcdb7)}
+.airport-card-pop .airport-card-visual{background:linear-gradient(135deg,#13405a,#3b9aa3 58%,#e5c89f)}
+.airport-card-lrm .airport-card-visual{background:linear-gradient(135deg,#173954,#3b8f99 60%,#bcded5)}
+.airport-card-azs .airport-card-visual{background:linear-gradient(135deg,#163d4b,#3d8b79 60%,#b2d3a4)}
+.airport-card-jbq .airport-card-visual{background:linear-gradient(135deg,#172d48,#526d82 64%,#d0c1aa)}
+.airport-card-content{display:flex;flex-direction:column;align-items:stretch;gap:9px;padding:19px;min-height:195px;flex:1}
+.airport-card-meta{font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:#54738a;font-weight:800}
+.airport-card h3{font-size:19px;line-height:1.3;margin:0;color:#17344b}
+.airport-card .airport-card-region{font-size:13px;line-height:1.5;color:#526f82;margin:0}
+.airport-card-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:auto;padding-top:12px}
+.airport-card-actions a{padding:10px 12px;text-decoration:none;font-size:12px;font-weight:800;border-radius:10px;line-height:1.4}
+.airport-card-actions .airport-card-board{background:#0b6480;color:#fff}
+.airport-card-actions .airport-card-board:hover{background:#074d64}
+.airport-card-actions .airport-card-info{border:1px solid #b9d5df;background:#f3fafc;color:#145d77;margin:0}
+.airport-card-actions .airport-card-info:hover{background:#dfedf3;color:#0c4760}
+@media(prefers-reduced-motion:reduce){.airport-card{transition:none}.airport-card:hover{transform:none}}
+@media(max-width:760px){.airport-card-visual{height:125px}.airport-card-content{min-height:0}}
+</style></head>
 <body>
 <header class="hero"><div class="wrap"><nav class="nav" aria-label="Languages"><a class="brand" href="/">Vuelos<span>RD</span> ✈</a><div class="languages"><button type="button" class="lang active" data-lang="es" aria-pressed="true"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="Dominicana"><rect width="24" height="16" fill="#fff"/><path d="M0 0h10v6H0zM14 10h10v6H14z" fill="#d51d35"/><path d="M14 0h10v6H14zM0 10h10v6H0z" fill="#003f87"/><circle cx="12" cy="8" r="1.35" fill="#17643a"/></svg><span>ES</span></button><button type="button" class="lang" data-lang="en" aria-pressed="false"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="USA"><rect width="24" height="16" fill="#fff"/><rect x="0" y="0" width="24" height="1.24" fill="#b22234"/><rect x="0" y="2.46" width="24" height="1.24" fill="#b22234"/><rect x="0" y="4.92" width="24" height="1.24" fill="#b22234"/><rect x="0" y="7.38" width="24" height="1.24" fill="#b22234"/><rect x="0" y="9.84" width="24" height="1.24" fill="#b22234"/><rect x="0" y="12.3" width="24" height="1.24" fill="#b22234"/><rect x="0" y="14.76" width="24" height="1.24" fill="#b22234"/><rect width="10" height="8.7" fill="#3c3b6e"/><g fill="#fff"><circle cx="1.4" cy="1.3" r=".5"/><circle cx="1.4" cy="3.4" r=".5"/><circle cx="1.4" cy="5.5" r=".5"/><circle cx="1.4" cy="7.5" r=".5"/><circle cx="4.2" cy="1.3" r=".5"/><circle cx="4.2" cy="3.4" r=".5"/><circle cx="4.2" cy="5.5" r=".5"/><circle cx="4.2" cy="7.5" r=".5"/><circle cx="7" cy="1.3" r=".5"/><circle cx="7" cy="3.4" r=".5"/><circle cx="7" cy="5.5" r=".5"/><circle cx="7" cy="7.5" r=".5"/></g></svg><span>EN</span></button><details class="lang-menu" id="langMenu"><summary aria-label="More languages">🌐 <span id="activeOther">+</span> <span class="chevron">⌄</span></summary><div class="lang-options" role="group" aria-label="Languages"><button type="button" data-choose-lang="de"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="Deutschland"><rect width="24" height="5.34" fill="#111"/><rect y="5.33" width="24" height="5.34" fill="#dd0000"/><rect y="10.66" width="24" height="5.34" fill="#ffce00"/></svg> Deutsch</button><button type="button" data-choose-lang="fr"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="France"><rect width="8" height="16" fill="#002395"/><rect x="8" width="8" height="16" fill="#fff"/><rect x="16" width="8" height="16" fill="#ed2939"/></svg> Français</button><button type="button" data-choose-lang="ht"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="Ayiti"><rect width="24" height="8" fill="#00209f"/><rect y="8" width="24" height="8" fill="#d21034"/><rect x="9.2" y="4" width="5.6" height="8" fill="#fff"/><path d="M12 5l-1 4h2z" fill="#388348"/></svg> Kreyòl</button></div></details></div></nav><div class="site-links"><a href="#flight-board" id="goBoard">Tablero</a><a href="#flight-status" id="goStatus">Estado del vuelo</a><a href="#airports" id="goAirports">Aeropuertos</a><a href="#airport-details" id="goDetail">Información</a><a href="#travel-tools" id="goTools">Herramientas de viaje</a></div><div class="eyebrow" data-i="eyebrow">REPÚBLICA DOMINICANA</div><h1 data-i="headline">Tus vuelos. Tus aeropuertos. Todo en un solo lugar.</h1><p data-i="intro">Consulta aeropuertos dominicanos, encuentra enlaces a llegadas y salidas y sigue tu vuelo con servicios externos.</p><div class="clockbox">🕒 <span data-i="local">Hora en República Dominicana</span> <span class="clock" id="clock">UTC−4</span></div><div class="clockcompare" id="homeclock" aria-live="off"></div></div></header>
 <main><div class="wrap"><section class="air-board" id="flight-board" aria-labelledby="boardTitle">
@@ -135,8 +163,36 @@ ht:{eyebrow:'REPIBLIK DOMINIKÈN',headline:'Vòl ou yo. Ayewopò ou yo. Tout nan
 };
 const $=id=>document.getElementById(id);let current='es';const originalLink=new URL(window.location.href);
 function links(){const code=$('airport').value.toLowerCase();$('arrivals').href='https://www.flightradar24.com/data/airports/'+code+'/arrivals';$('departures').href='https://www.flightradar24.com/data/airports/'+code+'/departures';const val=$('flight').value.trim().replace(/\s+/g,'').toUpperCase();const valid=!val||/^[A-Z0-9]{2,8}$/.test(val);$('flightError').textContent=valid?'':I[current].badFlight;$('track').href=val&&valid?'https://www.flightradar24.com/data/flights/'+encodeURIComponent(val.toLowerCase()):'https://www.flightradar24.com/';if(!valid)$('track').removeAttribute('href');$('track').setAttribute('aria-disabled',String(!valid));$('shareFlight').disabled=!valid;$('sdqOfficial').hidden=code!=='sdq';renderFlightStatus();}
-const airportCardInfo={es:'Información del aeropuerto ↗',en:'Airport details ↗',de:'Flughafeninfos ↗',fr:'Détails de l’aéroport ↗',ht:'Enfòmasyon ayewopò ↗'};
-function cards(){const holder=$('cards');holder.replaceChildren();for(const [code,name] of airports){const el=document.createElement('article');el.className='card';const tag=document.createElement('span');tag.className='code';tag.textContent=code;const title=document.createElement('h3');title.textContent=name;const p=document.createElement('p');p.textContent='República Dominicana';const btn=document.createElement('button');btn.type='button';btn.textContent=I[current].select;btn.addEventListener('click',()=>{$('airport').value=code;links();details();$('boardAirport').value=code;renderBoard();$('flight-board').scrollIntoView({behavior:'smooth'});});const infoBtn=document.createElement('a');infoBtn.href=airportDeepLink(code,null,'airport-details');infoBtn.className='airport-card-info';infoBtn.textContent=airportCardInfo[current];el.append(tag,title,p,btn,infoBtn);holder.append(el);}}
+const airportCardInfo={es:{info:'Ver detalles ↗',board:'Ver tablero ↗',region:'Zona',type:'Aeropuerto'},en:{info:'Airport details ↗',board:'Open flight board ↗',region:'Area',type:'Airport'},de:{info:'Flughafeninfos ↗',board:'Flugtafel öffnen ↗',region:'Region',type:'Flughafen'},fr:{info:'Infos aéroport ↗',board:'Voir les vols ↗',region:'Région',type:'Aéroport'},ht:{info:'Detay ayewopò ↗',board:'Gade tablo vòl ↗',region:'Rejyon',type:'Ayewopò'}};
+const airportArea={
+PUJ:{es:'Punta Cana · Bávaro',en:'Punta Cana · Bávaro',de:'Punta Cana · Bávaro',fr:'Punta Cana · Bávaro',ht:'Punta Cana · Bávaro'},
+SDQ:{es:'Gran Santo Domingo',en:'Greater Santo Domingo',de:'Großraum Santo Domingo',fr:'Grand Saint-Domingue',ht:'Gran Santo Domingo'},
+STI:{es:'Santiago · Cibao',en:'Santiago · Cibao',de:'Santiago · Cibao',fr:'Santiago · Cibao',ht:'Santiago · Cibao'},
+POP:{es:'Puerto Plata · Costa Norte',en:'Puerto Plata · North Coast',de:'Puerto Plata · Nordküste',fr:'Puerto Plata · Côte nord',ht:'Puerto Plata · Kòt nò'},
+LRM:{es:'La Romana · Este',en:'La Romana · East',de:'La Romana · Osten',fr:'La Romana · Est',ht:'La Romana · Lès'},
+AZS:{es:'Samaná · El Catey',en:'Samaná · El Catey',de:'Samaná · El Catey',fr:'Samaná · El Catey',ht:'Samaná · El Catey'},
+JBQ:{es:'Santo Domingo Norte',en:'North Santo Domingo',de:'Santo Domingo Nord',fr:'Saint-Domingue Nord',ht:'Santo Domingo Nò'}
+};
+function cards(){
+ const holder=$('cards');holder.replaceChildren();const words=airportCardInfo[current];
+ for(const [code,name] of airports){
+  const el=document.createElement('article');el.className='card airport-card airport-card-'+code.toLowerCase();
+  const visual=document.createElement('div');visual.className='airport-card-visual';visual.setAttribute('aria-hidden','true');
+  const horizon=document.createElement('span');horizon.className='airport-card-horizon';
+  const plane=document.createElement('span');plane.className='airport-card-plane';plane.textContent='✈';
+  const visualCode=document.createElement('span');visualCode.className='airport-card-code';visualCode.textContent=code;
+  visual.append(horizon,plane,visualCode);
+  const content=document.createElement('div');content.className='airport-card-content';
+  const meta=document.createElement('span');meta.className='airport-card-meta';meta.textContent=words.type+' · RD';
+  const title=document.createElement('h3');title.textContent=name;
+  const region=document.createElement('p');region.className='airport-card-region';region.textContent=words.region+': '+airportArea[code][current];
+  const actions=document.createElement('div');actions.className='airport-card-actions';
+  const boardLink=document.createElement('a');boardLink.href=airportDeepLink(code,'arrivals','flight-board');boardLink.className='airport-card-board';boardLink.textContent=words.board;
+  const infoLink=document.createElement('a');infoLink.href=airportDeepLink(code,null,'airport-details');infoLink.className='airport-card-info';infoLink.textContent=words.info;
+  actions.append(boardLink,infoLink);content.append(meta,title,region,actions);el.append(visual,content);holder.append(el);
+ }
+}
+
 const airportInfo={
 PUJ:{desc:{es:'Principal puerta aérea de Punta Cana, Bávaro y Cap Cana. Comprueba tu terminal directamente con el aeropuerto o la aerolínea.',en:'Air gateway to Punta Cana, Bávaro and Cap Cana. Verify your terminal with the airport or airline.',de:'Flughafen für Punta Cana, Bávaro und Cap Cana. Das Terminal bitte direkt bei Flughafen oder Airline überprüfen.',fr:'Aéroport desservant Punta Cana, Bávaro et Cap Cana. Vérifiez votre terminal auprès de l’aéroport ou de la compagnie.',ht:'Ayewopò pou Punta Cana, Bávaro ak Cap Cana. Verifye tèminal ou avèk ayewopò a oswa konpayi avyon an.'},url:'https://www.puntacanainternationalairport.com/en/'},
 SDQ:{desc:{es:'Aeropuerto Las Américas, al este de Santo Domingo. Consulta los servicios y conexiones en la web del operador.',en:'Las Américas Airport, east of Santo Domingo. Consult the operator for services and connections.',de:'Flughafen Las Américas östlich von Santo Domingo. Informationen zu Services und Verbindungen beim Betreiber.',fr:'Aéroport Las Américas, à l’est de Saint-Domingue. Consultez les services auprès de l’exploitant.',ht:'Ayewopò Las Américas, bò lès Santo Domingo. Gade enfòmasyon sou sèvis ak koneksyon yo lakay operatè a.'},url:'https://aerodom.com/en/airports/'},
