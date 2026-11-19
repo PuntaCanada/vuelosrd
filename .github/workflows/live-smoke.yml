@@ -45,6 +45,7 @@ jobs:
           assert 'function isFlightNumber(value)' in s and 'airline-start-search' in s, 'DEPLOYMENT STALE: flight format/airline quick-search missing'
           assert s.count("logo:'https://commons.wikimedia.org/wiki/Special:FilePath/") == 26, 'DEPLOYMENT STALE: expected 26 airline image sources'
           assert 'id="flightAirlineQuickFilter"' in s and 'function prepareAirlineFlight(code)' in s, 'DEPLOYMENT STALE: new airline search UI is missing'
+          assert 'href="/ht/"' in s and '"@type":"WebSite"' in s, 'DEPLOYMENT STALE: new multilingual SEO pages not published'
           assert 'commons.wikimedia.org/wiki/Special:FilePath/AAirlines.png' in s, 'Canonical American Airlines logo asset missing'
           assert 'airline-logo-frame' in s and 'id="airlinesCredits"' in s, 'DEPLOYMENT STALE: credits or logo layout missing'
           assert 'logoFrame.classList.add(\'is-fallback\')' in s and '.airline-logo-frame.is-fallback' in s, 'DEPLOYMENT STALE: hardened logo fallback missing'
@@ -85,3 +86,34 @@ jobs:
             sleep 8
           done
           curl --fail --location --silent --show-error --max-time 15 "https://vuelosrd.pages.dev/robots.txt" | grep -q 'User-agent'
+      - name: Verify canonical language pages and XML sitemap on Cloudflare
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --max-time 20 "https://vuelosrd.pages.dev/sitemap.xml" -o /tmp/vuelosrd-sitemap.xml
+          for lang in en de fr ht; do
+            curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --max-time 20 "https://vuelosrd.pages.dev/$lang/" -o "/tmp/vuelosrd-$lang.html"
+          done
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          from xml.etree import ElementTree as ET
+          base='https://vuelosrd.pages.dev/'
+          locales=('es','en','de','fr','ht')
+          ns={'s':'http://www.sitemaps.org/schemas/sitemap/0.9'}
+          root=ET.fromstring(Path('/tmp/vuelosrd-sitemap.xml').read_bytes())
+          urls=[elem.text for elem in root.findall('.//s:loc',ns)]
+          expected=[base]+[base+x+'/' for x in ('en','de','fr','ht')]
+          assert set(urls)==set(expected),f'Cloudflare sitemap URL mismatch: {urls}'
+          for lang in ('en','de','fr','ht'):
+              html=Path(f'/tmp/vuelosrd-{lang}.html').read_text(encoding='utf-8')
+              HTMLParser().feed(html)
+              assert '<html lang="'+lang+'">' in html, 'Wrong language content: '+lang
+              assert '<link rel="canonical" href="'+base+lang+'/">' in html, 'Canonical absent: '+lang
+              assert '<script type="application/ld+json">' in html, 'JSON-LD missing: '+lang
+              for alternate in locales:
+                  target=base if alternate=='es' else base+alternate+'/'
+                  assert 'hreflang="'+alternate+'" href="'+target+'"' in html, 'Language backlink missing: '+lang+' -> '+alternate
+          print('Cloudflare published five canonical pages and reciprocal hreflang sitemap.')
+          PY
+
