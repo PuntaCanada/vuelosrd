@@ -97,6 +97,8 @@ jobs:
           print('HTML and content checks OK')
           PY
           node --check /tmp/vuelosrd-inline.js
+      - name: Audit multilingual SEO, sitemap, canonicals and JSON-LD
+        run: node tests/seo-audit.cjs
       - name: Verify required static deployment files
         run: |
           test -s index.html
