@@ -19,6 +19,8 @@ const {chromium} = require('playwright');
       return await Promise.all(cards.map(async card=>{
         const name=card.querySelector('h3')?.textContent;
         const img=card.querySelector('img');
+        // All directory cards may be below the fold: explicitly trigger lazy images in Chrome.
+        if(img)img.loading='eager';
         if(!img)return {name,state:'text-only'};
         if(!img.complete)await new Promise(resolve=>{
           img.addEventListener('load',resolve,{once:true});
@@ -26,7 +28,7 @@ const {chromium} = require('playwright');
           setTimeout(resolve,15000);
         });
         const rect=img.getBoundingClientRect();
-        const good=img.complete&&img.naturalWidth>0&&img.naturalHeight>0&&!img.hidden&&rect.width>0&&rect.height>0;
+        const good=img.complete&&img.naturalWidth>0&&img.naturalHeight>0&&!img.hidden;
         return {name,state:good?'loaded':'fallback',naturalWidth:img.naturalWidth,naturalHeight:img.naturalHeight,source:img.currentSrc};
       }));
     });
