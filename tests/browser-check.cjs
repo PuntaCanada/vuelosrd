@@ -74,6 +74,34 @@ const {chromium} = require('playwright');
     assert.equal(await page.locator('#boardAirport').inputValue(),'SDQ');
     assert.equal(await page.locator('#boardDepartures').getAttribute('aria-pressed'),'true');
     assert.match(await page.locator('#boardProviderLink').getAttribute('href'),/sdq\/departures$/);
+    // The demo route's geographic flag must load in a real browser, not merely appear in HTML.
+    await page.goto(base+'?lang=de&airport=PUJ#flight-board',{waitUntil:'domcontentloaded'});
+    await page.locator('#boardRows tr').first().waitFor();
+    assert.equal(await page.locator('#boardRows tr').count(),5);
+    const flags=await page.locator('#boardRows td .board-country-flag').evaluateAll(async images=>{
+      return await Promise.all(images.map(async img=>{
+        if(!img.complete)await new Promise(resolve=>{
+          img.addEventListener('load',resolve,{once:true});
+          img.addEventListener('error',resolve,{once:true});
+          setTimeout(resolve,10000);
+        });
+        return {file:img.getAttribute('src'),loaded:img.complete&&img.naturalWidth>0,alt:img.alt};
+      }));
+    });
+    console.log('Demo country flag browser results:',JSON.stringify(flags));
+    assert.equal(flags.length,5,'Expected five route flags');
+    assert.ok(flags.every(f=>f.loaded),'Country flag image failed to load');
+    assert.deepEqual(flags.map(f=>f.file),['/assets/flags/de.svg','/assets/flags/us.svg','/assets/flags/es.svg','/assets/flags/ca.svg','/assets/flags/do.svg']);
+    assert.equal(flags[0].alt,'Deutschland');
+    await page.locator('#boardFilter').fill('Spanien');
+    assert.equal(await page.locator('#boardRows tr').count(),1,'Country name should filter routes');
+    assert.match(await page.locator('#boardRows tr').innerText(),/Madrid/);
+    await page.locator('#boardFilter').fill('');
+    await page.locator('#boardDepartures').click();
+    assert.equal(await page.locator('#boardRows .board-country-flag').count(),5,'Departure board still shows flags');
+    await page.locator('#boardAirport').selectOption('JBQ');
+    assert.equal(await page.locator('#boardRows .board-country-flag').count(),5,'Local routes show DR flags');
+    assert.equal(await page.locator('#boardRows .board-country-flag').first().getAttribute('src'),'/assets/flags/do.svg');
     await page.goto(base+'?lang=en#airlines',{waitUntil:'domcontentloaded'});
     await page.locator('.airline-card').first().waitFor();
     for(const width of [390,320]){
@@ -84,6 +112,10 @@ const {chromium} = require('playwright');
       console.log('Mobile width',width,'overflow:',overflow);
       assert.ok(overflow<=2,'Unexpected horizontal page overflow at '+width+'px: '+overflow);
       assert.equal(await page.locator('.airline-card').count(),5);
+      await page.locator('#flight-board').scrollIntoViewIfNeeded();
+      assert.equal(await page.locator('#boardRows .board-country-flag').count(),5);
+      const boardOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+      assert.ok(boardOverflow<=2,'Board flags cause page overflow at '+width+'px');
     }
     assert.deepEqual(errors,[],'JS runtime errors');
     console.log('PASS: desktop/mobile logo loads, inputs, translations, keyboard-accessible cards.');
