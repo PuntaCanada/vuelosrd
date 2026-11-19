@@ -92,6 +92,7 @@ const {chromium} = require('playwright');
       await page.locator('#airlines-title').waitFor();
       assert.equal(await page.locator('#airlines-title').innerText(),heading);
       assert.equal(await page.locator('.airline-card').count(),5);
+      assert.ok((await page.locator('#boardTableCaption').textContent()).length>35,'Caption missing in '+lang);
       assert.equal(await page.locator('#boardStatusFilter option').first().innerText(),statusLabels[lang],'Status filter must be localized');
     }
     await page.goto(base+'?airport=SDQ&view=departures&lang=de#flight-board',{waitUntil:'domcontentloaded'});
@@ -105,6 +106,8 @@ const {chromium} = require('playwright');
     await page.goto(base+'?lang=de&airport=PUJ#flight-board',{waitUntil:'domcontentloaded'});
     await page.locator('#boardRows tr').first().waitFor();
     assert.equal(await page.locator('#boardRows tr').count(),5);
+    assert.match(await page.locator('#boardTableCaption').textContent(),/fiktive Beispielflüge/);
+    assert.equal(await page.locator('#boardTableCaption').evaluate(e=>e.tagName),'CAPTION');
     const flags=await page.locator('#boardRows td .board-country-flag').evaluateAll(async images=>{
       return await Promise.all(images.map(async img=>{
         if(!img.complete)await new Promise(resolve=>{
