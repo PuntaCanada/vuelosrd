@@ -136,8 +136,50 @@
 .airport-card-actions .airport-card-info:hover{background:#dfedf3;color:#0c4760}
 @media(prefers-reduced-motion:reduce){.airport-card{transition:none}.airport-card:hover{transform:none}}
 @media(max-width:760px){.airport-card-visual{height:125px}.airport-card-content{min-height:0}}
+
+/* Mobile and visual polish: consistent focus, tap targets, readable content hierarchy. */
+:root{scroll-behavior:smooth}
+section[id]{scroll-margin-top:18px}
+.skip-link{position:absolute;z-index:1000;left:12px;top:-100px;padding:12px 17px;background:#fff;color:#102c44;border:2px solid #0c7c98;border-radius:10px;font-weight:800;text-decoration:none}
+.skip-link:focus{top:12px}
+.section h2,.flight-detail-header h2,.panel h2{color:#17354b}
+.panel,.detail,.flight-detail-panel,.airport-card{box-shadow:0 10px 28px #102b4310}
+.btn,.airport-quick a,.airport-card-actions a,.board-tools button,.board-toggle button,.lang,.lang-menu summary{min-height:44px}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.lang-menu summary:focus-visible{outline:3px solid #f0b44f;outline-offset:3px}
+.board-table td,.board-table th{line-height:1.45}
+.board-table td:nth-child(3){overflow-wrap:anywhere}
+@media(max-width:760px){
+ .wrap{width:min(100% - 28px,1120px)}
+ .nav{gap:9px}
+ .brand{font-size:25px}
+ .site-links{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;gap:8px;margin-inline:-2px;padding:3px 2px 10px;overscroll-behavior-x:contain}
+ .site-links a{flex:0 0 auto;white-space:nowrap;min-height:38px;display:inline-flex;align-items:center}
+ .hero h1{max-width:100%}
+ .section{padding-top:38px}
+ .panel{padding:20px 17px}
+ .flight-detail-body{padding:18px}
+ .detailbuttons .btn{flex:1 1 190px}
+ .airport-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .airport-card-actions a{display:flex;align-items:center;justify-content:center;padding:12px 7px;text-align:center}
+ .airport-card-content{padding:17px}
+}
+@media(max-width:420px){
+ .hero .languages{gap:5px}
+ .lang{padding:8px}
+ .lang-menu summary{padding:9px}
+ .site-links a{font-size:12px;padding:7px 11px}
+ .board-tools{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .board-tools .board-focus{grid-column:1/-1}
+ .board-tools button{grid-column:1/-1}
+ .board-tools a{font-size:12px;line-height:1.5}
+ .board-tools .board-share-message{grid-column:1/-1}
+ .board-controls input{font-size:16px}
+ .board-controls select{font-size:16px}
+}
+@media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*{scroll-behavior:auto!important}}
 </style></head>
 <body>
+<a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
 <header class="hero"><div class="wrap"><nav class="nav" aria-label="Languages"><a class="brand" href="/">Vuelos<span>RD</span> ✈</a><div class="languages"><button type="button" class="lang active" data-lang="es" aria-pressed="true"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="Dominicana"><rect width="24" height="16" fill="#fff"/><path d="M0 0h10v6H0zM14 10h10v6H14z" fill="#d51d35"/><path d="M14 0h10v6H14zM0 10h10v6H0z" fill="#003f87"/><circle cx="12" cy="8" r="1.35" fill="#17643a"/></svg><span>ES</span></button><button type="button" class="lang" data-lang="en" aria-pressed="false"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="USA"><rect width="24" height="16" fill="#fff"/><rect x="0" y="0" width="24" height="1.24" fill="#b22234"/><rect x="0" y="2.46" width="24" height="1.24" fill="#b22234"/><rect x="0" y="4.92" width="24" height="1.24" fill="#b22234"/><rect x="0" y="7.38" width="24" height="1.24" fill="#b22234"/><rect x="0" y="9.84" width="24" height="1.24" fill="#b22234"/><rect x="0" y="12.3" width="24" height="1.24" fill="#b22234"/><rect x="0" y="14.76" width="24" height="1.24" fill="#b22234"/><rect width="10" height="8.7" fill="#3c3b6e"/><g fill="#fff"><circle cx="1.4" cy="1.3" r=".5"/><circle cx="1.4" cy="3.4" r=".5"/><circle cx="1.4" cy="5.5" r=".5"/><circle cx="1.4" cy="7.5" r=".5"/><circle cx="4.2" cy="1.3" r=".5"/><circle cx="4.2" cy="3.4" r=".5"/><circle cx="4.2" cy="5.5" r=".5"/><circle cx="4.2" cy="7.5" r=".5"/><circle cx="7" cy="1.3" r=".5"/><circle cx="7" cy="3.4" r=".5"/><circle cx="7" cy="5.5" r=".5"/><circle cx="7" cy="7.5" r=".5"/></g></svg><span>EN</span></button><details class="lang-menu" id="langMenu"><summary aria-label="More languages">🌐 <span id="activeOther">+</span> <span class="chevron">⌄</span></summary><div class="lang-options" role="group" aria-label="Languages"><button type="button" data-choose-lang="de"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="Deutschland"><rect width="24" height="5.34" fill="#111"/><rect y="5.33" width="24" height="5.34" fill="#dd0000"/><rect y="10.66" width="24" height="5.34" fill="#ffce00"/></svg> Deutsch</button><button type="button" data-choose-lang="fr"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="France"><rect width="8" height="16" fill="#002395"/><rect x="8" width="8" height="16" fill="#fff"/><rect x="16" width="8" height="16" fill="#ed2939"/></svg> Français</button><button type="button" data-choose-lang="ht"><svg class="flag-icon" viewBox="0 0 24 16" role="img" aria-label="Ayiti"><rect width="24" height="8" fill="#00209f"/><rect y="8" width="24" height="8" fill="#d21034"/><rect x="9.2" y="4" width="5.6" height="8" fill="#fff"/><path d="M12 5l-1 4h2z" fill="#388348"/></svg> Kreyòl</button></div></details></div></nav><div class="site-links"><a href="#flight-board" id="goBoard">Tablero</a><a href="#flight-status" id="goStatus">Estado del vuelo</a><a href="#airports" id="goAirports">Aeropuertos</a><a href="#airport-details" id="goDetail">Información</a><a href="#travel-tools" id="goTools">Herramientas de viaje</a></div><div class="eyebrow" data-i="eyebrow">REPÚBLICA DOMINICANA</div><h1 data-i="headline">Tus vuelos. Tus aeropuertos. Todo en un solo lugar.</h1><p data-i="intro">Consulta aeropuertos dominicanos, encuentra enlaces a llegadas y salidas y sigue tu vuelo con servicios externos.</p><div class="clockbox">🕒 <span data-i="local">Hora en República Dominicana</span> <span class="clock" id="clock">UTC−4</span></div><div class="clockcompare" id="homeclock" aria-live="off"></div></div></header>
 <main><div class="wrap"><section class="air-board" id="flight-board" aria-labelledby="boardTitle">
 <div class="air-board-head"><div><div class="board-kicker">VUELOSRD · AIRPORT DISPLAY</div><h2 id="boardTitle">TABLERO DE VUELOS</h2></div><div><div class="board-kicker" id="boardClockLabel">HORA LOCAL RD</div><div class="board-clock" id="boardClock">--:--</div></div></div>
@@ -308,8 +350,9 @@ function renderFlightStatus(){
  $('statusWarning').textContent=w[9];$('statusTrackLink').textContent=w[10];$('statusBoardLink').textContent=w[11];
  $('statusTrackLink').href=valid?'https://www.flightradar24.com/data/flights/'+encodeURIComponent(raw.toLowerCase()):'https://www.flightradar24.com/';
 }
-function language(v){current=I[v]?v:'es';document.documentElement.lang=current;for(const el of document.querySelectorAll('[data-i]'))el.textContent=I[current][el.dataset.i];for(const el of document.querySelectorAll('.lang')){const active=el.dataset.lang===current;el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}const activeOther=$('activeOther');activeOther.replaceChildren();if(['de','fr','ht'].includes(current)){const icon=document.querySelector('[data-choose-lang="'+current+'"] .flag-icon').cloneNode(true);activeOther.append(icon,document.createTextNode(' '+current.toUpperCase()));}else activeOther.textContent='+';const navigation=navI[current];['goBoard','goStatus','goAirports','goDetail','goTools'].forEach((id,i)=>$(id).textContent=navigation[i]);$('shareFlight').textContent=shareI[current][0];$('shareMsg').textContent='';cards();details();renderExtras();renderBoard();links();renderFlightStatus();try{localStorage.setItem('vuelosrd_lang',current)}catch{};clock();}
+function language(v){current=I[v]?v:'es';document.documentElement.lang=current;document.querySelector('.skip-link').textContent=skipLinkText[current];for(const el of document.querySelectorAll('[data-i]'))el.textContent=I[current][el.dataset.i];for(const el of document.querySelectorAll('.lang')){const active=el.dataset.lang===current;el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}const activeOther=$('activeOther');activeOther.replaceChildren();if(['de','fr','ht'].includes(current)){const icon=document.querySelector('[data-choose-lang="'+current+'"] .flag-icon').cloneNode(true);activeOther.append(icon,document.createTextNode(' '+current.toUpperCase()));}else activeOther.textContent='+';const navigation=navI[current];['goBoard','goStatus','goAirports','goDetail','goTools'].forEach((id,i)=>$(id).textContent=navigation[i]);$('shareFlight').textContent=shareI[current][0];$('shareMsg').textContent='';cards();details();renderExtras();renderBoard();links();renderFlightStatus();try{localStorage.setItem('vuelosrd_lang',current)}catch{};clock();}
 function clock(){try{const locale=current==='ht'?'fr-HT':current;const formatter=(zone)=>new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());$('clock').textContent=formatter('America/Santo_Domingo');$('boardClock').textContent=formatter('America/Santo_Domingo');const myZone=Intl.DateTimeFormat().resolvedOptions().timeZone;$('homeclock').textContent=myZone&&myZone!=='America/Santo_Domingo'?shareI[current][3]+': '+formatter(myZone):'';}catch{$('clock').textContent='UTC−4';$('homeclock').textContent='';}}
+const skipLinkText={es:'Saltar al tablero de vuelos',en:'Skip to flight board',de:'Zur Flugtafel springen',fr:'Aller au tableau des vols',ht:'Ale nan tablo vòl'};
 for(const btn of document.querySelectorAll('.lang'))btn.addEventListener('click',()=>language(btn.dataset.lang));
 for(const button of document.querySelectorAll('[data-choose-lang]'))button.addEventListener('click',()=>{language(button.dataset.chooseLang);$('langMenu').open=false;});document.addEventListener('click',e=>{if(!$('langMenu').contains(e.target))$('langMenu').open=false;});
 $('airport').addEventListener('change',()=>{links();details();$('boardAirport').value=$('airport').value;renderBoard();});$('boardAirport').addEventListener('change',()=>{$('airport').value=$('boardAirport').value;links();details();renderBoard();});$('boardFilter').addEventListener('input',renderBoard);$('shareBoard').addEventListener('click',shareBoard);$('boardArrivals').addEventListener('click',()=>setBoardMode('arrivals'));$('boardDepartures').addEventListener('click',()=>setBoardMode('departures'));$('flight').addEventListener('input',links);$('shareFlight').addEventListener('click',shareLink);$('year').textContent=new Date().getFullYear();let saved='es';try{saved=localStorage.getItem('vuelosrd_lang')||'es'}catch{}const qlang=originalLink.searchParams.get('lang');const qairport=(originalLink.searchParams.get('airport')||'').toUpperCase();const qflight=(originalLink.searchParams.get('flight')||'').replace(/\s+/g,'').toUpperCase();if(airports.some(a=>a[0]===qairport))$('airport').value=qairport;$('boardAirport').value=$('airport').value;if(/^[A-Z0-9]{2,8}$/.test(qflight))$('flight').value=qflight;const qview=originalLink.searchParams.get('view');if(qview==='arrivals'||qview==='departures')boardMode=qview;language(I[qlang]?qlang:saved);setInterval(clock,30000);
