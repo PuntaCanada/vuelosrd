@@ -1,4 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://vuelosrd.pages.dev/</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://vuelosrd.pages.dev/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://vuelosrd.pages.dev/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://vuelosrd.pages.dev/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://vuelosrd.pages.dev/de/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://vuelosrd.pages.dev/fr/" />
+    <xhtml:link rel="alternate" hreflang="ht" href="https://vuelosrd.pages.dev/ht/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vuelosrd.pages.dev/" />
+  </url>
+  <url>
+    <loc>https://vuelosrd.pages.dev/en/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://vuelosrd.pages.dev/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://vuelosrd.pages.dev/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://vuelosrd.pages.dev/de/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://vuelosrd.pages.dev/fr/" />
+    <xhtml:link rel="alternate" hreflang="ht" href="https://vuelosrd.pages.dev/ht/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vuelosrd.pages.dev/" />
+  </url>
+  <url>
+    <loc>https://vuelosrd.pages.dev/de/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://vuelosrd.pages.dev/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://vuelosrd.pages.dev/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://vuelosrd.pages.dev/de/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://vuelosrd.pages.dev/fr/" />
+    <xhtml:link rel="alternate" hreflang="ht" href="https://vuelosrd.pages.dev/ht/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vuelosrd.pages.dev/" />
+  </url>
+  <url>
+    <loc>https://vuelosrd.pages.dev/fr/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://vuelosrd.pages.dev/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://vuelosrd.pages.dev/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://vuelosrd.pages.dev/de/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://vuelosrd.pages.dev/fr/" />
+    <xhtml:link rel="alternate" hreflang="ht" href="https://vuelosrd.pages.dev/ht/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vuelosrd.pages.dev/" />
+  </url>
+  <url>
+    <loc>https://vuelosrd.pages.dev/ht/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://vuelosrd.pages.dev/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://vuelosrd.pages.dev/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://vuelosrd.pages.dev/de/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://vuelosrd.pages.dev/fr/" />
+    <xhtml:link rel="alternate" hreflang="ht" href="https://vuelosrd.pages.dev/ht/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://vuelosrd.pages.dev/" />
+  </url>
 </urlset>
