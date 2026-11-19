@@ -1,0 +1,40 @@
+name: Check VuelosRD pilot
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  static-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate HTML markup and inline JS
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          import re
+          html = Path('index.html').read_text(encoding='utf-8')
+          class Parser(HTMLParser):
+              def error(self, message): raise ValueError(message)
+          Parser().feed(html)
+          assert '<html lang="es">' in html
+          for code in ('es','en','de','fr','ht'):
+              assert re.search(r'\b'+code+r':\{', html), f'Missing language {code}'
+          for code in ('PUJ','SDQ','STI','POP','LRM','AZS','JBQ'):
+              assert "'"+code+"'" in html, f'Missing airport {code}'
+          assert 'no publica datos de vuelo en tiempo real' in html
+          assert "localStorage" in html
+          scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',html,re.S)
+          assert len(scripts) == 1
+          Path('/tmp/vuelosrd-inline.js').write_text(scripts[0], encoding='utf-8')
+          print('HTML and content checks OK')
+          PY
+          node --check /tmp/vuelosrd-inline.js
+      - name: Verify required static deployment files
+        run: |
+          test -s index.html
+          test -s README.md
+          test -s _headers
+          test -s robots.txt
