@@ -38,6 +38,8 @@ jobs:
           assert 'Mobile and visual polish' in s and 'class="skip-link"' in s, 'DEPLOYMENT STALE: mobile accessibility polish missing'
           assert 'id="boardLiveLink"' in s and 'const realSourceText=' in s, 'DEPLOYMENT STALE: real flight source links absent'
           assert 'id="flightSearchPreview"' in s and 'const flightSearchMessages=' in s, 'DEPLOYMENT STALE: guided flight search missing'
+          assert 'id="airlines"' in s and 'const airlineDirectory=' in s, 'DEPLOYMENT STALE: official airline directory missing'
+          assert 'id="airlineFilter"' in s and 'function updateAirlineSuggestion()' in s, 'DEPLOYMENT STALE: airline search integration missing'
           assert 'id="boardStatusLink"' in s, 'DEPLOYMENT STALE: board status link absent'
           assert 'completamente ficticios' in s, 'Airport demo warning absent'
           assert 'flightradar24.com' in s.lower(), 'External data link missing'
