@@ -269,6 +269,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 @media(max-width:1000px) and (min-width:901px){.airline-logo-frame{width:105px;flex-basis:105px}}
 @media(max-width:480px){.airline-card-head{min-height:66px;gap:10px}.airline-logo-frame{height:60px;width:103px;flex-basis:103px}.airline-logo-frame img{padding:10px 7px}.airline-card .airline-card-heading h3{font-size:15px}}
 @media(prefers-reduced-motion:reduce){.airline-card{transition:none}}
+
+/* Accessible tracking affordances and touch-friendly small displays. */
+#statusTrackLink[aria-disabled="true"]{pointer-events:none;opacity:.48;filter:grayscale(.45)}
+#track[aria-disabled="true"]{pointer-events:none;opacity:.48}
+#flight[aria-invalid="true"]{border-color:#c64b54;box-shadow:0 0 0 1px #c64b54}
+#flightError[hidden]{display:none}
+@media(max-width:480px){.flight-detail-actions{display:grid;grid-template-columns:1fr}.flight-detail-actions .btn{width:100%;text-align:center;justify-content:center}.panel .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.panel .actions .btn{display:flex;justify-content:center;text-align:center;align-items:center;min-height:48px}.panel .actions #track{grid-column:1/-1}.airline-card a{min-height:44px}}
 </style></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
@@ -375,6 +382,8 @@ function flightNumberValue(){return $('flight').value.trim().replace(/\s+/g,'').
 function updateFlightSearch(){
  const msg=flightSearchMessages[current],number=flightNumberValue();
  const state=!number?'empty':/^[A-Z0-9]{2,8}$/.test(number)?'ready':'invalid';
+ $('flight').setAttribute('aria-invalid',String(state==='invalid'));
+ $('flightError').hidden=state!=='invalid';
  $('flightSearchPreview').dataset.state=state;
  $('flightSearchHint').textContent=state==='ready'?msg.ready.replace('{flight}',number):msg[state];
  updateAirlineSuggestion();$('clearFlight').hidden=state==='empty';$('clearFlight').setAttribute('aria-label',msg.clear);
@@ -540,7 +549,7 @@ function renderFlightStatus(){
  $('statusNumber').textContent=valid?raw:(empty?'—':w[12]);
  ['statusState','statusScheduled','statusActual','statusPosition'].forEach(id=>$(id).textContent=w[8]);
  $('statusWarning').textContent=w[9];$('statusTrackLink').textContent=w[10];$('statusBoardLink').textContent=w[11];
- $('statusTrackLink').href=valid?'https://www.flightradar24.com/data/flights/'+encodeURIComponent(raw.toLowerCase()):'https://www.flightradar24.com/';
+ $('statusTrackLink').setAttribute('aria-disabled',String(!valid));if(valid){$('statusTrackLink').href='https://www.flightradar24.com/data/flights/'+encodeURIComponent(raw.toLowerCase());}else{$('statusTrackLink').removeAttribute('href');}
 }
 function language(v){current=I[v]?v:'es';document.documentElement.lang=current;document.querySelector('.skip-link').textContent=skipLinkText[current];for(const el of document.querySelectorAll('[data-i]'))el.textContent=I[current][el.dataset.i];for(const el of document.querySelectorAll('.lang')){const active=el.dataset.lang===current;el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}const activeOther=$('activeOther');activeOther.replaceChildren();if(['de','fr','ht'].includes(current)){const icon=document.querySelector('[data-choose-lang="'+current+'"] .flag-icon').cloneNode(true);activeOther.append(icon,document.createTextNode(' '+current.toUpperCase()));}else activeOther.textContent='+';const navigation=navI[current];['goBoard','goStatus','goAirports','goDetail','goAirlines','goTools'].forEach((id,i)=>$(id).textContent=navigation[i]);$('shareFlight').textContent=shareI[current][0];$('shareMsg').textContent='';cards();details();renderExtras();renderBoard();renderAirlines();renderFlightFAQ();links();renderFlightStatus();try{localStorage.setItem('vuelosrd_lang',current)}catch{};clock();}
 function clock(){try{const locale=current==='ht'?'fr-HT':current;const formatter=(zone)=>new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());$('clock').textContent=formatter('America/Santo_Domingo');$('boardClock').textContent=formatter('America/Santo_Domingo');const myZone=Intl.DateTimeFormat().resolvedOptions().timeZone;$('homeclock').textContent=myZone&&myZone!=='America/Santo_Domingo'?shareI[current][3]+': '+formatter(myZone):'';}catch{$('clock').textContent='UTC−4';$('homeclock').textContent='';}}
