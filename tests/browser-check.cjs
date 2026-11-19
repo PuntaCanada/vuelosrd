@@ -4,7 +4,7 @@ const {chromium} = require('playwright');
 
 (async()=>{
   const base = process.env.VUELOSRD_URL || 'https://vuelosrd.pages.dev/';
-  const browser = await chromium.launch({headless:true});
+  const browser = await chromium.launch({headless:true,channel:'chrome'});
   const errors = [];
   try {
     const context = await browser.newContext({viewport:{width:1440,height:900},deviceScaleFactor:1});
