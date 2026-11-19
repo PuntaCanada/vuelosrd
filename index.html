@@ -282,6 +282,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 .airline-card .airline-start-search:hover{background:#ddedf2}
 .airline-card .airline-start-search:focus-visible{outline:3px solid #f0b44f;outline-offset:2px}
 @media(max-width:600px){.airline-card .airline-start-search{width:100%;min-height:48px}}
+
+/* Country flags next to fictional board routes. Local SVGs keep icons stable on Windows/iOS. */
+.board-table .board-route-name{display:inline;overflow-wrap:break-word}
+.board-table .board-country-flag{display:inline-block;vertical-align:-4px;width:26px;height:19px;object-fit:cover;margin-left:9px;flex:none;border:1px solid #a8bed0;border-radius:3px;box-shadow:0 1px 3px #0005;background:#fff}
+.board-table .board-country-code{display:inline-block;vertical-align:middle;margin-left:9px;border:1px solid #88abbd;border-radius:3px;padding:2px 5px;line-height:1.4;font-size:11px;font-weight:800;color:#e9f6fd}
+@media(max-width:680px){.board-table .board-country-flag{width:24px;height:18px;margin-left:7px;vertical-align:-3px}}
+@media(prefers-reduced-motion:reduce){.board-table .board-country-flag{transition:none}}
 </style></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
@@ -503,6 +510,29 @@ LRM:['Toronto','Miami','Punta Cana','Madrid','New York'],
 AZS:['Toronto','New York','Santo Domingo','Madrid','Miami'],
 JBQ:['Santiago','Punta Cana','Samaná','Puerto Plata','La Romana']
 };
+
+// The board is explicitly fictional; each demo destination's country is real geography.
+// Bundled SVG flags from lipis/flag-icons (MIT license in assets/flags/LICENSE).
+const demoCityCountry=Object.freeze({
+ 'Frankfurt':'de','New York':'us','Madrid':'es','Toronto':'ca',
+ 'Santo Domingo':'do','Miami':'us','Santiago':'do','Punta Cana':'do',
+ 'Boston':'us','Samaná':'do','Puerto Plata':'do','La Romana':'do'
+});
+const boardCountryNames={
+ es:{de:'Alemania',us:'Estados Unidos',es:'España',ca:'Canadá',do:'República Dominicana'},
+ en:{de:'Germany',us:'United States',es:'Spain',ca:'Canada',do:'Dominican Republic'},
+ de:{de:'Deutschland',us:'Vereinigte Staaten',es:'Spanien',ca:'Kanada',do:'Dominikanische Republik'},
+ fr:{de:'Allemagne',us:'États-Unis',es:'Espagne',ca:'Canada',do:'République dominicaine'},
+ ht:{de:'Almay',us:'Etazini',es:'Espay',ca:'Kanada',do:'Repiblik Dominikèn'}
+};
+function countryOfDemoRoute(route){const code=demoCityCountry[route];return code||null;}
+function appendDemoRouteFlag(cell,route){
+ const country=countryOfDemoRoute(route);
+ const holder=document.createElement('span');holder.className='board-route-name';holder.textContent=route;cell.append(holder);
+ if(!country)return;
+ const label=boardCountryNames[current][country];
+ const img=document.createElement('img');img.className='board-country-flag';img.src='/assets/flags/'+country+'.svg';img.width=26;img.height=19;img.loading='eager';img.decoding='async';img.alt=label;img.title=label;img.addEventListener('error',()=>{const fallback=document.createElement('span');fallback.className='board-country-code';fallback.textContent=country.toUpperCase();fallback.title=label;fallback.setAttribute('aria-label',label);img.replaceWith(fallback);});cell.append(img);
+}
 let boardMode='arrivals';
 function boardUrl(){const url=new URL(window.location.origin+window.location.pathname);url.searchParams.set('airport',$('boardAirport').value);url.searchParams.set('view',boardMode);url.searchParams.set('lang',current);url.hash='flight-board';return url.href;}
 async function shareBoard(){const url=boardUrl();const b=boardWords[current];if(navigator.share){try{await navigator.share({title:'VuelosRD · DEMO',url});return;}catch(e){if(e.name==='AbortError')return;}}try{await navigator.clipboard.writeText(url);$('boardShareMessage').textContent=b.copied;}catch{$('boardShareMessage').textContent=b.error+' ';const a=document.createElement('a');a.href=url;a.textContent=url;a.rel='noopener noreferrer';$('boardShareMessage').replaceChildren(a);}}
@@ -533,10 +563,10 @@ $('boardAirportOfficialLink').href=airportInfo[code].url;
 
 const values=demoRoutes[code];const query=$('boardFilter').value.toLocaleLowerCase().trim();
 const data=values.map((route,i)=>({flight:'DEMO '+String(i+1).padStart(2,'0'),airline:'DEMO',route,time:['09:15','10:40','12:05','14:20','16:55'][i],status:i===1?1:i===3?2:0}))
-.filter(v=>[v.flight,v.airline,v.route,v.time,b.statuses[v.status]].some(w=>w.toLocaleLowerCase().includes(query)));
+.filter(v=>{const c=countryOfDemoRoute(v.route);return [v.flight,v.airline,v.route,v.time,b.statuses[v.status],c||'',c?boardCountryNames[current][c]:''].some(w=>w.toLocaleLowerCase().includes(query));});
 const tbody=$('boardRows');tbody.replaceChildren();
 if(!data.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=5;td.textContent=b.empty;tr.append(td);tbody.append(tr);return;}
-for(const v of data){const tr=document.createElement('tr');for(const [key,kind] of [['flight','flight-number'],['airline',''],['route',''],['time','board-time'],['status','']]){const td=document.createElement('td');td.dataset.label=key==='route'?(boardMode==='arrivals'?b.origin:b.destination):key==='status'?b.status:b[key];if(kind)td.className=kind;if(key==='status'){const badge=document.createElement('span');badge.className='board-status '+['example-scheduled','example-boarding','example-delay'][v.status];badge.textContent=b.statuses[v.status];td.append(badge)}else td.textContent=v[key];tr.append(td)}tbody.append(tr);}
+for(const v of data){const tr=document.createElement('tr');for(const [key,kind] of [['flight','flight-number'],['airline',''],['route',''],['time','board-time'],['status','']]){const td=document.createElement('td');td.dataset.label=key==='route'?(boardMode==='arrivals'?b.origin:b.destination):key==='status'?b.status:b[key];if(kind)td.className=kind;if(key==='status'){const badge=document.createElement('span');badge.className='board-status '+['example-scheduled','example-boarding','example-delay'][v.status];badge.textContent=b.statuses[v.status];td.append(badge)}else if(key==='route')appendDemoRouteFlag(td,v.route);else td.textContent=v[key];tr.append(td)}tbody.append(tr);}
 }
 
 const flightStatusWords={
