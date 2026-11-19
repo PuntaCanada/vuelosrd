@@ -320,6 +320,18 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 .status-source-guide p{margin:0;color:#416176;font-size:13px;line-height:1.55}
 @media(min-width:681px){.board-scroll{max-height:535px;overflow:auto}.board-table thead th{position:sticky;top:0;z-index:2;box-shadow:0 2px 0 #285067}}
 @media(max-width:680px){.flight-detail-actions{display:grid;grid-template-columns:1fr}.flight-detail-actions .btn{width:100%;min-height:46px;justify-content:center;text-align:center}.board-table tbody td:nth-child(3){overflow-wrap:anywhere}}
+
+/* Airport-style city/country lines, with flag icons kept beside the name. */
+.board-table .board-route-group{display:inline-flex;align-items:center;gap:9px;max-width:100%;min-width:0;vertical-align:middle}
+.board-table .board-route-labels{display:inline-flex;flex-direction:column;min-width:0;gap:4px}
+.board-table .board-route-country{color:#9fc4d5;font-size:11px;line-height:1.35;letter-spacing:.1px}
+.board-table .board-route-group .board-country-flag{margin-left:0;flex-shrink:0}
+.board-table .board-route-name{font-weight:750;color:#eff8fb;line-height:1.35}
+.board-no-results{display:grid;justify-items:start;gap:13px;padding:17px 6px}
+.board-no-results p{margin:0;color:#d4e3ee}
+.board-empty-reset{border:1px solid #87b6c8;color:#e8faff;background:#1c526c;font-weight:800;border-radius:9px;padding:10px 14px;min-height:44px;cursor:pointer}
+.board-empty-reset:focus-visible{outline:3px solid #f1d17f;outline-offset:2px}
+@media(max-width:680px){.board-table .board-route-group{gap:7px}.board-table .board-route-country{font-size:11px}.board-no-results{padding:8px 2px}}
 </style></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
@@ -560,10 +572,14 @@ const boardCountryNames={
 function countryOfDemoRoute(route){const code=demoCityCountry[route];return code||null;}
 function appendDemoRouteFlag(cell,route){
  const country=countryOfDemoRoute(route);
- const holder=document.createElement('span');holder.className='board-route-name';holder.textContent=route;cell.append(holder);
- if(!country)return;
+ const group=document.createElement('span');group.className='board-route-group';
+ const names=document.createElement('span');names.className='board-route-labels';
+ const holder=document.createElement('span');holder.className='board-route-name';holder.textContent=route;names.append(holder);
+ if(!country){group.append(names);cell.append(group);return;}
  const label=boardCountryNames[current][country];
- const img=document.createElement('img');img.className='board-country-flag';img.src='/assets/flags/'+country+'.svg';img.width=26;img.height=19;img.loading='eager';img.decoding='async';img.alt=label;img.title=label;img.addEventListener('error',()=>{const fallback=document.createElement('span');fallback.className='board-country-code';fallback.textContent=country.toUpperCase();fallback.title=label;fallback.setAttribute('aria-label',label);img.replaceWith(fallback);});cell.append(img);
+ const subtitle=document.createElement('span');subtitle.className='board-route-country';subtitle.textContent=label;subtitle.setAttribute('aria-hidden','true');names.append(subtitle);
+ const img=document.createElement('img');img.className='board-country-flag';img.src='/assets/flags/'+country+'.svg';img.width=26;img.height=19;img.loading='eager';img.decoding='async';img.alt=label;img.title=label;img.addEventListener('error',()=>{const fallback=document.createElement('span');fallback.className='board-country-code';fallback.textContent=country.toUpperCase();fallback.title=label;fallback.setAttribute('aria-label',label);img.replaceWith(fallback);});
+ group.append(names,img);cell.append(group);
 }
 const boardEnhancementWords={
 es:{country:'País',all:'Todos los países',clear:'✕ Borrar filtros',count:'{n} de {total} ejemplos DEMO',airlines:'Ver aerolíneas ↗'},
@@ -624,7 +640,14 @@ const data=values.map((route,i)=>({flight:'DEMO '+String(i+1).padStart(2,'0'),ai
 .filter(v=>{const c=countryOfDemoRoute(v.route);return (!selectedCountry||c===selectedCountry)&&[v.flight,v.airline,v.route,v.time,b.statuses[v.status],c||'',c?boardCountryNames[current][c]:''].some(w=>w.toLocaleLowerCase().includes(query));});
 $('boardResultCount').textContent=enhanced.count.replace('{n}',String(data.length)).replace('{total}',String(values.length));$('boardClearFilters').hidden=!query&&!selectedCountry;
 const tbody=$('boardRows');tbody.replaceChildren();
-if(!data.length){const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=5;td.textContent=b.empty;tr.append(td);tbody.append(tr);return;}
+if(!data.length){
+ const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=5;
+ const wrap=document.createElement('div');wrap.className='board-no-results';
+ const msg=document.createElement('p');msg.textContent=b.empty;
+ const clear=document.createElement('button');clear.type='button';clear.className='board-empty-reset';clear.textContent=enhanced.clear;
+ clear.addEventListener('click',()=>{$('boardFilter').value='';$('boardCountry').value='';renderBoard();$('boardFilter').focus();});
+ wrap.append(msg,clear);td.append(wrap);tr.append(td);tbody.append(tr);return;
+}
 for(const v of data){const tr=document.createElement('tr');for(const [key,kind] of [['flight','flight-number'],['airline',''],['route',''],['time','board-time'],['status','']]){const td=document.createElement('td');td.dataset.label=key==='route'?(boardMode==='arrivals'?b.origin:b.destination):key==='status'?b.status:b[key];if(kind)td.className=kind;if(key==='status'){const badge=document.createElement('span');badge.className='board-status '+['example-scheduled','example-boarding','example-delay'][v.status];badge.textContent=b.statuses[v.status];td.append(badge)}else if(key==='route')appendDemoRouteFlag(td,v.route);else td.textContent=v[key];tr.append(td)}tbody.append(tr);}
 }
 
