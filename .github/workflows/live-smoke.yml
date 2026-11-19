@@ -51,6 +51,7 @@ jobs:
           assert 'appendDemoRouteFlag(td,v.route)' in s and 'const demoCityCountry=' in s, 'DEPLOYMENT STALE: country flags missing'
           assert 'id="boardAirportShortcuts"' in s and "url.searchParams.set('country'" in s, 'DEPLOYMENT STALE: airport shortcuts and share filters missing'
           assert 'id="statusAirlineSuggestion"' in s and 'statusAirlineHint' in s, 'DEPLOYMENT STALE: airline status source missing'
+          assert 'const statusSourceWords=' in s and 'id="statusAirportOfficialLink"' in s, 'DEPLOYMENT STALE: official airport source guidance missing'
           assert 'completamente ficticios' in s, 'Airport demo warning absent'
           assert 'flightradar24.com' in s.lower(), 'External data link missing'
           assert 'no publica datos de vuelo en tiempo real' in s, 'Required transparency notice absent'
