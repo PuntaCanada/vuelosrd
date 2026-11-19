@@ -43,6 +43,8 @@ jobs:
           assert 'const airportArea=' in html and 'airport-card-visual' in html, 'Airport cards design missing'
           assert 'Mobile and visual polish' in html and 'class="skip-link"' in html, 'Responsive accessibility styling missing'
           assert 'id="boardLiveLink"' in html and 'id="boardAirportOfficialLink"' in html, 'Real flight source links missing'
+          assert 'id="flightSearchPreview"' in html and 'function updateFlightSearch()' in html, 'Guided flight search missing'
+          assert 'const flightSearchMessages=' in html and 'id="clearFlight"' in html, 'Flight search languages or reset missing'
           assert 'const realSourceText=' in html, 'Real flight sources translation missing'
           assert 'skipLinkText[current]' in html, 'Translated keyboard skip link missing'
           assert 'className=\'airport-card-board\'' in html, 'Airport cards board navigation missing'
