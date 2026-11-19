@@ -332,6 +332,20 @@ const {chromium} = require('playwright');
     console.log('Axe WCAG board/mobile results:',JSON.stringify(audit));
     const serious=audit.flatMap(item=>item.violations.filter(v=>v.impact==='serious'||v.impact==='critical').map(v=>({target:item.target,...v})));
     assert.deepEqual(serious,[],'Axe found serious/critical WCAG failures in board or mobile navigation');
+    await page.setViewportSize({width:1440,height:900});
+    await page.goto(base+'?lang=en#flight-status',{waitUntil:'domcontentloaded'});
+    await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
+    const desktopAudits=await page.evaluate(async()=>{
+      const result=[];
+      for(const target of ['#flight-status','#airlines']){
+        const audit=await axe.run(document.querySelector(target),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
+        result.push({target,violations:audit.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.slice(0,3).map(n=>n.target)})),passes:audit.passes.length});
+      }
+      return result;
+    });
+    console.log('Axe WCAG status/airline results:',JSON.stringify(desktopAudits));
+    assert.deepEqual(desktopAudits.flatMap(item=>item.violations.filter(v=>['serious','critical'].includes(v.impact))),[],'Axe serious/critical WCAG failure in desktop flight or airline sections');
+
     assert.deepEqual(errors,[],'JS runtime errors');
     console.log('PASS: desktop/mobile logo loads, inputs, translations, keyboard-accessible cards.');
   } finally {await browser.close();}
