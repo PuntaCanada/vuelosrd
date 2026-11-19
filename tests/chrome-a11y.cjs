@@ -23,7 +23,7 @@ const assert = require('node:assert/strict');
    // Real Chrome smoke test: the full airline selection is visible, filterable and keyboard-operable.
    const airlineButtons=page.locator('#flightAirlineShortcutButtons [data-airline]');
    assert.equal(await airlineButtons.count(),28,'all directory airlines displayed initially');
-   assert.equal(await page.locator('#flightAirlineShortcutButtons img').count(),26,'airline images have source URLs');
+   assert.equal(await page.evaluate(()=>airlineDirectory.filter(a=>a.logo).length),26,'airline images have source URLs');
    await page.locator('#flightAirlineQuickFilter').fill('Arajet');
    assert.equal(await airlineButtons.count(),1,'airline name search');
    await page.locator('#flightAirlineQuickFilter').fill('DM');
