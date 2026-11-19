@@ -74,6 +74,7 @@ jobs:
           assert 'board-route-country' in html and "clear.id='boardEmptyReset'" in html, 'Board city subtitles or empty reset missing'
           assert 'id="boardTableCaption"' in html and 'const boardTableCaptionWords=' in html, 'Accessible translated board caption missing'
           assert 'id="mobileBottomNav"' in html and 'function updateMobileNavigation()' in html, 'Mobile quick navigation missing'
+          assert 'function updateMobileActiveSection()' in html and 'function updateSelectedAirlineChip()' in html, 'Active mobile/airline indicator missing'
           assert 'id="boardActiveFilters"' in html and 'function renderActiveBoardFilters()' in html and "event.key==='ArrowRight'" in html, 'Filter chips or keyboard airport navigation missing'
           assert 'id="boardStatusFilter"' in html and 'const boardStatusFilterWords=' in html, 'Localized demo status filter missing'
           assert 'function normalizeFlightInput(value)' in html and 'normalizeFlightInput(originalLink.searchParams' in html, 'Hyphenated flight normalization missing'
