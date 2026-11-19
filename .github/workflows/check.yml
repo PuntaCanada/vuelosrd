@@ -46,6 +46,8 @@ jobs:
           assert 'id="flightSearchPreview"' in html and 'function updateFlightSearch()' in html, 'Guided flight search missing'
           assert 'id="airlines"' in html and 'const airlineDirectory=' in html, 'Airline directory missing'
           assert 'id="airlineFilter"' in html and 'const airlineFilterWords=' in html, 'Multilingual airline filtering missing'
+          assert 'id="flight-help"' in html and 'const flightFAQ=' in html, 'Multilingual passenger FAQ missing'
+          assert 'function renderFlightFAQ()' in html, 'FAQ rendering missing'
           assert 'id="airlineMatch"' in html and 'function updateAirlineSuggestion()' in html, 'Airline hint not connected to search'
           assert html.count('class="flag-icon"') == 5, 'Keep all language flags'
           assert 'const flightSearchMessages=' in html and 'id="clearFlight"' in html, 'Flight search languages or reset missing'
