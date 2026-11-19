@@ -35,6 +35,9 @@ const {chromium} = require('playwright');
       if(item.name==='Air Canada')assert.equal(item.state,'text-only','Air Canada logo must remain text-only without authorization');
       else assert.equal(item.state,'loaded',item.name+' logo failed browser load');
     }
+    await page.locator('#flight').fill('AA');
+    assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'true','Airline code alone is not a flight number');
+    assert.equal(await page.locator('#statusTrackLink').getAttribute('href'),null);
     await page.locator('#flight').fill('DE 2228');
     assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'false');
     assert.match(await page.locator('#track').getAttribute('href'),/\/data\/flights\/de2228$/);
@@ -49,10 +52,30 @@ const {chromium} = require('playwright');
     await page.locator('#airlineFilter').fill('Jet');
     assert.equal(await page.locator('.airline-card').count(),1);
     assert.match(await page.locator('.airline-card h3').innerText(),/JetBlue/);
+    await page.locator('.airline-card .airline-start-search').click();
+    assert.equal(await page.locator('#flight').getAttribute('placeholder'),'B6 1234');
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'flight');
+    await page.locator('#flight').fill('B6123');
+    assert.match(await page.locator('#airlineMatchText').innerText(),/JetBlue/i);
+    assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'false');
     await page.locator('#airlineFilter').fill('');
     await page.locator('[data-lang="en"]').click();
     assert.equal(await page.locator('#airlines-title').innerText(),'Check with your airline');
     await page.screenshot({path:'airlines-desktop.png',fullPage:false});
+    const langs=[['es','Consulta con tu aerolínea'],['de','Flugstatus bei der Airline prüfen'],['en','Check with your airline'],['fr','Vérifier auprès de la compagnie'],['ht','Verifye vòl la ak konpayi avyon an']];
+    for(const [lang,heading] of langs){
+      await page.goto(base+'?lang='+lang+'#airlines',{waitUntil:'domcontentloaded'});
+      await page.locator('#airlines-title').waitFor();
+      assert.equal(await page.locator('#airlines-title').innerText(),heading);
+      assert.equal(await page.locator('.airline-card').count(),5);
+    }
+    await page.goto(base+'?airport=SDQ&view=departures&lang=de#flight-board',{waitUntil:'domcontentloaded'});
+    await page.locator('#boardAirport').waitFor();
+    assert.equal(await page.locator('#boardAirport').inputValue(),'SDQ');
+    assert.equal(await page.locator('#boardDepartures').getAttribute('aria-pressed'),'true');
+    assert.match(await page.locator('#boardProviderLink').getAttribute('href'),/sdq\/departures$/);
+    await page.goto(base+'?lang=en#airlines',{waitUntil:'domcontentloaded'});
+    await page.locator('.airline-card').first().waitFor();
     for(const width of [390,320]){
       await page.setViewportSize({width,height:844});
       await page.locator('#airlines').scrollIntoViewIfNeeded();
