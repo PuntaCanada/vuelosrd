@@ -1,0 +1,30 @@
+name: Public website smoke test
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  public-site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check Cloudflare Pages availability and main features
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="https://vuelosrd.pages.dev/"
+          echo "Checking $URL"
+          curl --fail --location --silent --show-error --retry 6 --retry-delay 8 --retry-all-errors --max-time 15 "$URL" -o /tmp/site.html
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          s=Path('/tmp/site.html').read_text(encoding='utf-8')
+          assert 'VuelosRD' in s, 'Wrong site content'
+          assert 'Punta Cana' in s, 'Airport selector missing'
+          assert 'Deutsch' in s, 'Language menu missing'
+          assert 'Flightradar24' in s, 'External data link missing'
+          assert 'no publica datos de vuelo en tiempo real' in s, 'Required transparency notice absent'
+          HTMLParser().feed(s)
+          print('Live endpoint reachable and expected content present.')
+          PY
+          curl --fail --location --silent --show-error --max-time 15 "https://vuelosrd.pages.dev/robots.txt" | grep -q 'User-agent'
