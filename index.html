@@ -403,6 +403,28 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 .board-scroll-hint{display:none;background:#0d3045;color:#c5e8f7;font-size:12px;font-weight:700;padding:9px 14px;margin:0;border-top:1px solid #31556a}
 @media(max-width:680px){.board-scroll-hint{display:block}}
 @media(forced-colors:active){.board-scroll:focus-visible{outline:3px solid Highlight}}
+
+/* Inclusive terminal navigation and touch targets, without external dependencies */
+html{scroll-padding-top:18px}#flight-board,#flightTitle,#airlines{scroll-margin-top:18px}
+.board-table th{white-space:nowrap}
+.board-table tbody tr:focus-within{outline:2px solid #f7cd70;outline-offset:-2px}
+.board-controls button,.board-tools button,.board-airport-chip,.mobile-bottom-nav a{min-height:44px}
+.board-scroll{overscroll-behavior-x:contain;scrollbar-gutter:stable}
+.board-scroll:focus-visible{outline:3px solid #ffca78;outline-offset:-3px}
+.board-filter-meta a,.board-real-actions a{min-height:44px;display:inline-flex;align-items:center}
+#flight[aria-invalid="true"]{border-color:#b02e37;box-shadow:0 0 0 2px #b02e3720}
+#flightError:empty{display:none}
+@media(max-width:760px){
+ body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+ .mobile-bottom-nav{padding-bottom:env(safe-area-inset-bottom,0px)}
+ .board-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .board-toggle{grid-column:1/-1}.board-toggle button{flex:1}
+ .board-controls select,.board-controls input{width:100%;max-width:none;min-width:0}
+ .board-scroll{scrollbar-width:thin}
+}
+@media(max-width:380px){.board-controls{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto!important}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
 </style></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
@@ -912,4 +934,29 @@ language(I[qlang]?qlang:saved);
 if(['de','us','es','ca','do'].includes(qcountry)&&[...$('boardCountry').options].some(o=>o.value===qcountry)){$('boardCountry').value=qcountry;renderBoard();}
 if(['0','1','2'].includes(qstatus)){$('boardStatusFilter').value=qstatus;renderBoard();}
 if(['time-desc','city'].includes(qsort)){$('boardSort').value=qsort;renderBoard();}setInterval(clock,30000);
+
+/* Keyboard navigation and form semantics. No operational flight data is fetched. */
+const flightField=document.getElementById('flight');
+const flightErrorNode=document.getElementById('flightError');
+function updateFlightValidity(){
+ const normalized=normalizeFlightInput(flightField.value);
+ const invalid=normalized.length>0&&!isFlightNumber(normalized);
+ flightField.setAttribute('aria-invalid',String(invalid));
+ flightErrorNode.setAttribute('aria-live',invalid?'polite':'off');
+}
+flightField.addEventListener('input',updateFlightValidity);
+updateFlightValidity();
+document.addEventListener('keydown',event=>{
+ if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey)return;
+ const element=event.target;
+ const editing=element&&(/^(INPUT|TEXTAREA|SELECT)$/.test(element.tagName)||element.isContentEditable);
+ if(event.key==='/'&&!editing){
+  event.preventDefault();flightField.scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});flightField.focus({preventScroll:true});
+ }
+ if(event.key==='Escape'){
+  const menu=document.querySelector('.lang-menu[open]');
+  if(menu){menu.open=false;const summary=menu.querySelector('summary');if(summary)summary.focus();}
+ }
+});
+
 </script></body></html>
