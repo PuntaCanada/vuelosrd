@@ -390,6 +390,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 /* Consistent non-live display sorting; retain tap targets on narrow devices. */
 .board-controls #boardSort{min-width:118px;max-width:185px}
 @media(max-width:680px){.board-controls #boardSort{max-width:none;min-width:0}}
+
+/* Airline search recovery, keyboard and touch accessible. */
+.airline-empty{display:flex;align-items:center;flex-wrap:wrap;gap:12px}
+.airline-empty p{margin:0}
+.airline-empty-reset{border:1px solid #9cbecf;background:#eef8fc;color:#0c526b;font:inherit;font-size:13px;font-weight:800;min-height:44px;border-radius:10px;padding:10px 15px;cursor:pointer}
+.airline-empty-reset:hover{background:#ddf1fa}
+.airline-empty-reset:focus-visible{outline:3px solid #dca944;outline-offset:2px}
 </style></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
@@ -445,11 +452,11 @@ fr:{heading:'Vérifier auprès de la compagnie',intro:'Vérifiez les horaires, m
 ht:{heading:'Verifye vòl la ak konpayi avyon an',intro:'Verifye orè, chanjman ak anilasyon sou sit ofisyèl konpayi yo. Se lyen ekstèn, san done vòl nou ranmase.',badge:'Sous ofisyèl ekstèn',note:'Prefiks vòl la pa pwouve ki konpayi k ap fè vòl la. Verifye konpayi an, dat la ak nimewo a.',link:'Enfòmasyon ofisyèl ↗',hint:'Prefiks {code}: petèt {name}. Verifye konpayi k ap fè vòl la.',match:'Sit ofisyèl ↗',description:'Enfòmasyon vòl sou sit konpayi an.',search:'Chèche yon vòl ↗'}
 };
 const airlineFilterWords={
-es:{label:"Buscar aerolínea",placeholder:"Nombre o código",count:"{n} aerolínea(s)",empty:"No se encontraron aerolíneas."},
-en:{label:"Find an airline",placeholder:"Name or code",count:"{n} airline(s)",empty:"No airlines found."},
-de:{label:"Airline suchen",placeholder:"Name oder Code",count:"{n} Airline(s)",empty:"Keine Airlines gefunden."},
-fr:{label:"Rechercher une compagnie",placeholder:"Nom ou code",count:"{n} compagnie(s)",empty:"Aucune compagnie trouvée."},
-ht:{label:"Chèche konpayi avyon",placeholder:"Non oswa kòd",count:"{n} konpayi",empty:"Pa jwenn okenn konpayi."}
+es:{label:"Buscar aerolínea",placeholder:"Nombre o código",count:"{n} aerolínea(s)",empty:"No se encontraron aerolíneas.",reset:"Mostrar todas"},
+en:{label:"Find an airline",placeholder:"Name or code",count:"{n} airline(s)",empty:"No airlines found.",reset:"Show all"},
+de:{label:"Airline suchen",placeholder:"Name oder Code",count:"{n} Airline(s)",empty:"Keine Airlines gefunden.",reset:"Alle anzeigen"},
+fr:{label:"Rechercher une compagnie",placeholder:"Nom ou code",count:"{n} compagnie(s)",empty:"Aucune compagnie trouvée.",reset:"Tout afficher"},
+ht:{label:"Chèche konpayi avyon",placeholder:"Non oswa kòd",count:"{n} konpayi",empty:"Pa jwenn okenn konpayi.",reset:"Montre tout"}
 };
 const airlineLogoWords={
 es:{source:'Fuente del logotipo ↗',credit:'Logotipos: archivos con origen documentado en Wikimedia Commons. Las marcas pertenecen a sus titulares. Air Canada aparece como texto mientras no exista autorización para usar su logotipo.'},
@@ -463,7 +470,13 @@ function renderAirlines(){
  $('airlineFilterLabel').textContent=filterWords.label;$('airlineFilter').placeholder=filterWords.placeholder;
  $('airlines-title').textContent=w.heading;$('airlines-intro').textContent=w.intro;$('airlines-independent').textContent=w.badge;$('airlines-note').textContent=w.note;
  const root=$('airlineCards');root.replaceChildren();const needle=$('airlineFilter').value.toLocaleLowerCase().trim();const found=airlineDirectory.filter(a=>(a.code+' '+a.name).toLocaleLowerCase().includes(needle));$('airlineResults').textContent=filterWords.count.replace('{n}',String(found.length));
- if(!found.length){const msg=document.createElement('div');msg.className='airline-empty';msg.textContent=filterWords.empty;root.append(msg);}
+ if(!found.length){
+ const wrap=document.createElement('div');wrap.className='airline-empty';
+ const msg=document.createElement('p');msg.textContent=filterWords.empty;
+ const reset=document.createElement('button');reset.type='button';reset.id='airlineEmptyReset';reset.className='airline-empty-reset';reset.textContent=filterWords.reset;
+ reset.addEventListener('click',()=>{$('airlineFilter').value='';renderAirlines();$('airlineFilter').focus();});
+ wrap.append(msg,reset);root.append(wrap);
+}
  for(const airline of found){
   const card=document.createElement('article');card.className='airline-card';
   const head=document.createElement('div');head.className='airline-card-head';
