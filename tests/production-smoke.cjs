@@ -26,6 +26,24 @@ const assert=require('node:assert/strict');
      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
      assert.equal(overflow,false,'no horizontal page overflow');
     }
+    if(viewport.width>600){
+     // A real browser must successfully decode logo images. Mere source URLs are not enough.
+     // Request each unique logo independently to bypass lazy-rendering below the fold.
+     const logos=await page.evaluate(async()=>{
+      const carriers=airlineDirectory.filter(x=>x.logo);
+      return await Promise.all(carriers.map(carrier=>new Promise(resolve=>{
+       const img=new Image();
+       const timer=setTimeout(()=>resolve({code:carrier.code,ok:false,reason:'timeout'}),12000);
+       img.onload=()=>{clearTimeout(timer);resolve({code:carrier.code,ok:img.naturalWidth>0,reason:img.naturalWidth>0?'loaded':'empty'})};
+       img.onerror=()=>{clearTimeout(timer);resolve({code:carrier.code,ok:false,reason:'image failed'})};
+       img.src=carrier.logo;
+      })));
+     });
+     assert.equal(logos.length,26,'all expected logo sources checked');
+     const broken=logos.filter(x=>!x.ok);
+     console.log('Live logo verification: '+(logos.length-broken.length)+'/'+logos.length+' rendered');
+     if(broken.length)throw new Error('Airline logos not loading: '+broken.map(x=>x.code+' ('+x.reason+')').join(', '));
+    }
     console.log('Cloudflare production smoke OK, '+viewport.width+'px, HTTP '+response.status()+', '+page.url());
    }catch(e){failed=true;console.error('Cloudflare production smoke FAILED '+viewport.width+'px: '+e.stack);}
    finally{await page.close();}
