@@ -91,7 +91,7 @@ jobs:
           scripts = re.findall(r'<script>(.*?)</script>',html,re.S)
           assert len(scripts) == 1, 'Expected one application JavaScript script'
           import json
-          jsonld = re.findall(r'<script type="application/ld\\+json">(.*?)</script>',html,re.S)
+          jsonld = re.findall(r'<script type="application/ld[+]json">(.*?)</script>',html,re.S)
           assert len(jsonld) == 1 and json.loads(jsonld[0])['@type']=='WebSite', 'Valid WebSite schema required'
           Path('/tmp/vuelosrd-inline.js').write_text(scripts[0], encoding='utf-8')
           print('HTML and content checks OK')
