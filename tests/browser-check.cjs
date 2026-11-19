@@ -243,6 +243,7 @@ const {chromium} = require('playwright');
     assert.equal(await page.locator('#boardRows tr').count(),1,'Samaná should match without accent');
     assert.match(await page.locator('#boardRows tr').first().innerText(),/Samaná/);
     await page.locator('#boardFilter').fill('');
+    await page.locator('[data-lang="es"]').click();
     await page.locator('#boardAirport').selectOption('PUJ');
     await page.locator('#boardFilter').fill('republica dominicana');
     assert.equal(await page.locator('#boardRows tr').count(),1,'Dominican country search should ignore accent');
