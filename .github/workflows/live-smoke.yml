@@ -42,6 +42,8 @@ jobs:
           assert 'id="airlineFilter"' in s and 'function updateAirlineSuggestion()' in s, 'DEPLOYMENT STALE: airline search integration missing'
           assert s.count("logo:'https://commons.wikimedia.org/wiki/Special:FilePath/") == 4, 'DEPLOYMENT STALE: sourced airline logos missing'
           assert 'airline-logo-frame' in s and 'id="airlinesCredits"' in s, 'DEPLOYMENT STALE: credits or logo layout missing'
+          assert 'logoFrame.classList.add(\'is-fallback\')' in s and '.airline-logo-frame.is-fallback' in s, 'DEPLOYMENT STALE: hardened logo fallback missing'
+          assert 'img.referrerPolicy=\'no-referrer\'' in s, 'DEPLOYMENT STALE: privacy-conscious logo loading missing'
           assert 'id="flight-help"' in s and 'function renderFlightFAQ()' in s, 'DEPLOYMENT STALE: passenger FAQ missing'
           assert 'id="boardStatusLink"' in s, 'DEPLOYMENT STALE: board status link absent'
           assert 'completamente ficticios' in s, 'Airport demo warning absent'
