@@ -77,3 +77,19 @@ The airline directory now contains 28 airline code/name entries, and all 28 shor
 The flight-search panel now provides a separate localized airline-code/name filter, a visible match count, an empty state with a reset action, and a clearable search in ES, EN, DE, FR and HT. All 28 airlines are offered by default; the show-less/show-more toggle remains available. Airline logos remain purely decorative in shortcut buttons (`alt=""`), so screen readers use the readable airline code and name. Logo image-load failures remove only the image, never the airline shortcut. Chromium regression tests now cover the expanded directory, search and code matching, zero-results state, collapse/expand control, locale switching and keyboard flight search at three viewport sizes.
 
 The Wikimedia filename for GOL was corrected to `GOL-Logo-Pref-FundoClaro-RGB.svg` after checking the Commons listing. External image reachability and actual GitHub Actions / Cloudflare publishing must be checked separately before claiming a fully validated production deployment.
+
+
+## Google Search / SEO deployment (2026-11-19)
+
+Search-engine entry points use five real, server-rendered HTML documents:
+- Spanish interactive home: https://vuelosrd.pages.dev/
+- English overview: https://vuelosrd.pages.dev/en/
+- German overview: https://vuelosrd.pages.dev/de/
+- French overview: https://vuelosrd.pages.dev/fr/
+- Haitian Creole overview: https://vuelosrd.pages.dev/ht/
+
+The overview pages provide independent, translated airport/flight-search explanations and link to the full interactive app using its existing `?lang=` selection. They are deliberately **not** fake flight status pages, nor duplicates of airport listings with invented flight data. Each URL has a self-referencing canonical, descriptive title and description, reciprocal hreflang, and WebPage JSON-LD. The Spanish home has WebSite JSON-LD with the site name. The root `sitemap.xml` lists all five canonical URLs with reciprocal xhtml:link alternates. `robots.txt` continues to allow crawling and points at this sitemap. Search-engine inclusion/rankings are **not guaranteed**.
+
+Verification after deploying: run `node tests/seo-audit.cjs` locally; GitHub's static checks and public smoke workflow validate the published pages and XML. Keep any future custom domain change consistent across canonical, hreflang, sitemap, structured data, robots.txt and Cloudflare before activating it.
+
+**Google Search Console (manual owner authentication required):** open https://search.google.com/search-console/ and select or verify the **URL-prefix property** `https://vuelosrd.pages.dev/` (or use a verified Domain property where applicable). In **Sitemaps**, submit `sitemap.xml`. Inspect the five exact URLs using **URL Inspection**, then request indexing if appropriate. Ownership verification, sitemap submission and actual indexed/not-indexed reporting require the site owner's authenticated Google account, and cannot be claimed from code commits or public GitHub checks. Recheck coverage over subsequent days, not minutes.
