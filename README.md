@@ -43,3 +43,6 @@ No se almacena información personal en servidores VuelosRD. El idioma se recuer
 
 ## Costes
 El sitio actual tiene **cero servicios de pago obligatorios**. La publicación gratuita depende de mantenerse dentro de los límites de Cloudflare Pages.
+
+## Deployment diagnostics
+GitHub-to-Cloudflare Pages integration check: 2026-11-19. The production site should contain five inline SVG language flags. Verify the Cloudflare production commit matches main before declaring the public release current.
