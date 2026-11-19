@@ -55,6 +55,7 @@ jobs:
           assert 'id="statusAirlineSuggestion"' in s and 'statusAirlineHint' in s, 'DEPLOYMENT STALE: airline status source missing'
           assert 'const statusSourceWords=' in s and 'id="statusAirportOfficialLink"' in s, 'DEPLOYMENT STALE: official airport source guidance missing'
           assert 'id="flightAirlineShortcutButtons"' in s and 'board-route-country' in s and "clear.id='boardEmptyReset'" in s, 'DEPLOYMENT STALE: route labels / airline chips / recovery missing'
+          assert '.airline-code{color:#344f63' in s, 'DEPLOYMENT STALE: airline code contrast fix missing'
           assert 'id="boardScrollHint"' in s and 'const boardScrollHintWords=' in s and 'scope="col"' in s, 'DEPLOYMENT STALE: accessible horizontal board missing'
           assert 'id="boardTableCaption"' in s and 'const boardTableCaptionWords=' in s, 'DEPLOYMENT STALE: accessible board caption missing'
           assert 'id="mobileBottomNav"' in s and 'function updateMobileNavigation()' in s, 'DEPLOYMENT STALE: mobile quick navigation missing'
