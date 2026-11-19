@@ -346,6 +346,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 .airline-more-toggle{border-style:dashed;background:#deeff8;color:#084b70}
 @media(max-width:540px){.flight-airline-chip-list:has(.airline-more-toggle[aria-expanded="true"]){flex-wrap:wrap;overflow-x:visible}}
 
+.flight-airline-chip{display:inline-flex;align-items:center;gap:8px}
+.flight-airline-chip img{width:42px;height:25px;object-fit:contain;flex:none}
+.airline-more-toggle{justify-content:center}
+
 /* Demo board status filter: explicitly sample-only, keyboard and mobile friendly */
 .board-controls #boardStatusFilter{min-width:155px;max-width:220px}
 @media(max-width:680px){.board-controls #boardStatusFilter{max-width:none;min-width:0}}
@@ -475,23 +479,23 @@ const airlineDirectory=[
 // Air Canada requires prior authorization for use of its logo. Brand name/code only pending permission.
 {code:'AC',name:'Air Canada',url:'https://www.aircanada.com/home/ca/en/aco/flight-status'}
 ,
-{code:'DM',name:'Arajet',url:'https://www.arajet.com/'},
-{code:'CM',name:'Copa Airlines',url:'https://www.copaair.com/'},
-{code:'DL',name:'Delta Air Lines',url:'https://www.delta.com/flight-status/'},
-{code:'UA',name:'United Airlines',url:'https://www.united.com/en/us/flightstatus'},
+{code:'DM',name:'Arajet',url:'https://www.arajet.com/',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/Arajet_Logo.jpg',credit:'https://commons.wikimedia.org/wiki/File:Arajet_Logo.jpg'},
+{code:'CM',name:'Copa Airlines',url:'https://www.copaair.com/',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/Copa_airlines_logo.png',credit:'https://commons.wikimedia.org/wiki/File:Copa_airlines_logo.png'},
+{code:'DL',name:'Delta Air Lines',url:'https://www.delta.com/flight-status/',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/Delta_logo.svg',credit:'https://commons.wikimedia.org/wiki/File:Delta_logo.svg'},
+{code:'UA',name:'United Airlines',url:'https://www.united.com/en/us/flightstatus',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/United_Airlines_wordmark.svg',credit:'https://commons.wikimedia.org/wiki/File:United_Airlines_wordmark.svg'},
 {code:'TS',name:'Air Transat',url:'https://www.airtransat.com/'},
-{code:'UX',name:'Air Europa',url:'https://www.aireuropa.com/'},
+{code:'UX',name:'Air Europa',url:'https://www.aireuropa.com/',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/Air_Europa_Logo_(2015).svg',credit:'https://commons.wikimedia.org/wiki/File:Air_Europa_Logo_(2015).svg'},
 {code:'4Y',name:'Discover Airlines',url:'https://www.discover-airlines.com/'},
-{code:'AV',name:'avianca',url:'https://www.avianca.com/'},
+{code:'AV',name:'avianca',url:'https://www.avianca.com/',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/Avianca_2023_wordmark.svg',credit:'https://commons.wikimedia.org/wiki/File:Avianca_2023_wordmark.svg'},
 {code:'AF',name:'Air France',url:'https://www.airfrance.com/'},
 {code:'BA',name:'British Airways',url:'https://www.britishairways.com/'},
-{code:'F9',name:'Frontier Airlines',url:'https://www.flyfrontier.com/'},
+{code:'F9',name:'Frontier Airlines',url:'https://www.flyfrontier.com/',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/Frontier_Airlines_logo.svg',credit:'https://commons.wikimedia.org/wiki/File:Frontier_Airlines_logo.svg'},
 {code:'WN',name:'Southwest Airlines',url:'https://www.southwest.com/'},
-{code:'WS',name:'WestJet',url:'https://www.westjet.com/'},
+{code:'WS',name:'WestJet',url:'https://www.westjet.com/',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/WestJetLogo2018.svg',credit:'https://commons.wikimedia.org/wiki/File:WestJetLogo2018.svg'},
 {code:'NK',name:'Spirit Airlines',url:'https://www.spirit.com/'},
 {code:'AR',name:'Aerolíneas Argentinas',url:'https://www.aerolineas.com.ar/'},
 {code:'AM',name:'Aeroméxico',url:'https://www.aeromexico.com/'},
-{code:'LA',name:'LATAM Airlines',url:'https://www.latamairlines.com/'},
+{code:'LA',name:'LATAM Airlines',url:'https://www.latamairlines.com/',logo:'https://commons.wikimedia.org/wiki/Special:FilePath/Latam-logo_-v_(Indigo).svg',credit:'https://commons.wikimedia.org/wiki/File:Latam-logo_-v_(Indigo).svg'},
 {code:'2W',name:'World2Fly',url:'https://www.w2fly.es/'},
 {code:'E9',name:'Iberojet',url:'https://www.iberojet.com/'},
 {code:'P5',name:'Wingo',url:'https://www.wingo.com/'},
@@ -559,14 +563,19 @@ ht:{title:'Chèche vòl selon konpayi',note:'Kòd la ede ekri nimewo vòl la, li
 const airlineMoreWords={
  es:['Más aerolíneas','Menos aerolíneas'],en:['More airlines','Fewer airlines'],de:['Weitere Airlines','Weniger Airlines'],fr:['Autres compagnies','Moins de compagnies'],ht:['Plis konpayi avyon','Mwens konpayi avyon']
 };
-let showAllAirlineShortcuts=false;
+let showAllAirlineShortcuts=true;
 function renderFlightAirlineShortcuts(){
  const words=flightAirlineShortcutWords[current],root=$('flightAirlineShortcutButtons');root.replaceChildren();
  $('flightAirlineShortcutTitle').textContent=words.title;$('flightAirlineShortcutNote').textContent=words.note;root.setAttribute('aria-label',words.title);
  const visible=showAllAirlineShortcuts?airlineDirectory:airlineDirectory.slice(0,5);
  for(const airline of visible){
   const button=document.createElement('button');button.type='button';button.className='flight-airline-chip';button.dataset.airline=airline.code;
-  button.textContent=airline.code+' · '+airline.name;button.setAttribute('aria-label',words.pick+': '+airline.name+' ('+airline.code+')');button.setAttribute('aria-pressed','false');
+  if(airline.logo){
+   const img=document.createElement('img');img.src=airline.logo;img.alt='';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+   img.addEventListener('error',()=>{img.remove();});button.append(img);
+  }
+  const name=document.createElement('span');name.textContent=airline.code+' · '+airline.name;button.append(name);
+  button.setAttribute('aria-label',words.pick+': '+airline.name+' ('+airline.code+')');button.setAttribute('aria-pressed','false');
   button.addEventListener('click',()=>{$('flight').placeholder=airline.code+' 1234';$('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('flight').focus({preventScroll:true});});
   root.append(button);
  }
