@@ -12,10 +12,10 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Install isolated Playwright browser dependencies
+      - name: Install browser automation package (system Chrome)
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.55.0
-          npx playwright install --with-deps chromium
+          google-chrome --version
       - name: Wait for Cloudflare Pages deployment
         run: |
           python3 - <<'PY'
