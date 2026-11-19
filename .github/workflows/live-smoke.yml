@@ -28,6 +28,7 @@ jobs:
           assert 'id="flight-board"' in s, 'DEPLOYMENT STALE: airport board not published'
           assert 'id="boardArrivals"' in s and 'id="boardDepartures"' in s, 'Airport board toggles absent'
           assert 'id="boardRows"' in s and 'function renderBoard()' in s, 'Airport board script absent'
+          assert 'id="shareBoard"' in s and 'function boardUrl()' in s, 'DEPLOYMENT STALE: shareable board missing'
           assert 'completamente ficticios' in s, 'Airport demo warning absent'
           assert 'flightradar24.com' in s.lower(), 'External data link missing'
           assert 'no publica datos de vuelo en tiempo real' in s, 'Required transparency notice absent'
