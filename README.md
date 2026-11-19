@@ -62,3 +62,7 @@ The Wikimedia Commons file pages describe these images as public-domain text/sim
 **Air Canada:** Its published policy requires prior permission before using its brand assets or logo: https://www.aircanada.com/ca/en/aco/home/about/media/permission.html . Accordingly, the Air Canada card uses only the textual airline name and code while permission is not documented. Do not replace that fallback with the logo without resolving the permission requirement.
 
 No new paid services, hosted image accounts, trackers, or third-party scripts were added.
+
+## Country flags on the demonstration flight board
+
+The five locally hosted SVGs under `assets/flags/` (Germany `de`, United States `us`, Spain `es`, Canada `ca`, Dominican Republic `do`) are from [lipis/flag-icons](https://github.com/lipis/flag-icons), version retrieved from its public main branch. These files are MIT licensed; the complete license notice is retained in `assets/flags/LICENSE` (copyright Panayiotis Lipiridis). Their use introduces **no new API, tracking, or recurring costs**. City-to-country mappings are manually curated for the **fictional example destinations only**, and do not represent real routes, schedules, or flight operating information.
