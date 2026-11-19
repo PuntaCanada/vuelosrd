@@ -253,6 +253,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 .airline-credit:hover{color:#0c5571}
 .airlines-credits{font-size:12px;line-height:1.65;margin-top:12px;color:#5a7182}
 @media(max-width:680px){.airline-logo-frame{width:100px;flex-basis:100px;height:59px}.airline-card-head{gap:11px}}
+
+/* Airline logo polish: spacious aspect-safe display, clearly labeled failure fallback. */
+.airline-card{gap:13px;border-color:#d6e5ec;min-width:0;transition:box-shadow .18s ease,border-color .18s ease}
+.airline-card:hover{border-color:#a9cad7;box-shadow:0 12px 32px #14374b16}
+.airline-card-head{align-items:center;min-height:83px;gap:15px}
+.airline-logo-frame{width:126px;flex-basis:126px;height:72px;background:linear-gradient(160deg,#fff,#f8fbfc);border-color:#dce8ed}
+.airline-logo-frame img{padding:12px 9px}
+.airline-logo-frame.is-fallback{border-style:dashed;border-color:#a5c0cf}
+.airline-logo-frame.is-fallback .airline-monogram{background:#edf3f7;color:#2e6079}
+.airline-card .airline-card-heading h3{font-size:16px;line-height:1.35}
+.airline-credit{margin-top:0;text-decoration:none;border-bottom:1px solid #aac4d2;padding-bottom:2px}
+.airline-credit:hover{border-color:#0c5571}
+.airline-card .airline-code{font-weight:750;letter-spacing:.8px}
+@media(max-width:1000px) and (min-width:901px){.airline-logo-frame{width:105px;flex-basis:105px}}
+@media(max-width:480px){.airline-card-head{min-height:66px;gap:10px}.airline-logo-frame{height:60px;width:103px;flex-basis:103px}.airline-logo-frame img{padding:10px 7px}.airline-card .airline-card-heading h3{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.airline-card{transition:none}}
 </style></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
@@ -326,7 +342,7 @@ function renderAirlines(){
   const head=document.createElement('div');head.className='airline-card-head';
   const logoFrame=document.createElement('div');logoFrame.className='airline-logo-frame airline-logo-'+airline.code.toLowerCase();
   const mono=document.createElement('span');mono.className='airline-monogram';mono.textContent=airline.code;logoFrame.append(mono);
-  if(airline.logo){const img=document.createElement('img');img.src=airline.logo;img.alt=airline.name+' logo';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';img.addEventListener('error',()=>{img.hidden=true;});logoFrame.append(img);}
+  if(airline.logo){const img=document.createElement('img');img.alt=airline.name+' logo';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';img.addEventListener('load',()=>{if(!img.naturalWidth){img.hidden=true;logoFrame.classList.add('is-fallback');}});img.addEventListener('error',()=>{img.hidden=true;logoFrame.classList.add('is-fallback');});logoFrame.append(img);img.src=airline.logo;}
   const name=document.createElement('div');name.className='airline-card-heading';const h=document.createElement('h3');h.textContent=airline.name;const label=document.createElement('div');label.className='airline-code';label.textContent=airline.code;name.append(h,label);head.append(logoFrame,name);
   const desc=document.createElement('p');desc.textContent=w.description;
   const link=document.createElement('a');link.href=airline.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=w.link;link.setAttribute('aria-label',w.link+' · '+airline.name);
