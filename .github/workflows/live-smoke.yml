@@ -22,7 +22,7 @@ jobs:
           assert 'VuelosRD' in s, 'Wrong site content'
           assert 'Punta Cana' in s, 'Airport selector missing'
           assert 'Deutsch' in s, 'Language menu missing'
-          assert 'Flightradar24' in s, 'External data link missing'
+          assert 'flightradar24.com' in s.lower(), 'External data link missing'
           assert 'no publica datos de vuelo en tiempo real' in s, 'Required transparency notice absent'
           HTMLParser().feed(s)
           print('Live endpoint reachable and expected content present.')
