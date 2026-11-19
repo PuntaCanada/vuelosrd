@@ -35,6 +35,7 @@ jobs:
           assert 'id="shareBoard"' in html and 'function boardUrl()' in html, 'Shareable board missing'
           assert 'id="flight-status"' in html and 'function renderFlightStatus()' in html, 'Flight detail panel missing'
           assert html.index('id="flight-board"') < html.index('id="flightTitle"'), 'Flight board must precede search'
+          assert 'Airport-terminal visual system' in html and 'margin-top:-83px' in html, 'New cohesive terminal design missing'
           assert 'id="boardStatusLink"' in html, 'Flight board must link to status detail'
           assert 'const flightStatusWords=' in html and 'statusPosition' in html, 'Flight status translations or missing-data indicators absent'
           assert "url.searchParams.set('view',boardMode)" in html, 'Share link must retain arrivals/departures'
