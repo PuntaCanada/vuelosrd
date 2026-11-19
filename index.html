@@ -467,9 +467,11 @@ de:{empty:'Flugnummer eingeben, um die externe Flugverfolgung vorzubereiten.',re
 fr:{empty:'Saisissez un numéro de vol pour préparer le suivi externe.',ready:'Vol {flight} : lien de suivi externe prêt. Le statut du vol n’a pas été vérifié.',invalid:'Saisissez un code de compagnie suivi de chiffres, p. ex. DE 2228.',clear:'Effacer le numéro de vol'},
 ht:{empty:'Antre nimewo vòl la pou pare swivi sou yon sèvis ekstèn.',ready:'Vòl {flight}: lyen ekstèn lan pare. Nou pa verifye eta vòl la.',invalid:'Antre kòd konpayi an ak chif vòl la, pa egzanp DE 2228.',clear:'Efase nimewo vòl la'}
 };
-function flightNumberValue(){return $('flight').value.trim().replace(/\s+/g,'').toUpperCase();}
+function normalizeFlightInput(value){return value.trim().replace(/[\s\-]+/g,'').toUpperCase();}
+function flightNumberValue(){return normalizeFlightInput($('flight').value);}
 function updateFlightSearch(){
  const msg=flightSearchMessages[current],number=flightNumberValue();
+ $('flight').setAttribute('autocapitalize','characters');
  const state=!number?'empty':isFlightNumber(number)?'ready':'invalid';
  $('flight').setAttribute('aria-invalid',String(state==='invalid'));
  $('flightError').hidden=state!=='invalid';
@@ -480,7 +482,7 @@ function updateFlightSearch(){
  if(state==='ready'){$('track').href='https://www.flightradar24.com/data/flights/'+encodeURIComponent(number.toLowerCase());$('track').target='_blank';}
  else{$('track').removeAttribute('href');}
 }
-function links(){const code=$('airport').value.toLowerCase();$('arrivals').href='https://www.flightradar24.com/data/airports/'+code+'/arrivals';$('departures').href='https://www.flightradar24.com/data/airports/'+code+'/departures';const val=$('flight').value.trim().replace(/\s+/g,'').toUpperCase();const valid=!val||isFlightNumber(val);$('flightError').textContent=valid?'':I[current].badFlight;updateFlightSearch();$('shareFlight').disabled=!valid;$('sdqOfficial').hidden=code!=='sdq';renderFlightStatus();}
+function links(){const code=$('airport').value.toLowerCase();$('arrivals').href='https://www.flightradar24.com/data/airports/'+code+'/arrivals';$('departures').href='https://www.flightradar24.com/data/airports/'+code+'/departures';const val=normalizeFlightInput($('flight').value);const valid=!val||isFlightNumber(val);$('flightError').textContent=valid?'':I[current].badFlight;updateFlightSearch();$('shareFlight').disabled=!valid;$('sdqOfficial').hidden=code!=='sdq';renderFlightStatus();}
 const airportCardInfo={es:{info:'Ver detalles ↗',board:'Ver tablero ↗',region:'Zona',type:'Aeropuerto'},en:{info:'Airport details ↗',board:'Open flight board ↗',region:'Area',type:'Airport'},de:{info:'Flughafeninfos ↗',board:'Flugtafel öffnen ↗',region:'Region',type:'Flughafen'},fr:{info:'Infos aéroport ↗',board:'Voir les vols ↗',region:'Région',type:'Aéroport'},ht:{info:'Detay ayewopò ↗',board:'Gade tablo vòl ↗',region:'Rejyon',type:'Ayewopò'}};
 const airportArea={
 PUJ:{es:'Punta Cana · Bávaro',en:'Punta Cana · Bávaro',de:'Punta Cana · Bávaro',fr:'Punta Cana · Bávaro',ht:'Punta Cana · Bávaro'},
@@ -549,7 +551,7 @@ ht:['🔗 Pataje lyen','Lyen an kopye.','Konpare ak lè kote ou ye a','Lè kote 
 function makeShareLink(){
  const url=new URL(window.location.origin+window.location.pathname);
  url.searchParams.set('airport',$('airport').value);
- const flight=$('flight').value.trim().replace(/\s+/g,'').toUpperCase();
+ const flight=normalizeFlightInput($('flight').value);
  if(isFlightNumber(flight))url.searchParams.set('flight',flight);
  url.searchParams.set('lang',current);
  return url.href;
@@ -711,7 +713,7 @@ fr:{title:'Vérifiez avant le voyage',instructions:'Vérifiez la date, la compag
 ht:{title:'Verifye anvan vwayaj la',instructions:'Konfime dat, konpayi ki opere vòl la ak dènye chanjman yo nan sous ofisyèl. Paj sa a pa bay done vòl an dirèk.',airport:'Sit ofisyèl ayewopò a ↗'}
 };
 function renderFlightStatus(){
- const w=flightStatusWords[current], code=$('airport').value, raw=$('flight').value.trim().replace(/\s+/g,'').toUpperCase();
+ const w=flightStatusWords[current], code=$('airport').value, raw=normalizeFlightInput($('flight').value);
  const valid=isFlightNumber(raw), empty=!raw;
  const ids=['statusTitle','statusIntro','statusAirportLabel','statusNumberLabel','statusStateLabel','statusScheduledLabel','statusActualLabel','statusPositionLabel'];
  ids.forEach((id,i)=>$(id).textContent=w[i]);
@@ -731,7 +733,7 @@ function clock(){try{const locale=current==='ht'?'fr-HT':current;const formatter
 const skipLinkText={es:'Saltar al tablero de vuelos',en:'Skip to flight board',de:'Zur Flugtafel springen',fr:'Aller au tableau des vols',ht:'Ale nan tablo vòl'};
 for(const btn of document.querySelectorAll('.lang'))btn.addEventListener('click',()=>language(btn.dataset.lang));
 for(const button of document.querySelectorAll('[data-choose-lang]'))button.addEventListener('click',()=>{language(button.dataset.chooseLang);$('langMenu').open=false;});document.addEventListener('click',e=>{if(!$('langMenu').contains(e.target))$('langMenu').open=false;});
-$('airport').addEventListener('change',()=>{links();details();$('boardAirport').value=$('airport').value;renderBoard();});$('boardAirport').addEventListener('change',()=>{$('airport').value=$('boardAirport').value;links();details();renderBoard();});$('boardFilter').addEventListener('input',renderBoard);$('boardCountry').addEventListener('change',renderBoard);$('boardStatusFilter').addEventListener('change',renderBoard);$('boardClearFilters').addEventListener('click',()=>{$('boardFilter').value='';$('boardCountry').value='';$('boardStatusFilter').value='';renderBoard();$('boardFilter').focus();});$('airlineFilter').addEventListener('input',renderAirlines);$('shareBoard').addEventListener('click',shareBoard);$('boardStatusLink').addEventListener('click',e=>{e.preventDefault();$('flight').scrollIntoView({behavior:'smooth',block:'center'});$('flight').focus({preventScroll:true});history.replaceState(null,'','#flightTitle');});$('boardArrivals').addEventListener('click',()=>setBoardMode('arrivals'));$('boardDepartures').addEventListener('click',()=>setBoardMode('departures'));$('flight').addEventListener('input',links);$('flight').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('track').getAttribute('aria-disabled')==='false'){e.preventDefault();window.open($('track').href,'_blank','noopener,noreferrer');}});$('clearFlight').addEventListener('click',()=>{$('flight').value='';links();$('flight').focus();});$('shareFlight').addEventListener('click',shareLink);$('year').textContent=new Date().getFullYear();let saved='es';try{saved=localStorage.getItem('vuelosrd_lang')||'es'}catch{}const qlang=originalLink.searchParams.get('lang');const qairport=(originalLink.searchParams.get('airport')||'').toUpperCase();const qflight=(originalLink.searchParams.get('flight')||'').replace(/\s+/g,'').toUpperCase();if(airports.some(a=>a[0]===qairport))$('airport').value=qairport;$('boardAirport').value=$('airport').value;if(isFlightNumber(qflight))$('flight').value=qflight;const qview=originalLink.searchParams.get('view');if(qview==='arrivals'||qview==='departures')boardMode=qview;
+$('airport').addEventListener('change',()=>{links();details();$('boardAirport').value=$('airport').value;renderBoard();});$('boardAirport').addEventListener('change',()=>{$('airport').value=$('boardAirport').value;links();details();renderBoard();});$('boardFilter').addEventListener('input',renderBoard);$('boardCountry').addEventListener('change',renderBoard);$('boardStatusFilter').addEventListener('change',renderBoard);$('boardClearFilters').addEventListener('click',()=>{$('boardFilter').value='';$('boardCountry').value='';$('boardStatusFilter').value='';renderBoard();$('boardFilter').focus();});$('airlineFilter').addEventListener('input',renderAirlines);$('shareBoard').addEventListener('click',shareBoard);$('boardStatusLink').addEventListener('click',e=>{e.preventDefault();$('flight').scrollIntoView({behavior:'smooth',block:'center'});$('flight').focus({preventScroll:true});history.replaceState(null,'','#flightTitle');});$('boardArrivals').addEventListener('click',()=>setBoardMode('arrivals'));$('boardDepartures').addEventListener('click',()=>setBoardMode('departures'));$('flight').addEventListener('input',links);$('flight').addEventListener('keydown',e=>{if(e.key==='Enter'&&$('track').getAttribute('aria-disabled')==='false'){e.preventDefault();window.open($('track').href,'_blank','noopener,noreferrer');}});$('clearFlight').addEventListener('click',()=>{$('flight').value='';links();$('flight').focus();});$('shareFlight').addEventListener('click',shareLink);$('year').textContent=new Date().getFullYear();let saved='es';try{saved=localStorage.getItem('vuelosrd_lang')||'es'}catch{}const qlang=originalLink.searchParams.get('lang');const qairport=(originalLink.searchParams.get('airport')||'').toUpperCase();const qflight=normalizeFlightInput(originalLink.searchParams.get('flight')||'');if(airports.some(a=>a[0]===qairport))$('airport').value=qairport;$('boardAirport').value=$('airport').value;if(isFlightNumber(qflight))$('flight').value=qflight;const qview=originalLink.searchParams.get('view');if(qview==='arrivals'||qview==='departures')boardMode=qview;
 const qcountry=(originalLink.searchParams.get('country')||'').toLowerCase();const qstatus=(originalLink.searchParams.get('status')||'');
 const qfilter=(originalLink.searchParams.get('filter')||'').trim().slice(0,30);
 if(/^[a-z0-9 _.-]{1,30}$/i.test(qfilter)||/^[\p{L}\p{M}\p{N} _.-]{1,30}$/u.test(qfilter))$('boardFilter').value=qfilter;
