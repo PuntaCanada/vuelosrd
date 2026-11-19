@@ -48,6 +48,7 @@ jobs:
           assert 'img.referrerPolicy=\'no-referrer\'' in s, 'DEPLOYMENT STALE: privacy-conscious logo loading missing'
           assert 'id="flight-help"' in s and 'function renderFlightFAQ()' in s, 'DEPLOYMENT STALE: passenger FAQ missing'
           assert 'id="boardStatusLink"' in s, 'DEPLOYMENT STALE: board status link absent'
+          assert 'appendDemoRouteFlag(td,v.route)' in s and 'const demoCityCountry=' in s, 'DEPLOYMENT STALE: country flags missing'
           assert 'completamente ficticios' in s, 'Airport demo warning absent'
           assert 'flightradar24.com' in s.lower(), 'External data link missing'
           assert 'no publica datos de vuelo en tiempo real' in s, 'Required transparency notice absent'
