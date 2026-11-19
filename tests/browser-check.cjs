@@ -284,6 +284,9 @@ const {chromium} = require('playwright');
       const sourceOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
       assert.ok(sourceOverflow<=2,'Status panel must not overflow at '+width);
       await page.locator('#flight-board').scrollIntoViewIfNeeded();
+      assert.equal(await page.locator('#boardScrollHint').isVisible(),true);
+      assert.equal(await page.locator('#boardColFlight').getAttribute('scope'),'col');
+      assert.equal(await page.locator('.board-scroll').getAttribute('tabindex'),'0');
       assert.equal(await page.locator('#boardAirportShortcuts button').count(),7);
       assert.ok(await page.locator('#boardAirportShortcuts').evaluate(e=>e.scrollWidth>=e.clientWidth),'Shortcut strip should fit or scroll horizontally');
       await page.locator('#boardAirportShortcuts button').last().click();
@@ -314,6 +317,21 @@ const {chromium} = require('playwright');
     const reducedTransition=await page.locator('#boardRows tr').first().evaluate(e=>getComputedStyle(e).transitionDuration);
     assert.ok(reducedTransition.split(',').every(v=>parseFloat(v)===0),'Reduced-motion setting should disable board row animation');
     await page.emulateMedia({reducedMotion:'no-preference'});
+    // Run actual WCAG 2.0/2.1 A and AA checks in the system Chrome browser.
+    await page.setViewportSize({width:390,height:844});
+    await page.goto(base+'?lang=de&airport=PUJ#flight-board',{waitUntil:'domcontentloaded'});
+    await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
+    const audit=await page.evaluate(async()=>{
+      const checks=[];
+      for(const target of ['#flight-board','#mobileBottomNav']){
+        const result=await axe.run(document.querySelector(target),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}});
+        checks.push({target,violations:result.violations.map(v=>({id:v.id,impact:v.impact,description:v.description,nodes:v.nodes.slice(0,3).map(n=>n.target)})),passes:result.passes.length});
+      }
+      return checks;
+    });
+    console.log('Axe WCAG board/mobile results:',JSON.stringify(audit));
+    const serious=audit.flatMap(item=>item.violations.filter(v=>v.impact==='serious'||v.impact==='critical').map(v=>({target:item.target,...v})));
+    assert.deepEqual(serious,[],'Axe found serious/critical WCAG failures in board or mobile navigation');
     assert.deepEqual(errors,[],'JS runtime errors');
     console.log('PASS: desktop/mobile logo loads, inputs, translations, keyboard-accessible cards.');
   } finally {await browser.close();}
