@@ -356,6 +356,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 .flight-airline-count{font-size:12px;color:#516e80;margin:3px 0 12px;min-height:1.4em}
 .flight-airline-empty{font-size:13px;color:#4d6675;display:block;padding:12px}
 
+.flight-search-preview[data-state="partial"]{border-color:#b8d4e2;background:#f0f8fc}.flight-airline-chip.is-matched{border-color:#0b718e;background:#e1f6f4}
 /* Demo board status filter: explicitly sample-only, keyboard and mobile friendly */
 .board-controls #boardStatusFilter{min-width:155px;max-width:220px}
 @media(max-width:680px){.board-controls #boardStatusFilter{max-width:none;min-width:0}}
@@ -555,7 +556,7 @@ function renderAirlines(){
   const name=document.createElement('div');name.className='airline-card-heading';const h=document.createElement('h3');h.textContent=airline.name;const label=document.createElement('div');label.className='airline-code';label.textContent=airline.code;name.append(h,label);head.append(logoFrame,name);
   const desc=document.createElement('p');desc.textContent=w.description;
   const link=document.createElement('a');link.href=airline.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=w.link;link.setAttribute('aria-label',w.link+' · '+airline.name);
-  const searchButton=document.createElement('button');searchButton.type='button';searchButton.className='airline-start-search';searchButton.textContent=w.search;searchButton.setAttribute('aria-label',w.search+' · '+airline.name);searchButton.addEventListener('click',()=>{document.querySelector('#flightTitle').scrollIntoView({behavior:'smooth',block:'start'});$('flight').placeholder=airline.code+' 1234';$('flight').focus({preventScroll:true});});
+  const searchButton=document.createElement('button');searchButton.type='button';searchButton.className='airline-start-search';searchButton.textContent=w.search;searchButton.setAttribute('aria-label',w.search+' · '+airline.name);searchButton.addEventListener('click',()=>{prepareAirlineFlight(airline.code);});
   card.append(head,desc,searchButton,link);if(airline.credit){const credit=document.createElement('a');credit.className='airline-credit';credit.href=airline.credit;credit.target='_blank';credit.rel='noopener noreferrer';credit.textContent=logoWords.source;card.append(credit);}root.append(card);
  }
 }
@@ -600,9 +601,7 @@ function renderFlightAirlineShortcuts(){
   const label=document.createElement('span');label.textContent=airline.code+' · '+airline.name;button.append(label);
   button.setAttribute('aria-label',words.pick+': '+airline.name+' ('+airline.code+')');button.setAttribute('aria-pressed','false');
   button.addEventListener('click',()=>{
-   $('flight').placeholder=airline.code+' 1234';
-   $('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
-   $('flight').focus({preventScroll:true});
+   prepareAirlineFlight(airline.code);
   });
   root.append(button);
  }
@@ -618,7 +617,7 @@ function renderFlightAirlineShortcuts(){
  updateSelectedAirlineChip();
 }
 function updateSelectedAirlineChip(){
- const number=flightNumberValue(),prefix=isFlightNumber(number)?number.slice(0,2):'';
+ const number=flightNumberValue(),prefix=isPartialAirlineCode(number)?number:isFlightNumber(number)?number.slice(0,2):'';
  for(const button of document.querySelectorAll('#flightAirlineShortcutButtons button')){
   const matches=Boolean(prefix)&&button.dataset.airline===prefix;
   button.classList.toggle('is-matched',matches);
@@ -641,28 +640,30 @@ ht:{title:'Kesyon moun poze sou vòl yo',intro:'Konprann enfòmasyon yo anvan w 
 };
 function renderFlightFAQ(){const w=flightFAQ[current];$('faqTitle').textContent=w.title;$('faqIntro').textContent=w.intro;const root=$('faqList');root.replaceChildren();for(const [q,a] of w.items){const d=document.createElement('details'),sum=document.createElement('summary'),p=document.createElement('p');sum.textContent=q;p.textContent=a;d.append(sum,p);root.append(d);}}
 const flightSearchMessages={
-es:{empty:'Introduce un número para preparar el seguimiento externo.',ready:'Vuelo {flight}: listo para consultar en el proveedor externo. No se ha comprobado el estado del vuelo.',invalid:'Introduce un código de aerolínea y un número, por ejemplo DE 2228.',clear:'Borrar número de vuelo'},
-en:{empty:'Enter a flight number to prepare external tracking.',ready:'Flight {flight}: external tracking link ready. Flight status has not been verified.',invalid:'Enter an airline code followed by digits, e.g. DE 2228.',clear:'Clear flight number'},
-de:{empty:'Flugnummer eingeben, um die externe Flugverfolgung vorzubereiten.',ready:'Flug {flight}: Link zum externen Anbieter bereit. Der Flugstatus wurde nicht überprüft.',invalid:'Airline-Code und Flugnummer eingeben, z. B. DE 2228.',clear:'Flugnummer löschen'},
-fr:{empty:'Saisissez un numéro de vol pour préparer le suivi externe.',ready:'Vol {flight} : lien de suivi externe prêt. Le statut du vol n’a pas été vérifié.',invalid:'Saisissez un code de compagnie suivi de chiffres, p. ex. DE 2228.',clear:'Effacer le numéro de vol'},
-ht:{empty:'Antre nimewo vòl la pou pare swivi sou yon sèvis ekstèn.',ready:'Vòl {flight}: lyen ekstèn lan pare. Nou pa verifye eta vòl la.',invalid:'Antre kòd konpayi an ak chif vòl la, pa egzanp DE 2228.',clear:'Efase nimewo vòl la'}
+es:{empty:'Introduce un número para preparar el seguimiento externo.',ready:'Vuelo {flight}: listo para consultar en el proveedor externo. No se ha comprobado el estado del vuelo.',invalid:'Introduce un código de aerolínea y un número, por ejemplo DE 2228.',partial:'Completa el número después de {code} para buscar tu vuelo.', clear:'Borrar número de vuelo'},
+en:{empty:'Enter a flight number to prepare external tracking.',ready:'Flight {flight}: external tracking link ready. Flight status has not been verified.',invalid:'Enter an airline code followed by digits, e.g. DE 2228.',partial:'Enter the flight digits after {code} to look up your flight.', clear:'Clear flight number'},
+de:{empty:'Flugnummer eingeben, um die externe Flugverfolgung vorzubereiten.',ready:'Flug {flight}: Link zum externen Anbieter bereit. Der Flugstatus wurde nicht überprüft.',invalid:'Airline-Code und Flugnummer eingeben, z. B. DE 2228.',partial:'Ergänze nach {code} die Flugnummer, um den Flug zu suchen.', clear:'Flugnummer löschen'},
+fr:{empty:'Saisissez un numéro de vol pour préparer le suivi externe.',ready:'Vol {flight} : lien de suivi externe prêt. Le statut du vol n’a pas été vérifié.',invalid:'Saisissez un code de compagnie suivi de chiffres, p. ex. DE 2228.',partial:'Ajoutez les chiffres du vol après {code} pour lancer la recherche.', clear:'Effacer le numéro de vol'},
+ht:{empty:'Antre nimewo vòl la pou pare swivi sou yon sèvis ekstèn.',ready:'Vòl {flight}: lyen ekstèn lan pare. Nou pa verifye eta vòl la.',invalid:'Antre kòd konpayi an ak chif vòl la, pa egzanp DE 2228.',partial:'Mete chif vòl la apre {code} pou chèche vòl ou.', clear:'Efase nimewo vòl la'}
 };
 function normalizeFlightInput(value){return value.trim().replace(/[\s\-]+/g,'').toUpperCase();}
 function flightNumberValue(){return normalizeFlightInput($('flight').value);}
+function isPartialAirlineCode(code){return airlineDirectory.some(airline=>airline.code===code);}
+function prepareAirlineFlight(code){$('flight').value=code+' ';$('flight').placeholder=code+' 1234';links();$('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('flight').focus({preventScroll:true});$('flight').setSelectionRange($('flight').value.length,$('flight').value.length);}
 function updateFlightSearch(){
  const msg=flightSearchMessages[current],number=flightNumberValue();
  $('flight').setAttribute('autocapitalize','characters');
- const state=!number?'empty':isFlightNumber(number)?'ready':'invalid';
+ const state=!number?'empty':isFlightNumber(number)?'ready':isPartialAirlineCode(number)?'partial':'invalid';
  $('flight').setAttribute('aria-invalid',String(state==='invalid'));
  $('flightError').hidden=state!=='invalid';
  $('flightSearchPreview').dataset.state=state;
- $('flightSearchHint').textContent=state==='ready'?msg.ready.replace('{flight}',number):msg[state];
+ $('flightSearchHint').textContent=state==='ready'?msg.ready.replace('{flight}',number):state==='partial'?msg.partial.replace('{code}',number):msg[state];
  updateAirlineSuggestion();updateSelectedAirlineChip();$('clearFlight').hidden=state==='empty';$('clearFlight').setAttribute('aria-label',msg.clear);
  $('track').setAttribute('aria-disabled',String(state!=='ready'));
  if(state==='ready'){$('track').href='https://www.flightradar24.com/data/flights/'+encodeURIComponent(number.toLowerCase());$('track').target='_blank';}
  else{$('track').removeAttribute('href');}
 }
-function links(){const code=$('airport').value.toLowerCase();$('arrivals').href='https://www.flightradar24.com/data/airports/'+code+'/arrivals';$('departures').href='https://www.flightradar24.com/data/airports/'+code+'/departures';const val=normalizeFlightInput($('flight').value);const valid=!val||isFlightNumber(val);$('flightError').textContent=valid?'':I[current].badFlight;updateFlightSearch();$('shareFlight').disabled=!valid;$('sdqOfficial').hidden=code!=='sdq';renderFlightStatus();}
+function links(){const code=$('airport').value.toLowerCase();$('arrivals').href='https://www.flightradar24.com/data/airports/'+code+'/arrivals';$('departures').href='https://www.flightradar24.com/data/airports/'+code+'/departures';const val=normalizeFlightInput($('flight').value);const valid=!val||isFlightNumber(val)||isPartialAirlineCode(val);$('flightError').textContent=valid?'':I[current].badFlight;updateFlightSearch();$('shareFlight').disabled=!valid;$('sdqOfficial').hidden=code!=='sdq';renderFlightStatus();}
 const airportCardInfo={es:{info:'Ver detalles ↗',board:'Ver tablero ↗',region:'Zona',type:'Aeropuerto'},en:{info:'Airport details ↗',board:'Open flight board ↗',region:'Area',type:'Airport'},de:{info:'Flughafeninfos ↗',board:'Flugtafel öffnen ↗',region:'Region',type:'Flughafen'},fr:{info:'Infos aéroport ↗',board:'Voir les vols ↗',region:'Région',type:'Aéroport'},ht:{info:'Detay ayewopò ↗',board:'Gade tablo vòl ↗',region:'Rejyon',type:'Ayewopò'}};
 const airportArea={
 PUJ:{es:'Punta Cana · Bávaro',en:'Punta Cana · Bávaro',de:'Punta Cana · Bávaro',fr:'Punta Cana · Bávaro',ht:'Punta Cana · Bávaro'},
@@ -1017,7 +1018,7 @@ const flightField=document.getElementById('flight');
 const flightErrorNode=document.getElementById('flightError');
 function updateFlightValidity(){
  const normalized=normalizeFlightInput(flightField.value);
- const invalid=normalized.length>0&&!isFlightNumber(normalized);
+ const invalid=normalized.length>0&&!isFlightNumber(normalized)&&!isPartialAirlineCode(normalized);
  flightField.setAttribute('aria-invalid',String(invalid));
  flightErrorNode.setAttribute('aria-live',invalid?'polite':'off');
 }
