@@ -177,6 +177,17 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
  .board-controls select{font-size:16px}
 }
 @media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*{scroll-behavior:auto!important}}
+
+/* Clear separation between example board and real flight information sources. */
+.board-real-sources{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:center;background:#102f3e;border-top:1px solid #36586a;border-bottom:1px solid #214355;padding:18px 24px}
+.board-real-sources strong{font-size:16px;color:#f5ffff;display:block;margin-bottom:5px}
+.board-real-sources p{font-size:12px;line-height:1.6;color:#bdd3dd;margin:0;max-width:540px}
+.board-real-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.board-real-actions a{background:#d9f3f2;color:#0a4351;font-size:12px;font-weight:800;padding:12px 14px;border-radius:9px;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+.board-real-actions a+ a{background:#193f4c;color:#e4f6f6;border:1px solid #668995}
+.board-real-actions a:hover{filter:brightness(.93)}
+@media(max-width:850px){.board-real-sources{grid-template-columns:1fr;gap:13px}.board-real-actions{justify-content:stretch}.board-real-actions a{flex:1 1 190px;justify-content:center;text-align:center}}
+@media(max-width:560px){.board-real-sources{padding:16px 14px}.board-real-actions{display:grid;grid-template-columns:1fr}.board-real-actions a{width:100%}}
 </style></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
@@ -186,6 +197,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 <div class="board-banner" id="boardWarning">⚠ DEMOSTRACIÓN · Los vuelos, horarios y estados mostrados son completamente ficticios. NO son datos en tiempo real.</div>
 <div class="board-controls"><div class="board-toggle" role="group" aria-label="Flight board type"><button id="boardArrivals" type="button" aria-pressed="true">↘ LLEGADAS</button><button id="boardDepartures" type="button" aria-pressed="false">↗ SALIDAS</button></div><label class="sr-only" for="boardAirport" id="boardAirportLabel">Aeropuerto</label><select id="boardAirport" aria-labelledby="boardAirportLabel"><option value="PUJ">PUJ · Punta Cana</option><option value="SDQ">SDQ · Santo Domingo</option><option value="STI">STI · Santiago</option><option value="POP">POP · Puerto Plata</option><option value="LRM">LRM · La Romana</option><option value="AZS">AZS · Samaná</option><option value="JBQ">JBQ · La Isabela</option></select><label class="sr-only" for="boardFilter" id="boardFilterLabel">Filtrar</label><input type="search" id="boardFilter" maxlength="30" placeholder="Filtrar vuelos demo..." aria-labelledby="boardFilterLabel"></div>
 <div class="board-tools"><span class="board-focus" id="boardAirportName">Punta Cana · PUJ</span><button id="shareBoard" type="button">Compartir tablero</button><a href="#flight-status" id="boardStatusLink">Estado del vuelo ↗</a><a href="#airport-details" id="boardDetailLink">Información del aeropuerto ↗</a><span id="boardShareMessage" class="board-share-message" role="status" aria-live="polite"></span></div><div class="board-scroll"><table class="board-table"><thead><tr><th id="boardColFlight">VUELO</th><th id="boardColAirline">AEROLÍNEA</th><th id="boardColRoute">ORIGEN</th><th id="boardColTime">HORA</th><th id="boardColStatus">ESTADO</th></tr></thead><tbody id="boardRows"></tbody></table></div>
+<div class="board-real-sources"><div><strong id="boardRealTitle">Consulta vuelos reales</strong><p id="boardRealDesc">Para datos actuales, consulta el proveedor externo o la información del aeropuerto. La tabla de arriba es una demostración.</p></div><div class="board-real-actions"><a id="boardLiveLink" target="_blank" rel="noopener noreferrer" href="https://www.flightradar24.com/data/airports/puj/arrivals">↗ Vuelos reales · Flightradar24</a><a id="boardAirportOfficialLink" target="_blank" rel="noopener noreferrer" href="https://www.puntacanainternationalairport.com/en/">↗ Información del aeropuerto</a></div></div>
 <div class="board-foot"><span id="boardFootnote">Los números DEMO no corresponden a vuelos reales.</span><a id="boardProviderLink" href="https://www.flightradar24.com/data/airports/puj/arrivals" rel="noopener noreferrer" target="_blank">Consultar proveedor externo ↗</a></div>
 </section>
 <section class="panel" aria-labelledby="flightTitle"><h2 id="flightTitle" data-i="find">Busca tu aeropuerto o vuelo</h2><p class="small" data-i="findDesc">Selecciona un aeropuerto para abrir los paneles de llegadas y salidas en el proveedor.</p><div class="grid"><div class="field"><label for="airport" data-i="airport">Aeropuerto</label><select id="airport"><option value="PUJ">Punta Cana · PUJ</option><option value="SDQ">Santo Domingo / Las Américas · SDQ</option><option value="STI">Santiago / Cibao · STI</option><option value="POP">Puerto Plata · POP</option><option value="LRM">La Romana · LRM</option><option value="AZS">Samaná / El Catey · AZS</option><option value="JBQ">La Isabela / El Higüero · JBQ</option></select></div><div class="field"><label for="flight" data-i="flight">Número de vuelo (opcional)</label><input id="flight" inputmode="text" autocomplete="off" maxlength="14" placeholder="Ej. DE 2228" aria-describedby="flightError"><div class="error" id="flightError" role="status"></div></div></div><div class="actions"><a id="arrivals" class="btn primary" target="_blank" rel="noopener noreferrer" href="https://www.flightradar24.com/data/airports/puj/arrivals" data-i="arrivals">↘ Llegadas</a><a id="departures" class="btn" target="_blank" rel="noopener noreferrer" href="https://www.flightradar24.com/data/airports/puj/departures" data-i="departures">↗ Salidas</a><a id="track" class="btn" target="_blank" rel="noopener noreferrer" href="https://www.flightradar24.com/" data-i="track">✈ Seguir vuelo</a></div><div class="sharebar"><button type="button" id="shareFlight">🔗 Compartir enlace</button><span class="sharemsg" id="shareMsg" role="status" aria-live="polite"></span></div><div class="externallinks"><a href="https://aerodom.com/en/airports/" target="_blank" rel="noopener noreferrer" id="sdqOfficial" hidden>↗ Aerodom · SDQ</a></div><div class="note small" data-i="disclaimer">Importante: los enlaces abren proveedores externos. VuelosRD no publica datos de vuelo en tiempo real propios y no confirma horarios, retrasos o cancelaciones. Verifica siempre con la aerolínea o el aeropuerto.</div></section>
@@ -313,6 +325,14 @@ let boardMode='arrivals';
 function boardUrl(){const url=new URL(window.location.origin+window.location.pathname);url.searchParams.set('airport',$('boardAirport').value);url.searchParams.set('view',boardMode);url.searchParams.set('lang',current);url.hash='flight-board';return url.href;}
 async function shareBoard(){const url=boardUrl();const b=boardWords[current];if(navigator.share){try{await navigator.share({title:'VuelosRD · DEMO',url});return;}catch(e){if(e.name==='AbortError')return;}}try{await navigator.clipboard.writeText(url);$('boardShareMessage').textContent=b.copied;}catch{$('boardShareMessage').textContent=b.error+' ';const a=document.createElement('a');a.href=url;a.textContent=url;a.rel='noopener noreferrer';$('boardShareMessage').replaceChildren(a);}}
 function setBoardMode(mode){boardMode=mode==='departures'?'departures':'arrivals';renderBoard();}
+
+const realSourceText={
+es:['Consulta vuelos reales','Para consultar información actual, utiliza una fuente externa. La tabla superior es una demostración.','↗ Vuelos reales · Flightradar24','↗ Información del aeropuerto'],
+en:['Check actual flight information','For current information, use an external source. The board above contains demo examples only.','↗ Actual flights · Flightradar24','↗ Airport information'],
+de:['Echte Fluginformationen abrufen','Aktuelle Flugauskünfte erhältst du beim externen Anbieter. Die Tafel darüber zeigt ausschließlich Demo-Beispiele.','↗ Echte Flüge · Flightradar24','↗ Flughafeninformationen'],
+fr:['Consulter les vrais vols','Pour les informations actuelles, consultez une source externe. Le tableau ci-dessus est une démonstration.','↗ Vols réels · Flightradar24','↗ Informations aéroport'],
+ht:['Gade vrè enfòmasyon vòl','Pou enfòmasyon aktyèl, sèvi ak sous ekstèn. Tablo anwo a se egzanp demonstrasyon sèlman.','↗ Vòl reyèl · Flightradar24','↗ Enfòmasyon ayewopò']
+};
 function renderBoard(){
 const b=boardWords[current],code=$('boardAirport').value;const airportName=airports.find(a=>a[0]===code)[1];$('boardAirportName').replaceChildren();const bold=document.createElement('strong');bold.textContent=code;$('boardAirportName').append(document.createTextNode(airportName+' · '),bold);$('shareBoard').textContent=b.share;$('boardDetailLink').textContent=b.detail;$('boardStatusLink').textContent=b.statusLink;$('boardShareMessage').textContent='';
 $('boardTitle').textContent=b.title;$('boardClockLabel').textContent=b.clock;$('boardWarning').textContent=b.warning;
@@ -323,6 +343,12 @@ $('boardAirportLabel').textContent=b.airport;$('boardFilterLabel').textContent=b
 $('boardColRoute').textContent=boardMode==='arrivals'?b.origin:b.destination;
 $('boardFootnote').textContent=b.foot;$('boardProviderLink').textContent=b.provider;
 $('boardProviderLink').href='https://www.flightradar24.com/data/airports/'+code.toLowerCase()+'/'+boardMode;
+const rs=realSourceText[current];
+$('boardRealTitle').textContent=rs[0];$('boardRealDesc').textContent=rs[1];
+$('boardLiveLink').textContent=rs[2];$('boardAirportOfficialLink').textContent=rs[3];
+$('boardLiveLink').href=$('boardProviderLink').href;
+$('boardAirportOfficialLink').href=airportInfo[code].url;
+
 const values=demoRoutes[code];const query=$('boardFilter').value.toLocaleLowerCase().trim();
 const data=values.map((route,i)=>({flight:'DEMO '+String(i+1).padStart(2,'0'),airline:'DEMO',route,time:['09:15','10:40','12:05','14:20','16:55'][i],status:i===1?1:i===3?2:0}))
 .filter(v=>[v.flight,v.airline,v.route,v.time,b.statuses[v.status]].some(w=>w.toLocaleLowerCase().includes(query)));
