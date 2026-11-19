@@ -72,6 +72,8 @@ jobs:
           assert 'const statusSourceWords=' in html and 'id="statusAirportOfficialLink"' in html, 'Official airport source guidance missing'
           assert 'id="flightAirlineShortcutButtons"' in html and 'renderFlightAirlineShortcuts()' in html, 'Airline search chips missing'
           assert 'board-route-country' in html and "clear.id='boardEmptyReset'" in html, 'Board city subtitles or empty reset missing'
+          assert 'id="boardStatusFilter"' in html and 'const boardStatusFilterWords=' in html, 'Localized demo status filter missing'
+          assert "url.searchParams.set('status'" in html and 'refreshBoardStatusOptions()' in html, 'Status filter must be shareable'
           assert "url.searchParams.set('country'" in html and "url.searchParams.set('filter'" in html, 'Sharable board filters missing'
           assert 'const flightStatusWords=' in html and 'statusPosition' in html, 'Flight status translations or missing-data indicators absent'
           assert "url.searchParams.set('view',boardMode)" in html, 'Share link must retain arrivals/departures'
