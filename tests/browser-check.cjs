@@ -91,7 +91,7 @@ const {chromium} = require('playwright');
     assert.equal(await page.locator('.airline-card').count(),28);
     assert.equal(await page.locator('#airlineFilter').inputValue(),'');
     assert.equal(await page.evaluate(()=>document.activeElement.id),'airlineFilter');
-    await page.locator('#airlineFilter').fill('Jet');
+    await page.locator('#airlineFilter').fill('JetBlue');
     assert.equal(await page.locator('.airline-card').count(),1);
     assert.match(await page.locator('.airline-card h3').innerText(),/JetBlue/);
     await page.locator('.airline-card .airline-start-search').click();
