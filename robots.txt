@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://vuelosrd.pages.dev/sitemap.xml
