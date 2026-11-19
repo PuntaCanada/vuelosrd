@@ -671,7 +671,7 @@ if(!data.length){
  const tr=document.createElement('tr');const td=document.createElement('td');td.colSpan=5;
  const wrap=document.createElement('div');wrap.className='board-no-results';
  const msg=document.createElement('p');msg.textContent=b.empty;
- const clear=document.createElement('button');clear.type='button';clear.className='board-empty-reset';clear.textContent=enhanced.clear;
+ const clear=document.createElement('button');clear.type='button';clear.id='boardEmptyReset';clear.className='board-empty-reset';clear.textContent=enhanced.clear;
  clear.addEventListener('click',()=>{$('boardFilter').value='';$('boardCountry').value='';renderBoard();$('boardFilter').focus();});
  wrap.append(msg,clear);td.append(wrap);tr.append(td);tbody.append(tr);return;
 }
