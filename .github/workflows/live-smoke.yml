@@ -22,6 +22,9 @@ jobs:
           assert 'VuelosRD' in s, 'Wrong site content'
           assert 'Punta Cana' in s, 'Airport selector missing'
           assert 'Deutsch' in s, 'Language menu missing'
+          assert s.count('class="flag-icon"') == 5, 'DEPLOYMENT STALE: SVG flag fix not on public website'
+          assert 'id="langMenu"' in s, 'DEPLOYMENT STALE: new language menu not published'
+          assert 'id="goAirports"' in s, 'DEPLOYMENT STALE: top navigation not published'
           assert 'flightradar24.com' in s.lower(), 'External data link missing'
           assert 'no publica datos de vuelo en tiempo real' in s, 'Required transparency notice absent'
           HTMLParser().feed(s)
