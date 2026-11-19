@@ -35,6 +35,7 @@ jobs:
           assert 'Compact airport display for narrow screens' in s and 'td.dataset.label=' in s, 'DEPLOYMENT STALE: mobile card layout missing'
           assert 'id="detail-board-link"' in s and 'const airportDetailWords=' in s, 'DEPLOYMENT STALE: airport detail improvements missing'
           assert 'const airportArea=' in s and 'airport-card-visual' in s, 'DEPLOYMENT STALE: destination cards missing'
+          assert 'Mobile and visual polish' in s and 'class="skip-link"' in s, 'DEPLOYMENT STALE: mobile accessibility polish missing'
           assert 'id="boardStatusLink"' in s, 'DEPLOYMENT STALE: board status link absent'
           assert 'completamente ficticios' in s, 'Airport demo warning absent'
           assert 'flightradar24.com' in s.lower(), 'External data link missing'
