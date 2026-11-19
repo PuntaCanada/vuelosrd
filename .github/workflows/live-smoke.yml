@@ -40,6 +40,7 @@ jobs:
           assert 'id="flightSearchPreview"' in s and 'const flightSearchMessages=' in s, 'DEPLOYMENT STALE: guided flight search missing'
           assert 'id="airlines"' in s and 'const airlineDirectory=' in s, 'DEPLOYMENT STALE: official airline directory missing'
           assert 'id="airlineFilter"' in s and 'function updateAirlineSuggestion()' in s, 'DEPLOYMENT STALE: airline search integration missing'
+          assert 'function isFlightNumber(value)' in s and 'airline-start-search' in s, 'DEPLOYMENT STALE: flight format/airline quick-search missing'
           assert s.count("logo:'https://commons.wikimedia.org/wiki/Special:FilePath/") == 4, 'DEPLOYMENT STALE: sourced airline logos missing'
           assert 'commons.wikimedia.org/wiki/Special:FilePath/AAirlines.png' in s, 'Canonical American Airlines logo asset missing'
           assert 'airline-logo-frame' in s and 'id="airlinesCredits"' in s, 'DEPLOYMENT STALE: credits or logo layout missing'
