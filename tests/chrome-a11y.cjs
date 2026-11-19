@@ -30,6 +30,13 @@ const assert = require('node:assert/strict');
    assert.equal(await airlineButtons.count(),1,'airline code search');
    await airlineButtons.first().click();
    assert.equal(await page.locator('#flight').getAttribute('placeholder'),'DM 1234','airline chip opens number entry');
+   assert.equal(await page.locator('#flight').inputValue(),'DM ','airline chip pre-fills code');
+   assert.equal(await page.locator('#flight').getAttribute('aria-invalid'),'false','partial code is not an error');
+   assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'true','partial number cannot open tracking');
+   await page.locator('#flight').fill('DM1234');
+   assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'false','complete number enables external link');
+   assert.match(await page.locator('#track').getAttribute('href'),/\/data\/flights\/dm1234/);
+
    await page.locator('#flightAirlineQuickFilter').fill('not-an-airline');
    assert.equal(await airlineButtons.count(),0,'empty state');
    await page.locator('#flightAirlineQuickFilter').fill('');
@@ -49,6 +56,9 @@ const assert = require('node:assert/strict');
    assert.equal(await page.evaluate(()=>document.activeElement.id),'flight');
    // Language navigation remains operable after filtering and search.
    await page.locator('[data-lang="en"]').click();
+   await page.locator('#flight').fill('DM ');
+   assert.match(await page.locator('#flightSearchHint').innerText(),/Enter the flight digits after DM/);
+
    assert.equal(await page.locator('#flightAirlineQuickFilter').getAttribute('placeholder'),'Search 28 airlines');
    await page.locator('[data-lang="es"]').click();
    const results=await page.evaluate(axeSource=>{eval(axeSource);return window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})},axe.source);
