@@ -57,6 +57,7 @@ jobs:
           assert 'id="flightAirlineShortcutButtons"' in s and 'board-route-country' in s and "clear.id='boardEmptyReset'" in s, 'DEPLOYMENT STALE: route labels / airline chips / recovery missing'
           assert 'id="boardTableCaption"' in s and 'const boardTableCaptionWords=' in s, 'DEPLOYMENT STALE: accessible board caption missing'
           assert 'id="mobileBottomNav"' in s and 'function updateMobileNavigation()' in s, 'DEPLOYMENT STALE: mobile quick navigation missing'
+          assert 'function normalizeSearchText(value)' in s and "e.key==='Escape'" in s, 'DEPLOYMENT STALE: accessible accent-free search missing'
           assert "reset.id='airlineEmptyReset'" in s, 'DEPLOYMENT STALE: airline search recovery missing'
           assert 'id="boardSort"' in s and 'function refreshBoardSortOptions()' in s and "url.searchParams.set('sort'" in s, 'DEPLOYMENT STALE: sorting missing'
           assert 'function updateMobileActiveSection()' in s and 'function updateSelectedAirlineChip()' in s, 'DEPLOYMENT STALE: active navigation and matched airline missing'
