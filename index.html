@@ -465,11 +465,16 @@ de:{source:'Logoquelle ↗',credit:'Logos: Quellenangaben bei Wikimedia Commons.
 fr:{source:'Source du logo ↗',credit:'Logos : fichiers sourcés sur Wikimedia Commons. Les marques appartiennent à leurs titulaires. Air Canada reste en texte sans autorisation de logo.'},
 ht:{source:'Sous logo a ↗',credit:'Logo yo: fichye ak sous sou Wikimedia Commons. Mak yo pou mèt yo. Air Canada rete sèlman tèks jiskaske gen pèmisyon pou logo a.'}
 };
+// Accent-insensitive text matching helps travelers find Samaná, República Dominicana etc.
+// Only used for matching typed names: presented city and country text stays unchanged.
+function normalizeSearchText(value){
+ return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().trim();
+}
 function renderAirlines(){
  const w=airlineWords[current], filterWords=airlineFilterWords[current], logoWords=airlineLogoWords[current];$('airlinesCredits').textContent=logoWords.credit;
  $('airlineFilterLabel').textContent=filterWords.label;$('airlineFilter').placeholder=filterWords.placeholder;
  $('airlines-title').textContent=w.heading;$('airlines-intro').textContent=w.intro;$('airlines-independent').textContent=w.badge;$('airlines-note').textContent=w.note;
- const root=$('airlineCards');root.replaceChildren();const needle=$('airlineFilter').value.toLocaleLowerCase().trim();const found=airlineDirectory.filter(a=>(a.code+' '+a.name).toLocaleLowerCase().includes(needle));$('airlineResults').textContent=filterWords.count.replace('{n}',String(found.length));
+ const root=$('airlineCards');root.replaceChildren();const needle=normalizeSearchText($('airlineFilter').value);const found=airlineDirectory.filter(a=>normalizeSearchText(a.code+' '+a.name).includes(needle));$('airlineResults').textContent=filterWords.count.replace('{n}',String(found.length));
  if(!found.length){
  const wrap=document.createElement('div');wrap.className='airline-empty';
  const msg=document.createElement('p');msg.textContent=filterWords.empty;
@@ -825,9 +830,9 @@ $('boardLiveLink').textContent=rs[2];$('boardAirportOfficialLink').textContent=r
 $('boardLiveLink').href=$('boardProviderLink').href;
 $('boardAirportOfficialLink').href=airportInfo[code].url;
 
-const values=demoRoutes[code];const query=$('boardFilter').value.toLocaleLowerCase().trim();const selectedCountry=$('boardCountry').value;const selectedStatus=$('boardStatusFilter').value;
+const values=demoRoutes[code];const query=normalizeSearchText($('boardFilter').value);const selectedCountry=$('boardCountry').value;const selectedStatus=$('boardStatusFilter').value;
 const data=values.map((route,i)=>({flight:'DEMO '+String(i+1).padStart(2,'0'),airline:'DEMO',route,time:['09:15','10:40','12:05','14:20','16:55'][i],status:i===1?1:i===3?2:0}))
-.filter(v=>{const c=countryOfDemoRoute(v.route);return (!selectedCountry||c===selectedCountry)&&(!selectedStatus||String(v.status)===selectedStatus)&&[v.flight,v.airline,v.route,v.time,b.statuses[v.status],c||'',c?boardCountryNames[current][c]:''].some(w=>w.toLocaleLowerCase().includes(query));});
+.filter(v=>{const c=countryOfDemoRoute(v.route);return (!selectedCountry||c===selectedCountry)&&(!selectedStatus||String(v.status)===selectedStatus)&&[v.flight,v.airline,v.route,v.time,b.statuses[v.status],c||'',c?boardCountryNames[current][c]:''].some(w=>normalizeSearchText(w).includes(query));});
 const sortOrder=$('boardSort').value;
 if(sortOrder==='time-desc')data.reverse();
 else if(sortOrder==='city')data.sort((a,b)=>a.route.localeCompare(b.route,current==='ht'?'fr':current));
