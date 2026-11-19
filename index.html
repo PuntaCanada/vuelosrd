@@ -366,6 +366,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
  body{padding-bottom:calc(85px + env(safe-area-inset-bottom))}
  #flight-board,#flightTitle,#airlines{scroll-margin-top:18px}
 }
+
+/* Crisp airport split-flap feel with readable keyboard focus and calm motion. */
+@media(min-width:681px){
+ .board-table tbody tr{transition:background-color .15s ease}
+ .board-table tbody tr:hover{background:#17415a}
+ .board-table tbody td{border-bottom:1px solid #28465a}
+}
+@media(prefers-reduced-motion:reduce){.board-table tbody tr{transition:none}}
+@media(forced-colors:active){.board-airport-chip[aria-pressed="true"],.board-active-filter-chip{border:2px solid ButtonText}.mobile-bottom-nav{border-top:2px solid CanvasText}}
 </style></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
@@ -375,7 +384,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 <div class="board-banner" id="boardWarning">⚠ DEMOSTRACIÓN · Los vuelos, horarios y estados mostrados son completamente ficticios. NO son datos en tiempo real.</div>
 <div class="board-airport-shortcuts" role="group" id="boardAirportShortcuts" aria-label="Aeropuertos dominicanos"></div>
 <div class="board-controls"><div class="board-toggle" role="group" aria-label="Flight board type"><button id="boardArrivals" type="button" aria-pressed="true">↘ LLEGADAS</button><button id="boardDepartures" type="button" aria-pressed="false">↗ SALIDAS</button></div><label class="sr-only" for="boardAirport" id="boardAirportLabel">Aeropuerto</label><select id="boardAirport" aria-labelledby="boardAirportLabel"><option value="PUJ">PUJ · Punta Cana</option><option value="SDQ">SDQ · Santo Domingo</option><option value="STI">STI · Santiago</option><option value="POP">POP · Puerto Plata</option><option value="LRM">LRM · La Romana</option><option value="AZS">AZS · Samaná</option><option value="JBQ">JBQ · La Isabela</option></select><label class="sr-only" for="boardFilter" id="boardFilterLabel">Filtrar</label><input type="search" id="boardFilter" maxlength="30" placeholder="Filtrar vuelos demo..." aria-labelledby="boardFilterLabel"><label for="boardCountry" class="sr-only" id="boardCountryLabel">País</label><select id="boardCountry" aria-labelledby="boardCountryLabel"><option value="">Todos los países</option></select><label for="boardStatusFilter" class="sr-only" id="boardStatusFilterLabel">Estado DEMO</label><select id="boardStatusFilter" aria-labelledby="boardStatusFilterLabel"><option value="">Todos los estados DEMO</option></select><button type="button" class="board-clear-filters" id="boardClearFilters" hidden>✕ Borrar filtros</button></div><div class="board-filter-meta"><span id="boardResultCount" role="status" aria-live="polite">5 ejemplos DEMO</span><a href="#airlines" id="boardAirlinesLink">Ver aerolíneas ↗</a></div><div id="boardActiveFilters" class="board-active-filters" aria-label="Filtros activos" hidden></div>
-<div class="board-tools"><span class="board-focus" id="boardAirportName">Punta Cana · PUJ</span><button id="shareBoard" type="button">Compartir tablero</button><a href="#flightTitle" id="boardStatusLink">Buscar un vuelo ↗</a><a href="#airport-details" id="boardDetailLink">Información del aeropuerto ↗</a><span id="boardShareMessage" class="board-share-message" role="status" aria-live="polite"></span></div><div class="board-scroll"><table class="board-table"><thead><tr><th id="boardColFlight">VUELO</th><th id="boardColAirline">AEROLÍNEA</th><th id="boardColRoute">ORIGEN</th><th id="boardColTime">HORA</th><th id="boardColStatus">ESTADO</th></tr></thead><tbody id="boardRows"></tbody></table></div>
+<div class="board-tools"><span class="board-focus" id="boardAirportName">Punta Cana · PUJ</span><button id="shareBoard" type="button">Compartir tablero</button><a href="#flightTitle" id="boardStatusLink">Buscar un vuelo ↗</a><a href="#airport-details" id="boardDetailLink">Información del aeropuerto ↗</a><span id="boardShareMessage" class="board-share-message" role="status" aria-live="polite"></span></div><div class="board-scroll"><table class="board-table"><caption id="boardTableCaption" class="sr-only">Vuelos ficticios de demostración, no datos en directo.</caption><thead><tr><th id="boardColFlight">VUELO</th><th id="boardColAirline">AEROLÍNEA</th><th id="boardColRoute">ORIGEN</th><th id="boardColTime">HORA</th><th id="boardColStatus">ESTADO</th></tr></thead><tbody id="boardRows"></tbody></table></div>
 <div class="board-real-sources"><div><strong id="boardRealTitle">Consulta vuelos reales</strong><p id="boardRealDesc">Para datos actuales, consulta el proveedor externo o la información del aeropuerto. La tabla de arriba es una demostración.</p></div><div class="board-real-actions"><a id="boardLiveLink" target="_blank" rel="noopener noreferrer" href="https://www.flightradar24.com/data/airports/puj/arrivals">↗ Vuelos reales · Flightradar24</a><a id="boardAirportOfficialLink" target="_blank" rel="noopener noreferrer" href="https://www.puntacanainternationalairport.com/en/">↗ Información del aeropuerto</a></div></div>
 <div class="board-foot"><span id="boardFootnote">Los números DEMO no corresponden a vuelos reales.</span><a id="boardProviderLink" href="https://www.flightradar24.com/data/airports/puj/arrivals" rel="noopener noreferrer" target="_blank">Consultar proveedor externo ↗</a></div>
 </section>
@@ -652,6 +661,13 @@ function appendDemoRouteFlag(cell,route){
  const img=document.createElement('img');img.className='board-country-flag';img.src='/assets/flags/'+country+'.svg';img.width=26;img.height=19;img.loading='eager';img.decoding='async';img.alt=label;img.title=label;img.addEventListener('error',()=>{const fallback=document.createElement('span');fallback.className='board-country-code';fallback.textContent=country.toUpperCase();fallback.title=label;fallback.setAttribute('aria-label',label);img.replaceWith(fallback);});
  group.append(names,img);cell.append(group);
 }
+const boardTableCaptionWords={
+es:'Vuelos de ejemplo completamente ficticios, no datos en tiempo real. Selecciona un aeropuerto y filtros para explorar.',
+en:'Entirely fictional sample flights, not live data. Select an airport and filters to explore.',
+de:'Vollständig fiktive Beispielflüge, keine Live-Flugdaten. Flughafen und Filter wählen.',
+fr:'Vols fictifs de démonstration, sans données en direct. Choisissez un aéroport et des filtres.',
+ht:'Vòl egzanp ki pa reyèl, pa done an dirèk. Chwazi yon ayewopò ak filtè.'
+};
 const boardEnhancementWords={
 es:{country:'País',all:'Todos los países',clear:'✕ Borrar filtros',count:'{n} de {total} ejemplos DEMO',airlines:'Ver aerolíneas ↗'},
 en:{country:'Country',all:'All countries',clear:'✕ Clear filters',count:'{n} of {total} DEMO examples',airlines:'View airlines ↗'},
@@ -728,7 +744,7 @@ fr:['Consulter les vrais vols','Pour les informations actuelles, consultez une s
 ht:['Gade vrè enfòmasyon vòl','Pou enfòmasyon aktyèl, sèvi ak sous ekstèn. Tablo anwo a se egzanp demonstrasyon sèlman.','↗ Vòl reyèl · Flightradar24','↗ Enfòmasyon ayewopò']
 };
 function renderBoard(){
-const b=boardWords[current],code=$('boardAirport').value;renderBoardAirportShortcuts();refreshBoardCountryOptions();refreshBoardStatusOptions();const enhanced=boardEnhancementWords[current];$('boardCountryLabel').textContent=enhanced.country;$('boardClearFilters').textContent=enhanced.clear;$('boardAirlinesLink').textContent=enhanced.airlines;const airportName=airports.find(a=>a[0]===code)[1];$('boardAirportName').replaceChildren();const bold=document.createElement('strong');bold.textContent=code;$('boardAirportName').append(document.createTextNode(airportName+' · '),bold);$('shareBoard').textContent=b.share;$('boardDetailLink').textContent=b.detail;$('boardStatusLink').textContent=b.statusLink;$('boardShareMessage').textContent='';
+const b=boardWords[current],code=$('boardAirport').value;$('boardTableCaption').textContent=boardTableCaptionWords[current];renderBoardAirportShortcuts();refreshBoardCountryOptions();refreshBoardStatusOptions();const enhanced=boardEnhancementWords[current];$('boardCountryLabel').textContent=enhanced.country;$('boardClearFilters').textContent=enhanced.clear;$('boardAirlinesLink').textContent=enhanced.airlines;const airportName=airports.find(a=>a[0]===code)[1];$('boardAirportName').replaceChildren();const bold=document.createElement('strong');bold.textContent=code;$('boardAirportName').append(document.createTextNode(airportName+' · '),bold);$('shareBoard').textContent=b.share;$('boardDetailLink').textContent=b.detail;$('boardStatusLink').textContent=b.statusLink;$('boardShareMessage').textContent='';
 $('boardTitle').textContent=b.title;$('boardClockLabel').textContent=b.clock;$('boardWarning').textContent=b.warning;
 $('boardArrivals').textContent=b.arrivals;$('boardDepartures').textContent=b.departures;
 $('boardArrivals').setAttribute('aria-pressed',String(boardMode==='arrivals'));$('boardDepartures').setAttribute('aria-pressed',String(boardMode==='departures'));
