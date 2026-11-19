@@ -31,6 +31,7 @@ jobs:
           assert 'id="shareBoard"' in s and 'function boardUrl()' in s, 'DEPLOYMENT STALE: shareable board missing'
           assert 'id="flight-status"' in s and 'function renderFlightStatus()' in s, 'DEPLOYMENT STALE: flight status panel missing'
           assert s.index('id="flight-board"') < s.index('id="flightTitle"'), 'DEPLOYMENT STALE: board not at top'
+          assert 'Airport-terminal visual system' in s and 'margin-top:-83px' in s, 'DEPLOYMENT STALE: new header / board design missing'
           assert 'id="boardStatusLink"' in s, 'DEPLOYMENT STALE: board status link absent'
           assert 'completamente ficticios' in s, 'Airport demo warning absent'
           assert 'flightradar24.com' in s.lower(), 'External data link missing'
