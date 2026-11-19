@@ -67,6 +67,8 @@ jobs:
           assert 'id="boardStatusLink"' in html, 'Flight board must link to status detail'
           assert 'const demoCityCountry=' in html and 'appendDemoRouteFlag(td,v.route)' in html, 'City country flag mapping missing'
           assert 'boardCountryNames=' in html, 'Localized country labels missing'
+          assert 'id="boardAirportShortcuts"' in html and 'function renderBoardAirportShortcuts()' in html, 'Airport shortcut navigation missing'
+          assert "url.searchParams.set('country'" in html and "url.searchParams.set('filter'" in html, 'Sharable board filters missing'
           assert 'const flightStatusWords=' in html and 'statusPosition' in html, 'Flight status translations or missing-data indicators absent'
           assert "url.searchParams.set('view',boardMode)" in html, 'Share link must retain arrivals/departures'
           scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',html,re.S)
