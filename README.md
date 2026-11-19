@@ -71,3 +71,9 @@ The five locally hosted SVGs under `assets/flags/` (Germany `de`, United States 
 ## Airline directory update (2026-11-19)
 
 The airline directory now contains 28 airline code/name entries, and all 28 shortcuts are shown by default (the toggle can collapse to the first five). 26 entries reference source-documented airline marks hosted on Wikimedia Commons; for Sun Country Airlines and Air Canada, text/code fallbacks remain. Air Canada brand permission is not assumed. Availability, trademark notices and artwork may change; any failed external image automatically falls back to the airline code. Logos identify airlines only and do **not** imply a verified present route, partnership, live flight feed or airline endorsement. Sources for added marks are linked through each airline's `credit` field in `index.html`. No new paid APIs or subscriptions have been introduced.
+
+## Airline quick search and regression coverage (2026-11-19)
+
+The flight-search panel now provides a separate localized airline-code/name filter, a visible match count, an empty state with a reset action, and a clearable search in ES, EN, DE, FR and HT. All 28 airlines are offered by default; the show-less/show-more toggle remains available. Airline logos remain purely decorative in shortcut buttons (`alt=""`), so screen readers use the readable airline code and name. Logo image-load failures remove only the image, never the airline shortcut. Chromium regression tests now cover the expanded directory, search and code matching, zero-results state, collapse/expand control, locale switching and keyboard flight search at three viewport sizes.
+
+The Wikimedia filename for GOL was corrected to `GOL-Logo-Pref-FundoClaro-RGB.svg` after checking the Commons listing. External image reachability and actual GitHub Actions / Cloudflare publishing must be checked separately before claiming a fully validated production deployment.
