@@ -29,6 +29,9 @@ jobs:
           assert html.count('class="flag-icon"') == 5, 'Five inline SVG flags required'
           assert 'id="langMenu"' in html and 'data-choose-lang="ht"' in html, 'Accessible language menu missing'
           assert 'id="goAirports"' in html and 'id="goTools"' in html, 'Top navigation missing'
+          assert 'id="flight-board"' in html and 'id="boardRows"' in html, 'Airport demo board missing'
+          assert 'const boardWords=' in html and 'function renderBoard()' in html, 'Multilingual board implementation missing'
+          assert 'completamente ficticios' in html and 'DEMO ' in html, 'Demo disclosure missing'
           scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',html,re.S)
           assert len(scripts) == 1
           Path('/tmp/vuelosrd-inline.js').write_text(scripts[0], encoding='utf-8')
