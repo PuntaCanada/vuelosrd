@@ -55,7 +55,7 @@ The independent airline-directory cards display four externally hosted SVG marks
 - Condor: https://commons.wikimedia.org/wiki/File:Condor_logo_2022.svg (derived from Condor branding; Condor newsroom permits logo usage with attribution subject to revocation: https://condor-newsroom.condor.com/en/de/downloads/ )
 - JetBlue: https://commons.wikimedia.org/wiki/File:JetBlue_Airways_Logo.svg
 - Iberia: https://commons.wikimedia.org/wiki/File:Logotipo_de_Iberia.svg
-- American Airlines: https://commons.wikimedia.org/wiki/File:American_Airlines_wordmark_(2013).svg
+- American Airlines: https://commons.wikimedia.org/wiki/File:AAirlines.png (official-source 2013 logo image; browser-tested; prior SVG source failed to load)
 
 The Wikimedia Commons file pages describe these images as public-domain text/simple-shape marks; **trademark and other rights remain applicable**. All marks remain the property of their respective owners. The site provides a source link on each applicable card and does not claim endorsement or affiliation. The logos are loaded externally from Wikimedia Commons; images may fail or change, in which case a text-code fallback is shown. No icons are generated or inferred from live flight data.
 
