@@ -32,6 +32,8 @@ jobs:
           assert 'id="flight-board"' in html and 'id="boardRows"' in html, 'Airport demo board missing'
           assert 'const boardWords=' in html and 'function renderBoard()' in html, 'Multilingual board implementation missing'
           assert 'completamente ficticios' in html and 'DEMO ' in html, 'Demo disclosure missing'
+          assert 'id="shareBoard"' in html and 'function boardUrl()' in html, 'Shareable board missing'
+          assert "url.searchParams.set('view',boardMode)" in html, 'Share link must retain arrivals/departures'
           scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',html,re.S)
           assert len(scripts) == 1
           Path('/tmp/vuelosrd-inline.js').write_text(scripts[0], encoding='utf-8')
