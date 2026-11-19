@@ -34,6 +34,7 @@ jobs:
           assert 'Airport-terminal visual system' in s and 'margin-top:-83px' in s, 'DEPLOYMENT STALE: new header / board design missing'
           assert 'Compact airport display for narrow screens' in s and 'td.dataset.label=' in s, 'DEPLOYMENT STALE: mobile card layout missing'
           assert 'id="detail-board-link"' in s and 'const airportDetailWords=' in s, 'DEPLOYMENT STALE: airport detail improvements missing'
+          assert 'const airportArea=' in s and 'airport-card-visual' in s, 'DEPLOYMENT STALE: destination cards missing'
           assert 'id="boardStatusLink"' in s, 'DEPLOYMENT STALE: board status link absent'
           assert 'completamente ficticios' in s, 'Airport demo warning absent'
           assert 'flightradar24.com' in s.lower(), 'External data link missing'
