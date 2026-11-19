@@ -253,6 +253,18 @@ const {chromium} = require('playwright');
       const boardOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
       assert.ok(boardOverflow<=2,'Board flags cause page overflow at '+width+'px');
     }
+    // Wider mobile/tablet and reduced-motion regressions: ensure the board stays usable.
+    for(const width of [768,844]){
+      await page.setViewportSize({width,height:390});
+      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+      console.log('Landscape/tablet width',width,'overflow:',overflow);
+      assert.ok(overflow<=2,'Landscape/tablet horizontal page overflow at '+width+'px');
+      assert.equal(await page.locator('#boardRows .board-country-flag').count(),5);
+    }
+    await page.emulateMedia({reducedMotion:'reduce'});
+    const reducedTransition=await page.locator('#boardRows tr').first().evaluate(e=>getComputedStyle(e).transitionDuration);
+    assert.ok(reducedTransition.split(',').every(v=>parseFloat(v)===0),'Reduced-motion setting should disable board row animation');
+    await page.emulateMedia({reducedMotion:'no-preference'});
     assert.deepEqual(errors,[],'JS runtime errors');
     console.log('PASS: desktop/mobile logo loads, inputs, translations, keyboard-accessible cards.');
   } finally {await browser.close();}
