@@ -16,9 +16,10 @@ assert.ok(html.includes('https://www.puntacanainternationalairport.com/en/servic
 assert.ok(html.includes('https://aeropuertocibao.com.do/en/'),'STI official airport website');
 assert.ok(html.includes('https://www.romanaairport.com/'),'LRM official airport website');
 for(const code of required)assert.ok(html.includes('<option value="'+code+'">'),'airport selector includes '+code);
-const match=html.match(/const travelAssistWords=(\{[^;]+\});/);
-assert.ok(match,'guide locale dataset present');
-const locales=JSON.parse(match[1]);
+const start=html.indexOf('const travelAssistWords=');
+const end=html.indexOf(';\nconst travelAssistTransport=',start);
+assert.ok(start>=0&&end>start,'guide locale dataset present');
+const locales=JSON.parse(html.slice(start+'const travelAssistWords='.length,end));
 for(const lang of ['es','en','de','fr','ht']){
  assert.ok(Array.isArray(locales[lang]),'locale '+lang);
  assert.equal(locales[lang].length,19,'full guidance translation for '+lang);
