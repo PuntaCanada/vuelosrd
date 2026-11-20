@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "retention": "60 observed checks maximum; actual dates, not simulated history",
+  "entries": [
+    {
+      "checkedAt": "2026-11-20T16:32:50.930Z",
+      "monitorStatus": "partial-or-complete",
+      "total": 47,
+      "ok": 34,
+      "uncertain": 13,
+      "broken": 0,
+      "actionableAlertCount": 0,
+      "monitorLimitationCount": 13,
+      "warningCategories": {
+        "access-restricted": 10,
+        "temporary-server": 0,
+        "dns-failure": 0,
+        "tls-failure": 0,
+        "timeout": 0,
+        "network-error": 3,
+        "confirmed-missing": 0,
+        "other-http": 0
+      }
+    }
+  ]
+}

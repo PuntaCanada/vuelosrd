@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-11-20T16:32:50.930Z",
+  "monitorStatus": "partial-or-complete",
+  "total": 47,
+  "ok": 34,
+  "uncertain": 13,
+  "broken": 0,
+  "actionableAlertCount": 0,
+  "monitorLimitationCount": 13,
+  "independentlyReadableUncertainCount": 9,
+  "independentEvidenceReviewedOn": "2026-11-20",
+  "warningCategories": {
+    "access-restricted": 10,
+    "temporary-server": 0,
+    "dns-failure": 0,
+    "tls-failure": 0,
+    "timeout": 0,
+    "network-error": 3,
+    "confirmed-missing": 0,
+    "other-http": 0
+  },
+  "warnings": [
+    {
+      "url": "https://eticket.migracion.gob.do/",
+      "status": 403,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "access-denied",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.aa.com/homePage.do?locale=en_US",
+      "status": 403,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "readable",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.aireuropa.com/",
+      "status": 403,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "readable",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.airfrance.com/",
+      "status": "23",
+      "outcome": "uncertain",
+      "category": "network-error",
+      "actionable": false,
+      "independentReview": {
+        "result": "access-denied",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.avianca.com/",
+      "status": 403,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "access-denied",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.copaair.com/",
+      "status": 401,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "redirect-readable",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.discover-airlines.com/",
+      "status": 403,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "redirect-readable",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.iberia.com/do/flight-status/",
+      "status": 403,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "readable",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.latamairlines.com/",
+      "status": 403,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "redirect-readable",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.spiritrestructuring.com/",
+      "status": "23",
+      "outcome": "uncertain",
+      "category": "network-error",
+      "actionable": false,
+      "independentReview": {
+        "result": "timeout",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.united.com/en/us/flightstatus",
+      "status": "23",
+      "outcome": "uncertain",
+      "category": "network-error",
+      "actionable": false,
+      "independentReview": {
+        "result": "readable",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.voegol.com.br/",
+      "status": 403,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "readable",
+        "reviewedOn": "2026-11-20"
+      }
+    },
+    {
+      "url": "https://www.w2fly.es/",
+      "status": 403,
+      "outcome": "uncertain",
+      "category": "access-restricted",
+      "actionable": false,
+      "independentReview": {
+        "result": "redirect-readable",
+        "reviewedOn": "2026-11-20"
+      }
+    }
+  ],
+  "meaning": "HTTP accessible indicates response only; blocked automated checks do not establish visitor browser failure. Independent reviews are dated, not live."
+}
