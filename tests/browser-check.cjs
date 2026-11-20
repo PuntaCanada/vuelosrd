@@ -13,6 +13,24 @@ const {chromium} = require('playwright');
     await page.goto(base+'?lang=de#airlines',{waitUntil:'domcontentloaded',timeout:30000});
     await page.locator('#airlineCards .airline-card').first().waitFor({timeout:15000});
     await page.locator('#goAirlines').waitFor();
+    // Public Cloudflare airport pages: real Chrome mobile layout, canonical, languages, links.
+    for(const [lang,code,width] of [['en','puj',320],['de','sti',390],['ht','jbq',320]]){
+      const guide=await context.newPage();guide.on('pageerror',e=>errors.push('airport '+code+': '+e.message));
+      await guide.setViewportSize({width,height:760});
+      const path='/'+lang+'/airports/'+code+'/',url=new URL(path,base).href;
+      const response=await guide.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
+      assert.equal(response.status(),200,'public airport page status '+path);
+      assert.equal(await guide.locator('html').getAttribute('lang'),lang,'public airport language');
+      assert.equal(await guide.locator('link[rel="canonical"]').getAttribute('href'),url,'public airport canonical');
+      assert.equal(await guide.locator('link[rel="alternate"][hreflang]').count(),6,'public reciprocal language guide links');
+      assert.equal(await guide.locator('nav.airports a').count(),7,'seven airport cross-links');
+      assert.equal(await guide.locator('h1').count(),1,'one guide heading');
+      assert.ok((await guide.locator('.source').first().locator('a').getAttribute('href')).startsWith('https://'),'official source');
+      const overflow=await guide.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+      assert.ok(overflow<=2,'public airport page mobile overflow '+path+' '+width);
+      if(code==='puj')await guide.screenshot({path:'airlines-airport-seo.png',fullPage:true});
+      await guide.close();
+    }
     // Journey assistant in real system Chrome: airport, airline, stage, external sources and privacy.
     assert.equal(await page.locator('#journeyAirport option').count(),7);
     assert.equal(await page.locator('#journeyAirline option').count(),29);
