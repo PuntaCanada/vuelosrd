@@ -18,6 +18,29 @@ const assert=require('node:assert/strict');
     assert.equal(await page.locator('#boardWarning').isVisible(),true,'fictional board clearly disclosed');
     // Published main must include the prior de7c6d6 navigation and 34663a36 safety changes.
     assert.equal(await page.locator('#journey-wizard').count(),1,'published five-language assistant');
+    // LIVE release verification: never substitute a CI fixture for the public JSON feed.
+    assert.equal(await page.locator('#sourceHealthPanel').isVisible(),true,'published source monitoring status panel');
+    await page.locator('#sourceHealthMetrics strong').first().waitFor({timeout:12000});
+    const liveFeed=await page.evaluate(async()=>{
+      const [status,history]=await Promise.all([
+       fetch('/data/source-health-latest.json',{cache:'no-store'}),
+       fetch('/data/source-health-history.json',{cache:'no-store'})
+      ]);
+      return {status:status.status,history:history.status,
+       latest:status.ok?await status.json():null,
+       timeline:history.ok?await history.json():null};
+    });
+    assert.equal(liveFeed.status,200,'actual Cloudflare snapshot file must be published');
+    assert.equal(liveFeed.history,200,'actual Cloudflare history file must be published');
+    assert.equal(liveFeed.latest.schemaVersion,1,'published schema version');
+    assert.equal(liveFeed.latest.total,47,'47 official sources in public report');
+    assert.equal(liveFeed.latest.ok+liveFeed.latest.uncertain+liveFeed.latest.broken,47,'public counts consistent');
+    assert.ok(Number.isFinite(Date.parse(liveFeed.latest.checkedAt)),'verified check timestamp in public status');
+    assert.ok(Array.isArray(liveFeed.timeline.entries)&&liveFeed.timeline.entries.length>=1,'at least one genuine check stored');
+    assert.match(await page.locator('#sourceHealthDate').innerText(),/Última comprobación automática/,'public UI displays genuine datestamp');
+    assert.equal(await page.locator('#sourceHealthMetrics strong').first().innerText(),String(liveFeed.latest.ok),'live UI renders actual count');
+    assert.equal(await page.locator('#airlineCards .source-alternative').count(),3,'three independently validated official alternate pages are visible');
+
     // Independent release verification: real Cloudflare page, not checked-out PR source.
     // The new VuelosRD 2.0 console first appears in main commit 66dca01a.
     await page.locator('#v2-console').waitFor({timeout:8000});
