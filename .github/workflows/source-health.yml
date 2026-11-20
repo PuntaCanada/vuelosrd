@@ -1,6 +1,12 @@
 name: Official airport source health
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'data/airport-source-registry.json'
+      - 'tests/source-health.cjs'
+      - '.github/workflows/source-health.yml'
   schedule:
     - cron: '27 8 * * 1'
 permissions:
