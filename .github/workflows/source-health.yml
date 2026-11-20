@@ -29,4 +29,6 @@ jobs:
       - name: Verify source classification without network
         run: node tests/source-health-unit.cjs
       - name: Check official airport, customs and immigration links
+        env:
+          NODE_USE_ENV_PROXY: '1'
         run: node tests/source-health.cjs
