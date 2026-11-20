@@ -18,6 +18,37 @@ const assert=require('node:assert/strict');
     assert.equal(await page.locator('#boardWarning').isVisible(),true,'fictional board clearly disclosed');
     // Published main must include the prior de7c6d6 navigation and 34663a36 safety changes.
     assert.equal(await page.locator('#journey-wizard').count(),1,'published five-language assistant');
+    // LIVE release verification: never substitute a CI fixture for the public JSON feed.
+    assert.equal(await page.locator('#sourceHealthPanel').isVisible(),true,'published source monitoring status panel');
+    await page.locator('#sourceHealthMetrics strong').first().waitFor({timeout:12000});
+    const liveFeed=await page.evaluate(async()=>{
+      const paths=[
+       '/data/source-health-latest.json',
+       'https://raw.githubusercontent.com/PuntaCanada/vuelosrd/main/data/source-health-latest.json',
+       '/data/source-health-history.json',
+       'https://raw.githubusercontent.com/PuntaCanada/vuelosrd/main/data/source-health-history.json'
+      ];
+      const results=await Promise.all(paths.map(async url=>{
+       try{const r=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(7000)});
+        return r.ok?await r.json():null;
+       }catch{return null}
+      }));
+      const candidates=results.slice(0,2).filter(x=>x?.total===47&&Number.isFinite(Date.parse(x.checkedAt)));
+      const latest=candidates.sort((a,b)=>Date.parse(b.checkedAt)-Date.parse(a.checkedAt))[0]||null;
+      const timelines=results.slice(2).filter(x=>Array.isArray(x?.entries));
+      const timeline=timelines.sort((a,b)=>Date.parse(b.entries.at(-1)?.checkedAt||0)-Date.parse(a.entries.at(-1)?.checkedAt||0))[0]||null;
+      return {latest,timeline,sameOriginStatusAvailable:!!results[0],githubMirrorAvailable:!!results[1]};
+    });
+    assert.ok(liveFeed.latest,'actual public JSON must be readable from Cloudflare or repository mirror');
+    assert.equal(liveFeed.latest.schemaVersion,1,'published schema version');
+    assert.equal(liveFeed.latest.total,47,'47 official sources in public report');
+    assert.equal(liveFeed.latest.ok+liveFeed.latest.uncertain+liveFeed.latest.broken,47,'public counts consistent');
+    assert.ok(Number.isFinite(Date.parse(liveFeed.latest.checkedAt)),'verified check timestamp in public status');
+    assert.ok(liveFeed.timeline?.entries?.length>=1,'at least one real check in public history');
+    assert.match(await page.locator('#sourceHealthDate').innerText(),/Última comprobación automática/,'public UI displays real datestamp');
+    assert.equal(await page.locator('#sourceHealthMetrics strong').first().innerText(),String(liveFeed.latest.ok),'public UI renders latest genuine count');
+    assert.equal(await page.locator('#airlineCards .source-alternative').count(),3,'three independently validated official alternate pages are visible');
+
     // Independent release verification: real Cloudflare page, not checked-out PR source.
     // The new VuelosRD 2.0 console first appears in main commit 66dca01a.
     await page.locator('#v2-console').waitFor({timeout:8000});
