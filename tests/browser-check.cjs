@@ -13,6 +13,19 @@ const {chromium} = require('playwright');
     await page.goto(base+'?lang=de#airlines',{waitUntil:'domcontentloaded',timeout:30000});
     await page.locator('#airlineCards .airline-card').first().waitFor({timeout:15000});
     await page.locator('#goAirlines').waitFor();
+    // Journey assistant in real system Chrome: airport, airline, stage, external sources and privacy.
+    assert.equal(await page.locator('#journeyAirport option').count(),7);
+    assert.equal(await page.locator('#journeyAirline option').count(),29);
+    await page.locator('#journeyAirport').selectOption('LRM');
+    assert.equal(await page.locator('#airport').inputValue(),'LRM');
+    assert.ok((await page.locator('#journey-airport-source').getAttribute('href')).includes('romanaairport.com'));
+    await page.locator('#journeyAirline').selectOption('B6');
+    assert.ok((await page.locator('#journey-airline-source').getAttribute('href')).includes('jetblue.com'));
+    await page.locator('#journeyStage').selectOption('arrival');
+    assert.equal(await page.locator('#passenger-arrival').getAttribute('aria-pressed'),'true');
+    await page.locator('#journeyStage').selectOption('departure');
+    await page.locator('#journeyAirport').selectOption('PUJ');
+    await page.locator('#journey-wizard').screenshot({path:'airlines-journey-assistant.png'});
     // Actual Chrome passenger hub: local checklist and airline / airport routing.
     assert.equal(await page.locator('#passenger-checklist input').count(),5,'departure checklist');
     await page.locator('#passenger-checklist input').first().check();
