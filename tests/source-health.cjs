@@ -80,7 +80,7 @@ async function run(){
  const results=[];
  for(let i=0;i<urls.length;i+=3){results.push(...await probeBatch(urls.slice(i,i+3)));}
  let broken=0,unknown=0;
- for(const x of results){console.log(x.outcome.toUpperCase()+' ['+x.status+'] '+x.url);if(x.outcome==='broken')broken++;if(x.outcome==='uncertain')unknown++;}
+ for(const x of results){if(x.outcome==='broken')broken++;if(x.outcome==='uncertain')unknown++;}
  console.log('OFFICIAL LINK HEALTH: '+urls.length+' checked; '+broken+' confirmed missing (404/410); '+unknown+' uncertain (site blocks or transient failures).');
  // The raw uncertain count is retained for auditing. Operational alerts are calculated below.
  const monitorUnavailable=results.length>0&&results.every(x=>x.outcome==='uncertain'&&typeof x.status==='string');
@@ -96,6 +96,11 @@ async function run(){
    reviewedOn:independent.reviewedOn,result:review.result,evidence:review.evidence,note:review.note
   }:null,usedBy:[...(origins.get(x.url)||[])]};
  });
+ for(const x of results){
+  const entry=warning.find(w=>w.url===x.url);
+  const label=x.outcome==='ok'?'HTTP_REACHABLE':entry?.actionable?'SOURCE_ALERT':'MONITOR_LIMITATION';
+  console.log(label+' ['+x.status+'] '+x.url+(entry?.independentReview?' (independent: '+entry.independentReview.result+')':''));
+ }
  const actionableAlerts=warning.filter(x=>x.actionable);
  const monitorLimitations=warning.filter(x=>!x.actionable);
  const externallyReadable=warning.filter(x=>['readable','redirect-readable'].includes(x.independentReview?.result));
@@ -117,7 +122,7 @@ async function run(){
  if(summaryPath){
   const rows=warning.map(x=>'| '+(x.actionable?'INVESTIGATE':'MONITOR LIMITATION')+' | '+String(x.status).replace(/\\|/g,'/')+' | '+x.category+' | '+(x.independentReview?.result||'not independently reviewed')+' | '+x.reason+' | '+x.usedBy.join(', ').replace(/\\|/g,'/')+' | '+x.url.replace(/\\|/g,'%7C')+' |');
   const markdown=[
-   '## VuelosRD official link health',
+   '## VuelosRD official link status: actionable failures vs crawler limitations',
    '',
    '| Checked | HTTP reachable | Uncertain | Confirmed 404/410 |',
    '|---:|---:|---:|---:|',
