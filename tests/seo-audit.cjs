@@ -61,4 +61,20 @@ for(const code of codes){
   assert.ok(item[key]===null||(typeof item[key]==='string'&&item[key].startsWith('https://')),'grounded link or explicit unknown '+code+' '+key);
  }
 }
+// The interactive portal and all 35 SEO guides must share the same official airport profiles.
+const home=fs.readFileSync('index.html','utf8');
+const registryNames=Object.keys(registry.airports);
+assert.equal(registryNames.length,7,'one registry record per airport');
+assert.ok(home.includes('function airportGuidePath(code)'),'internal dynamic airport guide route exists');
+assert.ok(home.includes('id="airport-orientation"'),'first-time visitor orientation exists');
+assert.ok(home.includes('airportSeoLabels[current].guide'),'airport guide is linked from the cards');
+for(const code of registryNames){
+ const pattern=new RegExp('\\n'+code+':\\{desc:\\{[^\\n]+\\},url:\\x27([^\\x27]+)\\x27');
+ const found=home.match(pattern);
+ assert.ok(found,'airportInfo '+code+' found');
+ assert.equal(found[1],registry.airports[code].official,'portal must use same verified airport operator as static guide: '+code);
+ const target='/airports/'+code.toLowerCase()+'/';
+ const landing=fs.readFileSync('airports/'+code.toLowerCase()+'/index.html','utf8');
+ assert.ok(landing.includes('href="'+registry.airports[code].official+'"'),'SEO page uses canonical operator source '+code);
+}
 console.log('SEO PASS: 40 canonical pages, reciprocal 5-language hreflang (HTML + sitemap), 35 Airport JSON-LD schemas and official-source completeness.');
