@@ -214,6 +214,15 @@ const assert = require('node:assert/strict');
    const link=await page.locator('.quick-travel-links a').nth(1).getAttribute('href');
    assert.equal(link,'/?lang='+lang+'&airport='+code.toUpperCase()+'#passenger-help-title','localized baggage deep link');
    assert.equal(await page.locator('#airport-sources').count(),1,'real official-source anchor');
+
+   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+   assert.ok(overflow<=2,'airport landing page mobile overflow '+code+' '+lang+' '+width+'px: '+overflow);
+   if(width<=390){
+    const findings=await page.evaluate(source=>{eval(source);return window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})},axe.source);
+    const severe=findings.violations.filter(v=>['serious','critical'].includes(v.impact));
+    assert.deepEqual(severe.map(v=>v.id),[],'serious/critical WCAG in guide '+code+' '+lang);
+   }
+   console.log('Airport guide PASS: '+code+' '+lang+' '+width+'px');
    if(code==='sti'&&lang==='de'){
      await page.locator('#quick-flight-number').fill('DE 1234');
      await page.locator('.quick-flight-form button[type="submit"]').click();
@@ -223,14 +232,6 @@ const assert = require('node:assert/strict');
      assert.equal(await page.locator('#flight').inputValue(),'DE1234','guide flight form normalizes number');
      assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'false','valid flight search may open external verification');
    }
-   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
-   assert.ok(overflow<=2,'airport landing page mobile overflow '+code+' '+lang+' '+width+'px: '+overflow);
-   if(width<=390){
-    const findings=await page.evaluate(source=>{eval(source);return window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})},axe.source);
-    const severe=findings.violations.filter(v=>['serious','critical'].includes(v.impact));
-    assert.deepEqual(severe.map(v=>v.id),[],'serious/critical WCAG in guide '+code+' '+lang);
-   }
-   console.log('Airport guide PASS: '+code+' '+lang+' '+width+'px');
   }catch(e){failures.push('Airport guide '+code+' '+lang+': '+e.stack);}
   await page.close();
  }
