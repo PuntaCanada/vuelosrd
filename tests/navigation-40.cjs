@@ -21,8 +21,13 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
       assert.equal(response.status(),200,'page reachable '+location);
       assert.equal(await page.locator('html').getAttribute('lang'),lang,'language '+location);
       assert.equal(await page.locator('h1').count(),1,'one page heading '+location);
-      assert.equal(await page.locator('nav.languages a').count(),5,'five language choices '+location);
-      assert.equal(await page.locator('nav.languages a[aria-current="page"]').count(),1,'current language '+location);
+      if(lang==='es'&&!code){
+       assert.equal(await page.locator('.languages [data-lang]').count(),2,'main language shortcut buttons');
+       assert.ok(await page.locator('#langMenu').count(),'main additional language menu');
+      }else{
+       assert.equal(await page.locator('nav.languages a').count(),5,'five language choices '+location);
+       assert.equal(await page.locator('nav.languages a[aria-current="page"]').count(),1,'current language '+location);
+      }
       if(code){
        assert.equal(await page.locator('nav.airports a').count(),7,'seven airport shortcuts '+location);
        assert.equal(await page.locator('nav.airports a[aria-current="page"]').count(),1,'current airport '+location);
@@ -47,11 +52,12 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
        assert.ok(await page.locator('#journey-wizard').count(),'main journey assistant available');
        assert.ok(await page.locator('#flightTitle').count(),'main flight search available');
       }
-      const first=page.locator('nav.languages a').first();
+      const root=lang==='es'&&!code;
+      const first=root?page.locator('.languages [data-lang]').first():page.locator('nav.languages a').first();
       await first.focus();
-      assert.equal(await page.evaluate(()=>document.activeElement.tagName),'A','keyboard focus '+location);
+      assert.equal(await page.evaluate(()=>document.activeElement.tagName),root?'BUTTON':'A','keyboard focus '+location);
       await page.keyboard.press('Tab');
-      assert.equal(await page.evaluate(()=>document.activeElement.tagName),'A','tab navigation '+location);
+      assert.equal(await page.evaluate(()=>document.activeElement.tagName),root?'BUTTON':'A','tab navigation '+location);
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
       assert.equal(overflow,false,'no horizontal overflow '+width+'px '+location);
       checked++;
