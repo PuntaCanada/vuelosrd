@@ -52,6 +52,8 @@ jobs:
           assert 'id="passenger-hub"' in s and 'id="passenger-checklist"' in s, 'DEPLOYMENT STALE: traveler checklists missing'
           assert 'id="journey-wizard"' in s and 'id="journeyAirport"' in s and 'id="journeyStage"' in s, 'DEPLOYMENT STALE: integrated journey assistant missing'
           assert 'function renderJourneyAssistant()' in s and 'id="journey-airline-source"' in s, 'DEPLOYMENT STALE: linked official airline journey source missing'
+          assert 'id="mobileGoJourney"' in s and 'id="journey-flight-link"' in s, 'DEPLOYMENT STALE: mobile trip/flight shortcuts missing'
+          assert "journey:'Meine Reise'" in s and 'function prepareAirlineFlight(code)' in s, 'DEPLOYMENT STALE: five-language journey navigation missing'
           assert 'function renderPassengerIssue()' in s and 'const passengerSources=' in s, 'DEPLOYMENT STALE: official baggage source routing missing'
           assert 'romanaairport.com/lost-and-found/' in s and 'puntacanainternationalairport.com/en/airport-services/item/lost-found' in s, 'DEPLOYMENT STALE: official airport lost and found links missing'
           assert 'id="goCompare"' in s and 'function renderAirportCompare()' in s, 'DEPLOYMENT STALE: comparison navigation missing'
@@ -141,6 +143,9 @@ jobs:
                   HTMLParser().feed(html)
                   url=uri(lang,code)
                   assert '<html lang="'+lang+'">' in html, 'Wrong guide language '+url
+                  assert 'id="quick-travel"' in html and 'class="quick-flight-form"' in html, 'Quick flight search missing '+url
+                  assert 'name="lang" value="'+lang+'"' in html and 'name="airport" value="'+code.upper()+'"' in html, 'Flight form misses locale/airport '+url
+                  assert 'href="#airport-sources"' in html and 'id="airport-sources"' in html, 'Official airport source shortcut broken '+url
                   assert '<link rel="canonical" href="'+url+'">' in html, 'Guide canonical '+url
                   match=re.search(r'<script type="application/ld\+json">([^<]+)</script>',html)
                   assert match and json.loads(match.group(1))['about']['iataCode']==code.upper(),'Airport schema invalid: '+url
