@@ -26,6 +26,7 @@ jobs:
           python3 -m http.server 8765 --bind 127.0.0.1 &
           sleep 2
           node tests/chrome-a11y.cjs
+          node tests/lab-performance.cjs
       - name: Verify published Cloudflare Pages in real Chromium
         shell: bash
         run: |
