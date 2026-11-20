@@ -24,7 +24,9 @@ async function probe(url){
   try{
    const headers={'user-agent':'VuelosRD-SourceHealth/1.0 (public official link monitoring; no scraping)'};
    let response=await fetch(url,{method:'HEAD',redirect:'follow',signal:AbortSignal.timeout(12000),headers});
-   if([403,405,501].includes(response.status)){response=await fetch(url,{method:'GET',redirect:'follow',signal:AbortSignal.timeout(12000),headers:{...headers,Range:'bytes=0-0'}});}
+   // Some sites reject HEAD with 404/410 while the ordinary page is available.
+   // Confirm apparent missing pages with GET before classifying them as broken.
+   if([403,404,405,410,501].includes(response.status)){response=await fetch(url,{method:'GET',redirect:'follow',signal:AbortSignal.timeout(12000),headers:{...headers,Range:'bytes=0-0'}});}
    if(response.body)await response.body.cancel();
    if([404,410].includes(response.status)){if(attempt===0)continue;return {url,status:response.status,outcome:'broken'};}
    if(response.ok||response.status===206)return {url,status:response.status,outcome:'ok'};
