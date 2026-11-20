@@ -51,6 +51,7 @@ function classifyWarning(x){
  if(typeof status!=='number')return {category:'network-error',reason:'Network or transport error in automated runner (including opaque runtime codes); review separately'};
  return {category:'other-http',reason:'Inconclusive HTTP status '+status};
 }
+function needsSourceInvestigation(category){return ['confirmed-missing','temporary-server','dns-failure','tls-failure'].includes(category);}
 async function probe(url,fetcher=fetch){
  for(let attempt=0;attempt<2;attempt++){
   try{
@@ -90,7 +91,7 @@ async function run(){
  // Independent retrieval is descriptive evidence, not a way to turn HTTP 403 into HTTP 200.
  const warning=results.filter(x=>x.outcome!=='ok').map(x=>{
   const classified=classifyWarning(x),review=independentReviews.get(x.url);
-  const actionable=['confirmed-missing','temporary-server','dns-failure','tls-failure'].includes(classified.category);
+  const actionable=needsSourceInvestigation(classified.category);
   return {...x,...classified,actionable,independentReview:review?{
    reviewedOn:independent.reviewedOn,result:review.result,evidence:review.evidence,note:review.note
   }:null,usedBy:[...(origins.get(x.url)||[])]};
@@ -128,7 +129,7 @@ async function run(){
    '',
    '**Actionable source alerts:** '+actionableAlerts.length+' (confirmed missing / repeat server / DNS / TLS).',
    '**Monitor-only access limitations:** '+monitorLimitations.length+' (may be bot/authorization/transport; not independently proven broken).',
-   '**Independently retrievable exact URLs among automated warnings:** '+externallyReadable.length+'; '** + 'remaining independent checks required:** '+needsIndependentFollowup.length+'.',
+   '**Independently retrievable exact URLs among automated warnings:** '+externallyReadable.length+'; **remaining independent checks required:** '+needsIndependentFollowup.length+'.',
    'Independent review as of '+independent.reviewedOn+'; observation is not a live visitor guarantee.',
    '',
    '**Monitor status:** '+(monitorUnavailable?'NETWORK UNAVAILABLE — no links verified; check runner network/proxy.':'Checks completed; ambiguous responses remain unverified.'),
@@ -147,4 +148,4 @@ async function run(){
  if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
 }
 if(require.main===module)run().catch(e=>{console.error(e);process.exitCode=1});
-module.exports={probe,probeBatch,classifyWarning};
+module.exports={probe,probeBatch,classifyWarning,needsSourceInvestigation};
