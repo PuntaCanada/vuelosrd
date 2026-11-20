@@ -598,7 +598,7 @@ function renderAirlines(){
   const head=document.createElement('div');head.className='airline-card-head';
   const logoFrame=document.createElement('div');logoFrame.className='airline-logo-frame airline-logo-'+airline.code.toLowerCase();
   const mono=document.createElement('span');mono.className='airline-monogram';mono.textContent=airline.code;logoFrame.append(mono);
-  if(airline.logo){const img=document.createElement('img');img.alt=airline.name+' logo';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';img.addEventListener('load',()=>{if(!img.naturalWidth){img.hidden=true;logoFrame.classList.add('is-fallback');}});img.addEventListener('error',()=>{img.hidden=true;logoFrame.classList.add('is-fallback');});logoFrame.append(img);img.src=airline.logo;}
+  if(airline.logo){const img=document.createElement('img');img.alt=airline.name+' logo';img.width=120;img.height=64;img.loading='lazy';img.decoding='async';img.fetchPriority='low';img.referrerPolicy='no-referrer';img.addEventListener('load',()=>{if(!img.naturalWidth){img.hidden=true;logoFrame.classList.add('is-fallback');}});img.addEventListener('error',()=>{img.hidden=true;logoFrame.classList.add('is-fallback');});logoFrame.append(img);img.src=airline.logo;}
   const name=document.createElement('div');name.className='airline-card-heading';const h=document.createElement('h3');h.textContent=airline.name;const label=document.createElement('div');label.className='airline-code';label.textContent=airline.code;name.append(h,label);head.append(logoFrame,name);
   const desc=document.createElement('p');desc.textContent=w.description;
   const link=document.createElement('a');link.href=airline.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=w.link;link.setAttribute('aria-label',w.link+' · '+airline.name);
@@ -641,7 +641,7 @@ function renderFlightAirlineShortcuts(){
  for(const airline of visible){
   const button=document.createElement('button');button.type='button';button.className='flight-airline-chip';button.dataset.airline=airline.code;
   if(airline.logo){
-   const img=document.createElement('img');img.src=airline.logo;img.alt='';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+   const img=document.createElement('img');img.width=42;img.height=25;img.src=airline.logo;img.alt='';img.loading='lazy';img.decoding='async';img.fetchPriority='low';img.referrerPolicy='no-referrer';
    img.addEventListener('error',()=>img.remove());button.append(img);
   }
   const label=document.createElement('span');label.textContent=airline.code+' · '+airline.name;button.append(label);
