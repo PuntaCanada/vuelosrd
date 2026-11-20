@@ -38,7 +38,8 @@ const assert = require('node:assert/strict');
    assert.ok((await page.locator('#assist-transport-link').getAttribute('href')).includes('puntacanainternationalairport.com'));
    assert.ok((await page.locator('#assist-baggage-link').getAttribute('href')).includes('aduanas.gob.do'));
    assert.ok((await page.locator('#assist-eticket-link').getAttribute('href')).includes('eticket.migracion.gob.do'));
-   await page.locator('[data-lang="de"]').click();
+   await page.locator('#langMenu summary').click();
+   await page.locator('[data-choose-lang="de"]').click();
    assert.ok((await page.locator('#travel-assist-title').innerText()).includes('Flughafenführer'));
    await page.locator('[data-lang="es"]').click();
    // Real Chrome smoke test: the full airline selection is visible, filterable and keyboard-operable.
