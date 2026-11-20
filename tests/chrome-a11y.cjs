@@ -10,6 +10,20 @@ const assert = require('node:assert/strict');
   try {
    await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
    await page.locator('#boardRows tr').first().waitFor();
+   // Users see explicit dated verification notes, not blanket 'broken link' warnings.
+   assert.equal(await page.locator('#airlineCards .airline-source-check').count(),12,'12 reviewed airline URLs have visible notes');
+   const airFrance=page.locator('#airlineCards .airline-card').filter({has:page.locator('h3', {hasText:'Air France'})});
+   assert.equal(await airFrance.locator('.airline-source-check').getAttribute('data-status'),'restricted','Air France has documented automated access restriction');
+   assert.match(await airFrance.locator('.airline-source-check').innerText(),/2026-11-20/,'source notes show human review date');
+   const spiritCard=page.locator('#airlineCards .airline-card').filter({has:page.locator('h3', {hasText:'Spirit'})});
+   assert.equal(await spiritCard.locator('.airline-source-check').getAttribute('data-status'),'timeout','historical Spirit timeout is not disguised');
+   const unitedCard=page.locator('#airlineCards .airline-card').filter({has:page.locator('h3', {hasText:'United Airlines'})});
+   assert.equal(await unitedCard.locator('.airline-source-check').getAttribute('data-status'),'readable','United was independently readable');
+   await page.locator('#langMenu summary').click();
+   await page.locator('[data-choose-lang="de"]').click();
+   assert.match(await airFrance.locator('.airline-source-check').innerText(),/Automatische Prüfung eingeschränkt/,'German visitor note');
+   await page.locator('[data-lang="es"]').click();
+
    // VuelosRD 2.0: a single visible journey workflow, not merely isolated links.
    const consolePanel=page.locator('#v2-console');
    assert.equal(await consolePanel.isVisible(),true,'2.0 console visible at '+viewport.width);
