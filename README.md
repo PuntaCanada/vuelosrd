@@ -119,3 +119,20 @@ The VuelosRD landing page includes a `#airport-compare` comparison of **PUJ, SDQ
 Official source grounding: Punta Cana operator services and disability assistance: https://www.puntacanainternationalairport.com/en/airport-services and https://www.puntacanainternationalairport.com/en/airport-services/item/wheelchair-service ; Cibao passenger services: https://aeropuertocibao.com.do/en/servicios-a-pasajeros/ ; La Romana services and taxis: https://www.romanaairport.com/service/ and https://www.romanaairport.com/taxi-services/ ; Aerodom operator-wide airport coverage: https://aerodom.com/en/airports/ . No unverified flights, prices, availability, accessibility certifications, airport rankings, route claims or real-time feeds are implied.
 
 Automated verification: `tests/travel-assist-audit.cjs` checks seven supported airports, complete locale messages, and the curated official source group. `tests/chrome-a11y.cjs` and `tests/browser-check.cjs` exercise the accessible search/filter, reset, synchronized detail navigation and mobile layout in Chromium. The Cloudflare smoke workflow checks that the new source/compare UI is present on the published site.
+
+## Traveler checklists and baggage support (2026-11-20)
+
+The public home page has a free, five-language `#passenger-hub` reachable from the top navigation. It includes two independent checklists (five departure steps and five arrival steps), progress indicator, and reset control. Only step numbers / completion state are saved via `localStorage` on the visitor's own device (`vuelosrd_check_v1`). No registration, passport number, booking code, person name, service request, account, external API, cookie tracker or analytics was added. Clearing browser data also clears the ticks. Checklists are generic preparation prompts, not personalized legal advice or guaranteed required documents.
+
+**Lost checked baggage vs terminal lost property:** The help selector distinguishes airline-handled delayed, damaged or missing checked baggage from belongings left in public terminal areas, an important difference confirmed by the Punta Cana airport FAQ and La Romana luggage guide. It never asks visitors to enter personal baggage or itinerary information. For checked bags, passengers are pointed to the airline route and official guidance; the 28-airline selector only links out to existing airline official pages and does not claim to submit a baggage report.
+
+Source documentation:
+- Punta Cana airport FAQ (aircraft / checked baggage -> airline; terminal objects -> airport): https://www.puntacanainternationalairport.com/en/faq
+- Punta Cana airport Lost & Found: https://www.puntacanainternationalairport.com/en/airport-services/item/lost-found
+- Punta Cana official contact: https://www.puntacanainternationalairport.com/en/about-us/contactus
+- La Romana airport luggage handling guidance: https://www.romanaairport.com/luggage/
+- La Romana terminal Lost & Found: https://www.romanaairport.com/lost-and-found/
+- La Romana operator contact: https://www.romanaairport.com/contact/
+- Other five airports: only their verified operator websites (Cibao: https://aeropuertocibao.com.do/en/ ; Aerodom: https://aerodom.com/en/airports/) until a specific airport lost-property source is verified. **Do not imply** these are dedicated lost-property desks or direct baggage-claim service.
+
+Test coverage: `node tests/passenger-hub-audit.cjs` checks all seven airports, official source hostnames, five complete translations, item/checked-bag distinctions and privacy. Three viewport Chromium plus system-Chrome public deployment tests cover completion progress, mode isolation, reset, persistence, lost-property source routing, 28-airline official link selector, and localization. No paid service or new recurring cost.
