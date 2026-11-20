@@ -38,6 +38,27 @@ async function run(){
  let broken=0,unknown=0;
  for(const x of results){console.log(x.outcome.toUpperCase()+' ['+x.status+'] '+x.url);if(x.outcome==='broken')broken++;if(x.outcome==='uncertain')unknown++;}
  console.log('OFFICIAL LINK HEALTH: '+urls.length+' checked; '+broken+' confirmed missing (404/410); '+unknown+' uncertain (site blocks or transient failures).');
+ const checkedAt=new Date().toISOString(),lastReviewed=data.verifiedOn||'not documented';
+ const ok=results.length-broken-unknown,warning=results.filter(x=>x.outcome!=='ok');
+ const report={
+  schemaVersion:1,checkedAt,sourceCatalogLastReviewed:lastReviewed,
+  total:urls.length,ok,uncertain:unknown,broken,
+  limitations:'Automated 403/401/429/timeout responses do not prove a broken URL; 200 confirms HTTP reachability only, not accuracy of travel content.',
+  warnings:warning
+ };
+ const summaryPath=process.env.GITHUB_STEP_SUMMARY;
+ if(summaryPath){
+  const rows=warning.map(x=>'| '+x.outcome.toUpperCase()+' | '+String(x.status).replace(/\\|/g,'/')+' | '+x.url.replace(/\\|/g,'%7C')+' |').join('\\n');
+  fs.appendFileSync(summaryPath,
+   '## VuelosRD official-link health\\n\\n'+
+   '| Checked | HTTP reachable | Uncertain | Confirmed 404/410 |\\n|---:|---:|---:|---:|\\n'+
+   '| '+report.total+' | '+report.ok+' | '+report.uncertain+' | '+report.broken+' |\\n\\n'+
+   'Source catalog last human-reviewed: '+lastReviewed+'; automated run: '+checkedAt+'\\n\\n'+
+   (warning.length?'| Outcome | HTTP / error | URL |\\n|---|---|---|\\n'+rows+'\\n':'No URL warnings.\\n')+
+   '\\n**Interpretation:** 403/401/429 and network errors may be bot blocking; these URLs need manual follow-up. HTTP 200 is not proof that details are current or correct.\\n');
+ }
+ if(process.env.VUELOSRD_HEALTH_REPORT)fs.writeFileSync(process.env.VUELOSRD_HEALTH_REPORT,JSON.stringify(report,null,2)+'\\n');
+
  if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
 }
 run().catch(e=>{console.error(e);process.exitCode=1});
