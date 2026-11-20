@@ -13,6 +13,27 @@ const {chromium} = require('playwright');
     await page.goto(base+'?lang=de#airlines',{waitUntil:'domcontentloaded',timeout:30000});
     await page.locator('#airlineCards .airline-card').first().waitFor({timeout:15000});
     await page.locator('#goAirlines').waitFor();
+    // Actual Chrome passenger hub: local checklist and airline / airport routing.
+    assert.equal(await page.locator('#passenger-checklist input').count(),5,'departure checklist');
+    await page.locator('#passenger-checklist input').first().check();
+    assert.equal(await page.locator('#passenger-progress-bar').getAttribute('value'),'1','progress is updated');
+    await page.locator('#passenger-arrival').click();
+    assert.equal(await page.locator('#passenger-progress-bar').getAttribute('value'),'0','arrival checklist independent');
+    await page.locator('#passenger-departure').click();
+    assert.equal(await page.locator('#passenger-progress-bar').getAttribute('value'),'1','departure progress retained');
+    await page.locator('#passenger-reset').click();
+    assert.equal(await page.locator('#passenger-progress-bar').getAttribute('value'),'0','reset clears departure ticks');
+    await page.locator('#passengerIssue').selectOption('item');
+    await page.locator('#passengerAirport').selectOption('PUJ');
+    assert.ok((await page.locator('#passenger-issue-link').getAttribute('href')).includes('airport-services/item/lost-found'));
+    await page.locator('#passengerAirport').selectOption('LRM');
+    assert.ok((await page.locator('#passenger-issue-link').getAttribute('href')).includes('romanaairport.com/lost-and-found'));
+    await page.locator('#passengerAirport').selectOption('JBQ');
+    assert.ok((await page.locator('#passenger-issue-link').getAttribute('href')).includes('aerodom.com'),'operator overview fallback');
+    await page.locator('#passengerIssue').selectOption('checked');
+    await page.locator('#passengerAirline').selectOption('B6');
+    assert.ok((await page.locator('#passenger-airline-link').getAttribute('href')).includes('jetblue.com'));
+    await page.locator('#passenger-hub').screenshot({path:'airlines-passenger-hub.png'});
     // Verify the seven-airport comparison using system Chrome, including selection and source filters.
     assert.equal(await page.locator('#compare-grid .compare-card').count(),7);
     await page.locator('#compareSearch').fill('PUJ');
