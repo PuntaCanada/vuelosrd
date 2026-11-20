@@ -76,7 +76,9 @@ async function run(){
    '|---:|---:|---:|---:|',
    '| '+report.total+' | '+report.ok+' | '+report.uncertain+' | '+report.broken+' |',
    '',
-   'Source catalog last human-reviewed: '+lastReviewed+'; automated run: '+checkedAt,\n   '',\n   '**Monitor status:** '+(monitorUnavailable?'NETWORK UNAVAILABLE — no links verified; check runner network/proxy.':'Checks completed; ambiguous responses remain unverified.'),
+   'Source catalog last human-reviewed: '+lastReviewed+'; automated run: '+checkedAt,
+   '',
+   '**Monitor status:** '+(monitorUnavailable?'NETWORK UNAVAILABLE — no links verified; check runner network/proxy.':'Checks completed; ambiguous responses remain unverified.'),
    '',
    ...(warning.length?['| Outcome | HTTP / error | Interpretation | Used by | URL |','|---|---|---|---|---|',...rows]:['No URL warnings.']),
    '',
@@ -87,7 +89,8 @@ async function run(){
  }
  if(process.env.VUELOSRD_HEALTH_REPORT)fs.writeFileSync(process.env.VUELOSRD_HEALTH_REPORT,JSON.stringify(report,null,2)+'\n');
 
- if(monitorUnavailable)process.exitCode=1;\n if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
+ if(monitorUnavailable)process.exitCode=1;
+ if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
 }
 if(require.main===module)run().catch(e=>{console.error(e);process.exitCode=1});
 module.exports={probe};
