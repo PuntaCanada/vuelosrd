@@ -146,3 +146,26 @@ The airport selector is synchronized with the existing airport detail and exampl
 **Evidence and limitations:** No new airport services, prices, schedules, airline/airport relationships, routes or live flight data were introduced. Operator sites are reused directly from `airportInfo` and airline sites from `airlineDirectory`; this is **not** a claim that any particular airline serves the selected airport, nor that the operator page contains a live flight board. The checked-baggage vs terminal-lost-property guidance continues to reuse existing official contact sources. Journey choices are never sent to a server or retained in localStorage; only the opt-in checklist ticks remain on device. The previously fictional airport flight board is still expressly marked DEMO.
 
 Tests: `tests/passenger-hub-audit.cjs` checks all five journey translations and link provenance. `tests/chrome-a11y.cjs` exercises linked airport/airline/stage choices, absent-airline state and language switching at desktop and narrow viewports. `tests/browser-check.cjs` checks the same on real Chrome and captures the wizard. Cloudflare smoke validates the published controls.
+
+## Search-ready airport landing pages: 7 airports × 5 languages (2026-11-20)
+
+**35 new static HTML guides** are published at `/airports/{iata}/` (Spanish) and `/{lang}/airports/{iata}/` for English (`en`), German (`de`), French (`fr`) and Haitian Creole (`ht`). The IATA slugs are `puj`, `sdq`, `sti`, `pop`, `lrm`, `azs`, `jbq`. Each guide has a self-referencing canonical, locale title/description and text, 5 reciprocal HTML hreflang links plus x-default, static official source links, missing-source callouts, HTML landmarks, and a static `WebPage` JSON-LD object about that airport. The guides link to the app using `?lang=xx&airport=XXX#journey-wizard` and cross-link all seven airports in the selected language.
+
+The original 5-language hub pages now link directly to the seven airport guides in each language. The interactive Spanish home now links to language-matched guide pages from the airport cards and comparison panel, and has a first-visitor three-step orientation explaining the fictional DEMO board.
+
+**Official source inventory**: `data/airport-source-registry.json`, checked 20 November 2026. It distinguishes *operator-specific published services* (Punta Cana / Cibao / La Romana) from *unverified specific services* (the four Aerodom airports). Importantly, we found and linked dedicated airport profile pages, not just the generic Aerodom home:
+- PUJ: https://www.puntacanainternationalairport.com/en/
+- SDQ: https://aerodom.com/en/airports/santo-domingo-2/
+- STI: https://aeropuertocibao.com.do/en/
+- POP: https://aerodom.com/en/airports/puerto-plata-2/
+- LRM: https://www.romanaairport.com/
+- AZS: https://aerodom.com/en/airports/el-catey-samana-2/
+- JBQ: https://aerodom.com/en/airports/el-higuero/
+
+Some airports have separately verified terminal services, transport, lost-property or operator arrivals/departures pages, while others have explicit missing-data notices. Neither the source links nor airport IATA code establishes an airline route, live flight, real-time schedule, available fare, terminal assignment or individual accessibility. Source content and availability can change; no external site is scraped or copied.
+
+**SEO checks**: `sitemap.xml` now contains exactly **40 URLs** (5 hubs + 35 guides), with reciprocal XML hreflang and x-default. `tests/seo-audit.cjs` verifies each local HTML page, canonical, title, description, full hreflang cluster, valid airport JSON-LD, vetted link registry, and that pages remain indexable. Cloudflare smoke now actually downloads and checks all 35 pages and the published XML. Browser tests exercise real mobile displays (320 px and 390 px) with navigation and accessibility.
+
+**Source monitoring**: free `.github/workflows/source-health.yml` runs every Monday and when the official link registry or check changes. It tests the seven operator sources, government e-ticket/customs, additional airport service links and all 28 previously listed official airline links. It distinguishes genuine repeated **404/410** (CI error) from website bot protection/temporary **403/429/5xx/timeouts** (warning). This is a health signal, not proof a link always works for every real visitor. Government `https://eticket.migracion.gob.do/` was still linked from the official Dominican migration authority and tourism site in November 2026; a bot-side HTTP 403 does not establish it is invalid.
+
+**Google Search Console**: submit the unchanged sitemap address `https://vuelosrd.pages.dev/sitemap.xml` (not 35 separate sitemaps); if it was already submitted, inspect status and use URL Inspection for sample airport pages. A successful local/public fetch does not prove Google crawled or indexed a page, and a Google console 'Couldn't fetch' state has not been diagnosed.
