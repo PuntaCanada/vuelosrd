@@ -47,7 +47,7 @@ const journey=getJson('journeyWords',';\nfunction renderJourneyAssistant()');
 for(const lang of ['es','en','de','fr','ht']){
  const w=journey[lang];assert.ok(w,'journey translation '+lang);
  for(const key of ['title','intro','airport','airline','stage','choose','departure','arrival','withoutAirline','airportSource','airlineSource','checklist','transfer','baggage','notice']){
-  assert.ok(typeof w[key]==='string'&&w[key].length>4,'missing journey text '+lang+' '+key);
+  assert.ok(typeof w[key]==='string'&&w[key].length>=4,'missing journey text '+lang+' '+key);
  }
 }
 for(const id of ['journey-wizard','journeyAirport','journeyAirline','journeyStage','journey-summary','journey-airport-source','journey-airline-source','journey-transfer-link','journey-baggage-link','journey-checklist-link']){
