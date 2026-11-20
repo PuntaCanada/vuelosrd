@@ -56,3 +56,6 @@ async function loadSourceHealth(){
  }catch{sourceLatest=null;sourceHistory=null}
  renderSourceHealthPanel();renderAirlines();
 }
+
+// Defer dynamic loading until the existing inline VuelosRD app and its language state are ready.
+window.addEventListener('DOMContentLoaded',()=>loadSourceHealth(),{once:true});
