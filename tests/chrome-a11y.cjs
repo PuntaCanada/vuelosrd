@@ -20,6 +20,21 @@ const assert = require('node:assert/strict');
    assert.equal(await page.locator('#boardRows tr').count(),1);
    await page.locator('#boardClearFilters').click();
    assert.ok((await page.locator('#boardRows tr').count())>1);
+   // Airport detail sources: verified operator links, translated and synchronized across selectors.
+   await page.locator('#travelAssistAirport').selectOption('PUJ');
+   assert.ok((await page.locator('#deep-access-link').getAttribute('href')).includes('wheelchair-service'),'PUJ airline-requested wheelchair source');
+   assert.ok((await page.locator('#deep-transfer-link').getAttribute('href')).includes('transportations'),'PUJ transport source');
+   await page.locator('#travelAssistAirport').selectOption('LRM');
+   assert.ok((await page.locator('#deep-transfer-link').getAttribute('href')).includes('romanaairport.com/taxi-services/'),'La Romana taxi operator source');
+   await page.locator('#travelAssistAirport').selectOption('STI');
+   assert.ok((await page.locator('#deep-service-link').getAttribute('href')).includes('/servicios-a-pasajeros/'),'STI passenger services');
+   await page.locator('#travelAssistAirport').selectOption('SDQ');
+   assert.ok((await page.locator('#deep-service-link').getAttribute('href')).includes('aerodom.com'),'Aerodom general source');
+   await page.locator('#langMenu summary').click();
+   await page.locator('[data-choose-lang="de"]').click();
+   assert.equal(await page.locator('#deep-transfer-title').innerText(),'Abholung und Transfer');
+   await page.locator('[data-lang="es"]').click();
+   assert.equal(await page.locator('#deep-transfer-title').innerText(),'Transporte y recogida');
    // Practical airport travel guide, official external links, selection and localized content.
    assert.equal(await page.locator('#travelAssistAirport option').count(),7,'seven supported airports');
    await page.locator('#travelAssistAirport').selectOption('STI');
