@@ -189,6 +189,35 @@ const assert = require('node:assert/strict');
   } catch(e){failures.push(viewport.width+': '+e.stack);}
   await page.close();
  }
+ // Independently crawl real static multilingual airport guides in Chromium.
+ const airportCases=[['puj','es',320],['sdq','en',390],['sti','de',390],['pop','fr',320],['lrm','ht',390],['azs','es',1440],['jbq','de',320]];
+ for(const [code,lang,width] of airportCases){
+  const page=await browser.newPage({viewport:{width,height:780},reducedMotion:'reduce'});
+  try{
+   const uri='http://127.0.0.1:8765/'+(lang==='es'?'':lang+'/')+'airports/'+code+'/';
+   const result=await page.goto(uri,{waitUntil:'domcontentloaded'});
+   assert.equal(result.status(),200,'airport guide loads: '+uri);
+   assert.equal(await page.locator('html').getAttribute('lang'),lang,'guide language');
+   assert.equal(await page.locator('h1').count(),1,'one visible airport heading');
+   const canonical='https://vuelosrd.pages.dev/'+(lang==='es'?'':lang+'/')+'airports/'+code+'/';
+   assert.equal(await page.locator('link[rel="canonical"]').getAttribute('href'),canonical);
+   assert.equal(await page.locator('link[rel="alternate"][hreflang]').count(),6,'five reciprocal locale links plus fallback');
+   assert.equal(await page.locator('nav.airports a').count(),7,'seven cross-linked airport guides');
+   const official=await page.locator('.source').first().locator('a').getAttribute('href');
+   assert.ok(official.startsWith('https://'),'official operator source');
+   const portal=await page.locator('a.button').first().getAttribute('href');
+   assert.ok(portal.includes('airport='+code.toUpperCase()),'deep link opens selected airport');
+   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+   assert.ok(overflow<=2,'airport landing page mobile overflow '+code+' '+lang+' '+width+'px: '+overflow);
+   if(width<=390){
+    const findings=await page.evaluate(source=>{eval(source);return window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}})},axe.source);
+    const severe=findings.violations.filter(v=>['serious','critical'].includes(v.impact));
+    assert.deepEqual(severe.map(v=>v.id),[],'serious/critical WCAG in guide '+code+' '+lang);
+   }
+   console.log('Airport guide PASS: '+code+' '+lang+' '+width+'px');
+  }catch(e){failures.push('Airport guide '+code+' '+lang+': '+e.stack);}
+  await page.close();
+ }
  await browser.close();
  if(failures.length){console.error(failures.join('\n\n'));process.exitCode=1;}
 })().catch(e=>{console.error(e);process.exitCode=1;});
