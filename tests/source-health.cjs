@@ -32,8 +32,10 @@ function classifyWarning(x){
  if(x.outcome==='broken')return {category:'confirmed-missing',reason:'HTTP 404/410 confirmed by repeated GET requests'};
  if([401,403,429].includes(status))return {category:'access-restricted',reason:'Automated request denied or rate limited; bot protection possible'};
  if(typeof status==='number'&&status>=500)return {category:'temporary-server',reason:'HTTP '+status+' from upstream; transient service or gateway failure possible'};
- if(['ENOTFOUND','EAI_AGAIN','ENODATA','ENETUNREACH'].includes(code))return {category:'dns-failure',reason:'DNS name resolution or network routing failed in the runner; not proof of a dead site'};
- if(typeof status!=='number')return {category:'network-error',reason:'Network, TLS, timeout or transport error in automated runner; review separately'};
+ if(['ENOTFOUND','EAI_AGAIN','ENODATA'].includes(code))return {category:'dns-failure',reason:'DNS name resolution failed in the runner; not proof of a dead site'};
+ if(['CERT_HAS_EXPIRED','UNABLE_TO_VERIFY_LEAF_SIGNATURE','ERR_TLS_CERT_ALTNAME_INVALID','DEPTH_ZERO_SELF_SIGNED_CERT','SELF_SIGNED_CERT_IN_CHAIN'].includes(code)||code.startsWith('ERR_SSL_')||code.startsWith('ERR_TLS_'))return {category:'tls-failure',reason:'TLS certificate or handshake verification failed in the runner; requires manual investigation'};
+ if(['TIMEOUTERROR','ABORTERROR','ETIMEDOUT','UND_ERR_CONNECT_TIMEOUT','UND_ERR_HEADERS_TIMEOUT'].includes(code))return {category:'timeout',reason:'Automated request timed out; not proof of a broken source'};
+ if(typeof status!=='number')return {category:'network-error',reason:'Network or transport error in automated runner (including opaque runtime codes); review separately'};
  return {category:'other-http',reason:'Inconclusive HTTP status '+status};
 }
 async function probe(url,fetcher=fetch){
@@ -74,7 +76,7 @@ async function run(){
   ...x,...classifyWarning(x),usedBy:[...(origins.get(x.url)||[])]
  }));
  const warningCategories=Object.fromEntries(
-  ['access-restricted','temporary-server','dns-failure','network-error','confirmed-missing','other-http']
+  ['access-restricted','temporary-server','dns-failure','tls-failure','timeout','network-error','confirmed-missing','other-http']
   .map(category=>[category,warning.filter(w=>w.category===category).length])
  );
  const report={

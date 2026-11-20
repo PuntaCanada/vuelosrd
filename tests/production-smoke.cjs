@@ -18,6 +18,14 @@ const assert=require('node:assert/strict');
     assert.equal(await page.locator('#boardWarning').isVisible(),true,'fictional board clearly disclosed');
     // Published main must include the prior de7c6d6 navigation and 34663a36 safety changes.
     assert.equal(await page.locator('#journey-wizard').count(),1,'published five-language assistant');
+    // Verify the exact prior 050d82f7 user-visible airline keyboard feature on Cloudflare.
+    await page.locator('#flightAirlineQuickFilter').fill('Arajet');
+    assert.match(await page.locator('#flightAirlineShortcutNote').innerText(),/Intro|Enter|Entrée|Antre/,'050d82f7 keyboard hint published');
+    await page.locator('#flightAirlineQuickFilter').press('Enter');
+    assert.equal(await page.locator('#flight').inputValue(),'DM ','050d82f7 Enter airline selection published');
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'flight','050d82f7 Enter focuses flight input');
+    await page.locator('#flightAirlineQuickFilter').fill('');
+
     // The prior b371ae2c release includes selected-airport guides at both entry points.
     assert.equal(await page.locator('#flightAirportGuide').count(),1,'b371ae2c flight-to-guide control deployed');
     assert.equal(await page.locator('#journey-guide-link').count(),1,'b371ae2c journey-to-guide control deployed');
