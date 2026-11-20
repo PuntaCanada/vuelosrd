@@ -13,6 +13,20 @@ const {chromium} = require('playwright');
     await page.goto(base+'?lang=de#airlines',{waitUntil:'domcontentloaded',timeout:30000});
     await page.locator('#airlineCards .airline-card').first().waitFor({timeout:15000});
     await page.locator('#goAirlines').waitFor();
+    // Practical travel assistance: real desktop Chrome, seven-airport navigation and real sources.
+    assert.equal(await page.locator('#travelAssistAirport option').count(),7);
+    assert.match(await page.locator('#travel-assist-title').innerText(),/Flughafenführer/);
+    await page.locator('#travelAssistAirport').selectOption('STI');
+    assert.equal(await page.locator('#airport').inputValue(),'STI');
+    assert.ok((await page.locator('#assist-operator-link').getAttribute('href')).includes('aeropuertocibao.com.do'));
+    assert.equal(await page.locator('#assist-sti-arrivals').isVisible(),true);
+    assert.equal(await page.locator('#assist-sti-departures').isVisible(),true);
+    await page.locator('#travelAssistAirport').selectOption('LRM');
+    assert.equal(await page.locator('#assist-sti-arrivals').isVisible(),false);
+    assert.ok((await page.locator('#assist-operator-link').getAttribute('href')).includes('romanaairport.com'));
+    await page.locator('#travelAssistAirport').selectOption('PUJ');
+    assert.ok((await page.locator('#assist-transport-link').getAttribute('href')).includes('puntacanainternationalairport.com'));
+    await page.locator('#travel-assist').screenshot({path:'airlines-travel-guide.png'});
     console.log('Desktop document loaded; cards:',await page.locator('.airline-card').count());
     assert.equal(await page.locator('.airline-card').count(),28);
     const imageResults=await page.locator('.airline-card').evaluateAll(async cards=>{
