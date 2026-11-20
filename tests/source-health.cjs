@@ -44,9 +44,12 @@ async function probe(url,fetcher=fetch){
   }
  }
 }
+async function probeBatch(items,probeOne=probe){
+ return Promise.all(items.map(url=>probeOne(url)));
+}
 async function run(){
  const results=[];
- for(let i=0;i<urls.length;i+=3){results.push(...await Promise.all(urls.slice(i,i+3).map(url=>probe(url))));}
+ for(let i=0;i<urls.length;i+=3){results.push(...await probeBatch(urls.slice(i,i+3)));}
  let broken=0,unknown=0;
  for(const x of results){console.log(x.outcome.toUpperCase()+' ['+x.status+'] '+x.url);if(x.outcome==='broken')broken++;if(x.outcome==='uncertain')unknown++;}
  console.log('OFFICIAL LINK HEALTH: '+urls.length+' checked; '+broken+' confirmed missing (404/410); '+unknown+' uncertain (site blocks or transient failures).');
@@ -96,4 +99,4 @@ async function run(){
  if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
 }
 if(require.main===module)run().catch(e=>{console.error(e);process.exitCode=1});
-module.exports={probe};
+module.exports={probe,probeBatch};
