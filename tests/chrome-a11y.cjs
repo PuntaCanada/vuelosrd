@@ -26,7 +26,13 @@ const assert = require('node:assert/strict');
    assert.equal(await page.locator('#airport').inputValue(),'STI','travel guide synchronized');
    assert.ok((await page.locator('#assist-operator-link').getAttribute('href')).includes('aeropuertocibao.com.do'));
    assert.ok((await page.locator('#assist-flight-link').getAttribute('href')).includes('/data/airports/sti'));
+   assert.equal(await page.locator('#assist-sti-arrivals').isVisible(),true,'Cibao operator arrival board available');
+   assert.ok((await page.locator('#assist-sti-arrivals').getAttribute('href')).includes('aeropuertocibao.com.do/llegadas'));
+   assert.ok((await page.locator('#assist-sti-departures').getAttribute('href')).includes('aeropuertocibao.com.do/salidas'));
+
    await page.locator('#travelAssistAirport').selectOption('LRM');
+   assert.equal(await page.locator('#assist-sti-arrivals').isVisible(),false,'other airports do not get wrong STI operator board');
+
    assert.ok((await page.locator('#assist-operator-link').getAttribute('href')).includes('romanaairport.com'));
    await page.locator('#travelAssistAirport').selectOption('PUJ');
    assert.ok((await page.locator('#assist-transport-link').getAttribute('href')).includes('puntacanainternationalairport.com'));
@@ -46,6 +52,7 @@ const assert = require('node:assert/strict');
    await airlineButtons.first().click();
    assert.equal(await page.locator('#flight').getAttribute('placeholder'),'DM 1234','airline chip opens number entry');
    assert.equal(await page.locator('#flight').inputValue(),'DM ','airline chip pre-fills code');
+   assert.equal(await page.locator('#airlineMatch').isVisible(),true,'recognized airline code is explained before digits');
    assert.equal(await page.locator('#flight').getAttribute('aria-invalid'),'false','partial code is not an error');
    assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'true','partial number cannot open tracking');
    await page.locator('#flight').fill('DM1234');
