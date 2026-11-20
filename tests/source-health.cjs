@@ -3,6 +3,8 @@
 // NOT that an official operator URL is definitively dead. Report as warnings.
 'use strict';
 const fs=require('node:fs'),assert=require('node:assert/strict');
+const {promisify}=require('node:util'),{execFile}=require('node:child_process');
+const execFileAsync=promisify(execFile);
 const data=JSON.parse(fs.readFileSync('data/airport-source-registry.json','utf8'));
 const found=new Set(), origins=new Map();
 function register(url,origin){
@@ -26,6 +28,18 @@ for(const entry of airlineUrls)register(entry[2],entry[1]+' airline / official w
 const urls=[...found].sort();
 const allowedHosts=new Set(["www.puntacanainternationalairport.com","aeropuertocibao.com.do","www.romanaairport.com","aerodom.com","eticket.migracion.gob.do","www.aduanas.gob.do","www.condor.com","www.jetblue.com","www.iberia.com","www.aa.com","www.aircanada.com","www.arajet.com","www.copaair.com","www.delta.com","www.united.com","www.airtransat.com","www.aireuropa.com","www.discover-airlines.com","www.avianca.com","www.airfrance.com","www.britishairways.com","www.flyfrontier.com","www.southwest.com","www.westjet.com","www.spirit.com","www.aerolineas.com.ar","www.aeromexico.com","www.latamairlines.com","www.w2fly.es","www.iberojet.com","www.wingo.com","www.skyairline.com","www.voegol.com.br","www.suncountry.com"]);
 for(const url of urls)assert.ok(allowedHosts.has(new URL(url).hostname),'Only vetted operator/authority hosts: '+url);
+// curl respects runner HTTP(S)_PROXY automatically; Node fetch may not.
+// Used only when built-in fetch cannot establish a network connection.
+async function curlRequest(url,options){
+ const args=['--location','--silent','--show-error','--max-time','12','--output','/dev/null','--write-out','%{http_code}','--user-agent','VuelosRD-SourceHealth/1.0 (public link monitoring)'];
+ if(options.method==='HEAD')args.push('--head');
+ else args.push('--range','0-0');
+ args.push(url);
+ const {stdout}=await execFileAsync('curl',args,{timeout:14000,maxBuffer:2048});
+ const status=Number(stdout.trim());
+ if(!Number.isInteger(status)||status<100||status>599)throw new Error('No HTTP response from curl');
+ return {status,ok:status>=200&&status<300,body:null};
+}
 async function probe(url,fetcher=fetch){
  for(let attempt=0;attempt<2;attempt++){
   try{
@@ -38,7 +52,15 @@ async function probe(url,fetcher=fetch){
    if([404,410].includes(response.status)){if(attempt===0)continue;return {url,status:response.status,outcome:'broken'};}
    if(response.ok||response.status===206)return {url,status:response.status,outcome:'ok'};
    return {url,status:response.status,outcome:'uncertain'};
-  }catch(e){if(attempt===0)continue;return {url,status:String(e.cause?.code||e.code||e.name||e),outcome:'uncertain'};}
+  }catch(e){
+   if(fetcher===fetch&&e.name==='TypeError'){
+    fetcher=curlRequest;
+    attempt=-1; // restart with system HTTP client; still require repeated GET-confirmed missing responses
+    continue;
+   }
+   if(attempt===0)continue;
+   return {url,status:String(e.cause?.code||e.code||e.name||e),outcome:'uncertain'};
+  }
  }
 }
 async function run(){
