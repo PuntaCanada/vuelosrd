@@ -12,6 +12,21 @@ const assert = require('node:assert/strict');
    await page.locator('#boardRows tr').first().waitFor();
    assert.match(await page.locator('#boardWarning').innerText(),/DEMO|DEMOSTRA|fictici/i);
    assert.ok((await page.locator('#boardRows tr').count())>0,'demo board rendered');
+   // Visible mobile-friendly actions connect flight search, airline code search and the journey assistant.
+   assert.equal(await page.locator('#flightFocusAirline').isVisible(),true,'flight-to-airline action visible');
+   assert.equal(await page.locator('#flightFocusJourney').isVisible(),true,'flight-to-journey action visible');
+   await page.locator('#flightFocusAirline').click();
+   assert.equal(await page.evaluate(()=>document.activeElement.id),'flightAirlineQuickFilter','airline quick search is keyboard-ready');
+   await page.locator('#flightAirlineQuickFilter').fill('Arajet');
+   assert.equal(await page.locator('#flightAirlineShortcutButtons [data-airline]').count(),1,'quick search filters airline codes');
+   await page.locator('#flightAirlineQuickFilter').fill('');
+   await page.locator('#flightFocusJourney').click();
+   assert.equal(await page.evaluate(()=>document.activeElement.id),'journeyAirport','journey shortcut focuses airport selector');
+   await page.locator('#langMenu summary').click();
+   await page.locator('[data-choose-lang="de"]').click();
+   assert.equal(await page.locator('#flightFocusAirline').innerText(),'Airline suchen','German quick link translation');
+   await page.locator('[data-lang="es"]').click();
+
    await page.locator('#boardAirport').selectOption('SDQ');
    assert.equal(await page.locator('#airport').inputValue(),'SDQ');
    await page.locator('#boardDepartures').click();
