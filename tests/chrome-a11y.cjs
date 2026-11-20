@@ -35,6 +35,25 @@ const assert = require('node:assert/strict');
    assert.equal(await page.locator('#deep-transfer-title').innerText(),'Abholung und Transfer');
    await page.locator('[data-lang="es"]').click();
    assert.equal(await page.locator('#deep-transfer-title').innerText(),'Transporte y recogida');
+   // Browser comparison: seven airports, free-text query, source completeness and detail navigation.
+   assert.equal(await page.locator('#compare-grid .compare-card').count(),7,'seven airports compared');
+   await page.locator('#compareSearch').fill('Samaná');
+   assert.equal(await page.locator('#compare-grid .compare-card').count(),1,'accent insensitive airport lookup');
+   assert.equal(await page.locator('#compare-grid .compare-card').first().getAttribute('data-airport'),'AZS');
+   await page.locator('#compareSearch').fill('xxxxx-not-an-airport');
+   assert.equal(await page.locator('#compare-empty').isVisible(),true,'comparison empty state');
+   await page.locator('#compare-reset').click();
+   assert.equal(await page.locator('#compare-grid .compare-card').count(),7);
+   await page.locator('#compareFilter').selectOption('detail');
+   assert.equal(await page.locator('#compare-grid .compare-card').count(),3,'specific airport sources only');
+   await page.locator('#compareFilter').selectOption('overview');
+   assert.equal(await page.locator('#compare-grid .compare-card').count(),4,'overview-only sources clearly distinguished');
+   await page.locator('#compareFilter').selectOption('all');
+   await page.locator('#compare-grid button[data-airport="LRM"]').click();
+   assert.equal(await page.locator('#airport').inputValue(),'LRM','comparison updates airport detail');
+   assert.equal(await page.locator('#travelAssistAirport').inputValue(),'LRM','comparison updates travel guide');
+   assert.equal(await page.locator('#compare-grid .compare-card.selected').count(),1,'selected airport highlighted');
+   await page.locator('#compare-grid button[data-airport="PUJ"]').click();
    // Practical airport travel guide, official external links, selection and localized content.
    assert.equal(await page.locator('#travelAssistAirport option').count(),7,'seven supported airports');
    await page.locator('#travelAssistAirport').selectOption('STI');
