@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "reviewedOn": "2026-11-20",
+  "scope": "Independent exact-URL public HTML retrieval, NOT end-user browser guarantee or flight-data accuracy",
+  "evidenceMethod": "External web fetch, independent from GitHub runner; blocked outcomes retain manual-check requirement",
+  "reviews": [
+    {
+      "url": "https://eticket.migracion.gob.do/",
+      "result": "access-denied",
+      "note": "Exact form returned 403 to automated independent fetch. Nevertheless, Dominican Migration and the Dominican Tourism Ministry explicitly link this exact URL as the official free E-Ticket: https://migracion.gob.do/en/servicio/e-ticket-application-passenger-arrival-and-departure/ and https://www.godominicanrepublic.com/travel/entry-requirements. Keep the direct link; visitor access still needs browser verification.",
+      "evidence": "Independent HTTP/web content review on 2026-11-20",
+      "officialCorroboration": "https://migracion.gob.do/en/servicio/e-ticket-application-passenger-arrival-and-departure/"
+    },
+    {
+      "url": "https://www.aa.com/homePage.do?locale=en_US",
+      "result": "readable",
+      "note": "Exact original official AA homepage with flight status interface retrieved",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.aireuropa.com/",
+      "result": "readable",
+      "note": "Exact official homepage returned JavaScript application shell",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.airfrance.com/",
+      "result": "access-denied",
+      "note": "Exact homepage refused an independent HTTP fetch with 403; this does not establish a dead website. Keep historical automated error as an access limitation; manually check in a normal visitor browser.",
+      "evidence": "Independent HTTP/web content review on 2026-11-20",
+      "officialCorroboration": null
+    },
+    {
+      "url": "https://www.avianca.com/",
+      "result": "access-denied",
+      "note": "Exact root refused independent automated fetch with HTTP 403. Official Avianca help site identifies avianca.com as its official source: https://ayuda.avianca.com/hc/es/articles/19016810055963--D%C3%B3nde-puedo-encontrar-la-informaci%C3%B3n-oficial-de-avianca ; exact homepage browser access unverified.",
+      "evidence": "Independent HTTP/web content review on 2026-11-20",
+      "officialCorroboration": "https://ayuda.avianca.com/hc/es/articles/19016810055963--D%C3%B3nde-puedo-encontrar-la-informaci%C3%B3n-oficial-de-avianca"
+    },
+    {
+      "url": "https://www.copaair.com/",
+      "result": "redirect-readable",
+      "note": "Official root redirects to /en-us/ and returns application shell",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.discover-airlines.com/",
+      "result": "redirect-readable",
+      "note": "Official root redirects to /xx/en/homepage and HTML is readable",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.iberia.com/do/flight-status/",
+      "result": "readable",
+      "note": "Exact official flight-status page independently retrieved",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.latamairlines.com/",
+      "result": "redirect-readable",
+      "note": "Official root redirects to /br/pt and HTML is readable",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.spiritrestructuring.com/",
+      "result": "timeout",
+      "note": "Exact site timed out in independent automated fetch. Its official historical Guests page and shutdown notice were separately indexed: https://spiritrestructuring.com/guests. Keep historical restructuring link only; no active Spirit flight search.",
+      "evidence": "Independent HTTP/web content review on 2026-11-20",
+      "officialCorroboration": "https://spiritrestructuring.com/guests"
+    },
+    {
+      "url": "https://www.united.com/en/us/flightstatus",
+      "result": "readable",
+      "note": "Exact official flight-status SPA HTML retrieved; JavaScript needed for flight data",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.voegol.com.br/",
+      "result": "readable",
+      "note": "Exact official GOL homepage retrieved",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.w2fly.es/",
+      "result": "redirect-readable",
+      "note": "Official root redirects to /es-es and HTML is readable",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    }
+  ]
+}

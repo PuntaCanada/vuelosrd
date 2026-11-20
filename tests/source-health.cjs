@@ -4,6 +4,18 @@
 'use strict';
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const data=JSON.parse(fs.readFileSync('data/airport-source-registry.json','utf8'));
+const independent=JSON.parse(fs.readFileSync('data/source-independent-review.json','utf8'));
+assert.equal(independent.schemaVersion,1,'independent source-review schema');
+assert.match(independent.reviewedOn,/^20\d\d-\d\d-\d\d$/,'dated manual evidence');
+const independentReviews=new Map();
+for(const entry of independent.reviews){
+ assert.ok(entry.url.startsWith('https://'),'source review uses HTTPS');
+ assert.ok(['readable','redirect-readable','access-denied','timeout'].includes(entry.result),'known external review result');
+ assert.ok(!independentReviews.has(entry.url),'unique independent review');
+ assert.ok(entry.note&&entry.evidence,'review must explain its observation');
+ independentReviews.set(entry.url,entry);
+}
+
 const found=new Set(), origins=new Map();
 function register(url,origin){
  found.add(url);
@@ -26,6 +38,7 @@ for(const entry of airlineUrls)register(entry[2],entry[1]+' airline / official w
 const urls=[...found].sort();
 const allowedHosts=new Set(["www.puntacanainternationalairport.com","aeropuertocibao.com.do","www.romanaairport.com","aerodom.com","eticket.migracion.gob.do","www.aduanas.gob.do","www.condor.com","www.jetblue.com","www.iberia.com","www.aa.com","www.aircanada.com","www.arajet.com","www.copaair.com","www.delta.com","www.united.com","www.airtransat.com","www.aireuropa.com","www.discover-airlines.com","www.avianca.com","www.airfrance.com","www.britishairways.com","www.flyfrontier.com","www.southwest.com","www.westjet.com","www.spiritrestructuring.com","www.aerolineas.com.ar","www.aeromexico.com","www.latamairlines.com","www.w2fly.es","www.iberojet.com","www.wingo.com","www.skyairline.com","www.voegol.com.br","www.suncountry.com"]);
 for(const url of urls)assert.ok(allowedHosts.has(new URL(url).hostname),'Only vetted operator/authority hosts: '+url);
+for(const url of independentReviews.keys())assert.ok(found.has(url),'independent evidence is for a monitored official URL: '+url);
 // Classifications describe automated checks, not whether a visitor can open a page.
 function classifyWarning(x){
  const status=x.status,code=String(status).toUpperCase();
@@ -38,6 +51,7 @@ function classifyWarning(x){
  if(typeof status!=='number')return {category:'network-error',reason:'Network or transport error in automated runner (including opaque runtime codes); review separately'};
  return {category:'other-http',reason:'Inconclusive HTTP status '+status};
 }
+function needsSourceInvestigation(category){return ['confirmed-missing','temporary-server','dns-failure','tls-failure'].includes(category);}
 async function probe(url,fetcher=fetch){
  for(let attempt=0;attempt<2;attempt++){
   try{
@@ -45,7 +59,7 @@ async function probe(url,fetcher=fetch){
    let response=await fetcher(url,{method:'HEAD',redirect:'follow',signal:AbortSignal.timeout(12000),headers});
    // Some sites reject HEAD with 404/410 while the ordinary page is available.
    // Confirm apparent missing pages with GET before classifying them as broken.
-   if([403,404,405,410,501].includes(response.status)){response=await fetcher(url,{method:'GET',redirect:'follow',signal:AbortSignal.timeout(12000),headers:{...headers,Range:'bytes=0-0'}});}
+   if([403,404,405,410,501].includes(response.status)){response=await fetcher(url,{method:'GET',redirect:'follow',signal:AbortSignal.timeout(12000),headers});}
    if(response.body)await response.body.cancel();
    if([404,410].includes(response.status)){if(attempt===0)continue;return {url,status:response.status,outcome:'broken'};}
    if(response.ok||response.status===206)return {url,status:response.status,outcome:'ok'};
@@ -66,15 +80,31 @@ async function run(){
  const results=[];
  for(let i=0;i<urls.length;i+=3){results.push(...await probeBatch(urls.slice(i,i+3)));}
  let broken=0,unknown=0;
- for(const x of results){console.log(x.outcome.toUpperCase()+' ['+x.status+'] '+x.url);if(x.outcome==='broken')broken++;if(x.outcome==='uncertain')unknown++;}
+ for(const x of results){if(x.outcome==='broken')broken++;if(x.outcome==='uncertain')unknown++;}
  console.log('OFFICIAL LINK HEALTH: '+urls.length+' checked; '+broken+' confirmed missing (404/410); '+unknown+' uncertain (site blocks or transient failures).');
+ // The raw uncertain count is retained for auditing. Operational alerts are calculated below.
  const monitorUnavailable=results.length>0&&results.every(x=>x.outcome==='uncertain'&&typeof x.status==='string');
  if(monitorUnavailable)console.error('MONITOR ENVIRONMENT FAILURE: all external requests failed at the network layer; NO official URL was verified. Check runner DNS/proxy/egress before interpreting source warnings.');
  const checkedAt=new Date().toISOString(),lastReviewed=data.verifiedOn||'not documented';
  const ok=results.length-broken-unknown;
- const warning=results.filter(x=>x.outcome!=='ok').map(x=>({
-  ...x,...classifyWarning(x),usedBy:[...(origins.get(x.url)||[])]
- }));
+ // A blocked monitoring request is NOT a user-facing broken-link alert.
+ // Independent retrieval is descriptive evidence, not a way to turn HTTP 403 into HTTP 200.
+ const warning=results.filter(x=>x.outcome!=='ok').map(x=>{
+  const classified=classifyWarning(x),review=independentReviews.get(x.url);
+  const actionable=needsSourceInvestigation(classified.category);
+  return {...x,...classified,actionable,independentReview:review?{
+   reviewedOn:independent.reviewedOn,result:review.result,evidence:review.evidence,note:review.note
+  }:null,usedBy:[...(origins.get(x.url)||[])]};
+ });
+ for(const x of results){
+  const entry=warning.find(w=>w.url===x.url);
+  const label=x.outcome==='ok'?'HTTP_REACHABLE':entry?.actionable?'SOURCE_ALERT':'MONITOR_LIMITATION';
+  console.log(label+' ['+x.status+'] '+x.url+(entry?.independentReview?' (independent: '+entry.independentReview.result+')':''));
+ }
+ const actionableAlerts=warning.filter(x=>x.actionable);
+ const monitorLimitations=warning.filter(x=>!x.actionable);
+ const externallyReadable=warning.filter(x=>['readable','redirect-readable'].includes(x.independentReview?.result));
+ const needsIndependentFollowup=warning.filter(x=>!x.independentReview||!['readable','redirect-readable'].includes(x.independentReview.result));
  const warningCategories=Object.fromEntries(
   ['access-restricted','temporary-server','dns-failure','tls-failure','timeout','network-error','confirmed-missing','other-http']
   .map(category=>[category,warning.filter(w=>w.category===category).length])
@@ -82,14 +112,17 @@ async function run(){
  const report={
   schemaVersion:1,checkedAt,sourceCatalogLastReviewed:lastReviewed,monitorStatus:monitorUnavailable?'network-unavailable':'partial-or-complete',
   total:urls.length,ok,uncertain:unknown,broken,warningCategories,
+  actionableAlertCount:actionableAlerts.length,monitorLimitationCount:monitorLimitations.length,
+  independentlyReadableUncertainCount:externallyReadable.length,needsIndependentFollowupCount:needsIndependentFollowup.length,
+  independentEvidenceReviewedOn:independent.reviewedOn,
   limitations:'Automated 403/401/429/timeout responses do not prove a broken URL; 200 confirms HTTP reachability only, not accuracy of travel content.',
   warnings:warning
  };
  const summaryPath=process.env.GITHUB_STEP_SUMMARY;
  if(summaryPath){
-  const rows=warning.map(x=>'| '+x.outcome.toUpperCase()+' | '+String(x.status).replace(/\\|/g,'/')+' | '+x.category+' | '+x.reason+' | '+x.usedBy.join(', ').replace(/\\|/g,'/')+' | '+x.url.replace(/\\|/g,'%7C')+' |');
+  const rows=warning.map(x=>'| '+(x.actionable?'INVESTIGATE':'MONITOR LIMITATION')+' | '+String(x.status).replace(/\\|/g,'/')+' | '+x.category+' | '+(x.independentReview?.result||'not independently reviewed')+' | '+x.reason+' | '+x.usedBy.join(', ').replace(/\\|/g,'/')+' | '+x.url.replace(/\\|/g,'%7C')+' |');
   const markdown=[
-   '## VuelosRD official link health',
+   '## VuelosRD official link status: actionable failures vs crawler limitations',
    '',
    '| Checked | HTTP reachable | Uncertain | Confirmed 404/410 |',
    '|---:|---:|---:|---:|',
@@ -99,9 +132,14 @@ async function run(){
    '',
    '**Warning categories (automated; not verified dead links):** '+Object.entries(warningCategories).map(([k,v])=>k+': '+v).join(' · '),
    '',
+   '**Actionable source alerts:** '+actionableAlerts.length+' (confirmed missing / repeat server / DNS / TLS).',
+   '**Monitor-only access limitations:** '+monitorLimitations.length+' (may be bot/authorization/transport; not independently proven broken).',
+   '**Independently retrievable exact URLs among automated warnings:** '+externallyReadable.length+'; **remaining independent checks required:** '+needsIndependentFollowup.length+'.',
+   'Independent review as of '+independent.reviewedOn+'; observation is not a live visitor guarantee.',
+   '',
    '**Monitor status:** '+(monitorUnavailable?'NETWORK UNAVAILABLE — no links verified; check runner network/proxy.':'Checks completed; ambiguous responses remain unverified.'),
    '',
-   ...(warning.length?['| Outcome | HTTP / error | Category | Interpretation | Used by | URL |','|---|---|---|---|---|---|',...rows]:['No URL warnings.']),
+   ...(warning.length?['| Triage | HTTP / error | Category | Independent exact-URL check | Interpretation | Used by | URL |','|---|---|---|---|---|---|---|',...rows]:['No URL warnings.']),
    '',
    '**Interpretation:** 401/403/429 and network errors may indicate bot blocking. Manually investigate uncertain results; a successful HTTP response does not prove current schedules or services.',
    ''
@@ -110,8 +148,9 @@ async function run(){
  }
  if(process.env.VUELOSRD_HEALTH_REPORT)fs.writeFileSync(process.env.VUELOSRD_HEALTH_REPORT,JSON.stringify(report,null,2)+'\n');
 
+ console.log('SOURCE TRIAGE: '+actionableAlerts.length+' actionable alerts, '+monitorLimitations.length+' monitoring limitations; '+externallyReadable.length+' separately retrievable exact URLs; '+needsIndependentFollowup.length+' require independent follow-up.');
  if(monitorUnavailable)process.exitCode=1;
  if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
 }
 if(require.main===module)run().catch(e=>{console.error(e);process.exitCode=1});
-module.exports={probe,probeBatch,classifyWarning};
+module.exports={probe,probeBatch,classifyWarning,needsSourceInvestigation};

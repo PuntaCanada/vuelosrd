@@ -1,7 +1,11 @@
 // Deterministic HTTP classification regression: no external requests.
 'use strict';
 const assert=require('node:assert/strict');
-const {probe,probeBatch,classifyWarning}=require('./source-health.cjs');
+const {probe,probeBatch,classifyWarning,needsSourceInvestigation}=require('./source-health.cjs');
+const reviews=require('../data/source-independent-review.json');
+assert.equal(reviews.reviews.length,13,'all previously recurrently uncertain URLs independently reviewed');
+assert.equal(reviews.reviews.filter(r=>['readable','redirect-readable'].includes(r.result)).length,9,'nine exact URLs retrieved by independent fetch');
+assert.equal(reviews.reviews.filter(r=>['access-denied','timeout'].includes(r.result)).length,4,'four exact URLs still require manual browser verification');
 const response=status=>({status,ok:status>=200&&status<300,body:null});
 async function scenario(name,statuses,expected,methods){
  let calls=0,seen=[];
@@ -29,6 +33,8 @@ async function scenario(name,statuses,expected,methods){
   [{outcome:'broken',status:404},'confirmed-missing']
  ];
  for(const [input,category] of cases)assert.equal(classifyWarning(input).category,category,'source classification '+JSON.stringify(input));
+ for(const category of ['access-restricted','network-error','timeout'])assert.equal(needsSourceInvestigation(category),false,'bot/transport limitation is not a verified broken link');
+ for(const category of ['confirmed-missing','temporary-server','dns-failure','tls-failure'])assert.equal(needsSourceInvestigation(category),true,'actual service condition requires human investigation');
  const seen=[];
  const batched=await probeBatch(['https://example.org/a','https://example.org/b'],async(...args)=>{
   assert.equal(args.length,1,'do not pass Array.map index as the HTTP fetcher');
@@ -41,10 +47,11 @@ async function scenario(name,statuses,expected,methods){
  await scenario('confirmed missing twice',[404,404,404,404],'broken',['HEAD','GET','HEAD','GET']);
  await scenario('transient missing',[404,404,200],'ok');
  await scenario('403 bot block',[403,403],'uncertain',['HEAD','GET']);
+ await scenario('403 HEAD denied, ordinary GET allowed',[403,200],'ok',['HEAD','GET']);
  await scenario('401 access denied',[401],'uncertain',['HEAD']);
  await scenario('429 throttling',[429],'uncertain',['HEAD']);
  await scenario('503 server failure repeated',[503,503],'uncertain',['HEAD','HEAD']);
  await scenario('503 recovers',[503,200],'ok',['HEAD','HEAD']);
  await scenario('connection error',[new Error('network'),new Error('network')],'uncertain',['HEAD','HEAD']);
- console.log('SOURCE HEALTH UNIT PASS: 11 HTTP/network scenarios plus 14 warning categories and array-map argument regression, including false-404 prevention and safe bot-block classification.');
+ console.log('SOURCE HEALTH UNIT PASS: 12 HTTP/network scenarios plus 14 warning categories and independent-review coverage and array-map argument regression, including false-404 prevention and safe bot-block classification.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
