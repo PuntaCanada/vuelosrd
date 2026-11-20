@@ -28,4 +28,30 @@ for(const lang of ['es','en','de','fr','ht']){
  assert.ok(locales[lang].every(x=>typeof x==='string'&&x.length>=5),'nonempty guide labels in '+lang);
 }
 assert.ok(!html.includes('liveFlightAPI'),'must not introduce fictional live API');
+// Operator-documented airport detail source links and localizations.
+const startDeep=html.indexOf('const airportDeepSources=');
+const endDeep=html.indexOf(';\nfunction renderAirportDeepGuide',startDeep);
+assert.ok(startDeep>0&&endDeep>startDeep,'structured airport sources');
+const deepSources=JSON.parse(html.slice(startDeep+'const airportDeepSources='.length,endDeep));
+assert.equal(Object.keys(deepSources).length,7,'sources for all seven airports');
+for(const code of required){
+ const src=deepSources[code];
+ for(const key of ['service','access','transfer']){
+  assert.ok(src[key].startsWith('https://'),'safe official source for '+code+' '+key);
+  const host=new URL(src[key]).hostname;
+  assert.ok(['www.puntacanainternationalairport.com','aeropuertocibao.com.do','www.romanaairport.com','aerodom.com'].includes(host),'trusted airport operator for '+code);
+ }
+}
+assert.ok(deepSources.PUJ.access.includes('wheelchair-service'),'PUJ wheelchair reference');
+assert.ok(deepSources.LRM.transfer.includes('taxi-services'),'LRM taxi reference');
+const startText=html.indexOf('const airportDeepWords='),endText=html.indexOf(';\nconst airportDeepSources=',startText);
+assert.ok(startText>0&&endText>startText,'translated airport guides');
+const deepWords=JSON.parse(html.slice(startText+'const airportDeepWords='.length,endText));
+for(const lang of ['es','en','de','fr','ht']){
+ assert.equal(deepWords[lang].head.length,3,'three service headings '+lang);
+ assert.equal(deepWords[lang].general.length,3,'three fallback descriptions '+lang);
+ assert.equal(deepWords[lang].puj.length,3,'PUJ descriptions '+lang);
+ assert.equal(deepWords[lang].sti.length,3,'STI descriptions '+lang);
+ assert.equal(deepWords[lang].lrm.length,3,'LRM descriptions '+lang);
+}
 console.log('Travel assistant audit OK: seven airports, five translated languages and grounded free source links.');
