@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "reviewedOn": "2026-11-20",
+  "scope": "Independent exact-URL public HTML retrieval, NOT end-user browser guarantee or flight-data accuracy",
+  "evidenceMethod": "External web fetch, independent from GitHub runner; blocked outcomes retain manual-check requirement",
+  "reviews": [
+    {
+      "url": "https://eticket.migracion.gob.do/",
+      "result": "access-denied",
+      "note": "HTTP 403 in independent web fetch; no successful exact-page retrieval",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.aa.com/homePage.do?locale=en_US",
+      "result": "readable",
+      "note": "Exact original official AA homepage with flight status interface retrieved",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.aireuropa.com/",
+      "result": "readable",
+      "note": "Exact official homepage returned JavaScript application shell",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.airfrance.com/",
+      "result": "access-denied",
+      "note": "HTTP 403 in independent web fetch; no successful exact-page retrieval",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.avianca.com/",
+      "result": "access-denied",
+      "note": "HTTP 403 on exact root; airline official service/help pages available separately",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.copaair.com/",
+      "result": "redirect-readable",
+      "note": "Official root redirects to /en-us/ and returns application shell",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.discover-airlines.com/",
+      "result": "redirect-readable",
+      "note": "Official root redirects to /xx/en/homepage and HTML is readable",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.iberia.com/do/flight-status/",
+      "result": "readable",
+      "note": "Exact official flight-status page independently retrieved",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.latamairlines.com/",
+      "result": "redirect-readable",
+      "note": "Official root redirects to /br/pt and HTML is readable",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.spiritrestructuring.com/",
+      "result": "timeout",
+      "note": "Exact root timed out independently; first-party /guests page indexed, historical carrier",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.united.com/en/us/flightstatus",
+      "result": "readable",
+      "note": "Exact official flight-status SPA HTML retrieved; JavaScript needed for flight data",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.voegol.com.br/",
+      "result": "readable",
+      "note": "Exact official GOL homepage retrieved",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    },
+    {
+      "url": "https://www.w2fly.es/",
+      "result": "redirect-readable",
+      "note": "Official root redirects to /es-es and HTML is readable",
+      "evidence": "Independent HTTP/web content review on 2026-11-20"
+    }
+  ]
+}
