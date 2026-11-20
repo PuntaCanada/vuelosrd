@@ -18,6 +18,12 @@ const assert=require('node:assert/strict');
     assert.equal(await page.locator('#boardWarning').isVisible(),true,'fictional board clearly disclosed');
     // Published main must include the prior de7c6d6 navigation and 34663a36 safety changes.
     assert.equal(await page.locator('#journey-wizard').count(),1,'published five-language assistant');
+    assert.equal(await page.locator('#flightFocusAirline').isVisible(),true,'a7227cd9 airline shortcut published');
+    assert.equal(await page.locator('#flightFocusJourney').isVisible(),true,'a7227cd9 journey shortcut published');
+    await page.locator('#flightFocusAirline').click();
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'flightAirlineQuickFilter','published airline shortcut focuses mobile search');
+    await page.locator('#flightFocusJourney').click();
+    assert.equal(await page.evaluate(()=>document.activeElement.id),'journeyAirport','published journey shortcut focuses airport selector');
     await page.locator('#flightAirlineQuickFilter').fill('Spirit');
     const spirit=page.locator('#flightAirlineShortcutButtons [data-airline="NK"]');
     assert.equal(await spirit.count(),1,'historical Spirit entry published');

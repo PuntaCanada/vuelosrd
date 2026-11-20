@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'data/airport-source-registry.json'
+      - 'index.html'
       - 'tests/source-health.cjs'
       - 'tests/source-health-unit.cjs'
       - '.github/workflows/source-health.yml'
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - 'data/airport-source-registry.json'
+      - 'index.html'
       - 'tests/source-health.cjs'
       - '.github/workflows/source-health.yml'
   schedule:
