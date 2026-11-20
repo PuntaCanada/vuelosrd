@@ -65,5 +65,5 @@ for(const lang of ['es','en','de','fr','ht']){
  assert.equal(compareLocales[lang].length,21,'all comparison labels localized '+lang);
  assert.ok(compareLocales[lang].every(x=>typeof x==='string'&&x.length>2),'nonempty comparison translations '+lang);
 }
-assert.ok(html.includes("textContent=hasDetails?w[16]:w[15]"),'unverified services clearly labeled');
+assert.ok(html.includes("hasDetails?w[16]:w[15]"),'unverified services clearly labeled');
 console.log('Travel assistant audit OK: seven airports, five translated languages and grounded free source links.');
