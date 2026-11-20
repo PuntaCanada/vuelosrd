@@ -25,7 +25,7 @@ const assert=require('node:assert/strict');
     await page.locator('#flightAirlineQuickFilter').fill('');
     if(viewport.width>600){
      for(const lang of ['en','de','fr','ht']){
-      const hub=await page.context().newPage();
+      const hub=await browser.newPage({viewport,locale:'es-DO'});
       try{
        const url=new URL('/'+lang+'/',base).href;
        const result=await hub.goto(url,{waitUntil:'domcontentloaded',timeout:20000});
