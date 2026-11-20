@@ -97,6 +97,8 @@ jobs:
           print('HTML and content checks OK')
           PY
           node --check /tmp/vuelosrd-inline.js
+      - name: Audit traveler checklists and official baggage contact routes
+        run: node tests/passenger-hub-audit.cjs
       - name: Audit practical airport sources and five-language guidance
         run: node tests/travel-assist-audit.cjs
       - name: Audit multilingual SEO, sitemap, canonicals and JSON-LD
