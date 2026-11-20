@@ -9,8 +9,15 @@ for(const [code,item] of Object.entries(data.airports)){
  assert.ok(/^[A-Z]{3}$/.test(code),'IATA code metadata');
  for(const k of ['official','services','transport','lostProperty','baggage','arrivals','departures'])if(item[k])found.add(item[k]);
 }
+// Also check 28 existing official airline-directory links.
+const html=fs.readFileSync('index.html','utf8'),at=html.indexOf('const airlineDirectory=[');
+const end=html.indexOf('];',at);
+assert.ok(at>=0&&end>at,'official airline directory present');
+const airlineUrls=[...html.slice(at,end).matchAll(/\{code:'([A-Z0-9]{2})',name:'[^']+',url:'(https:\/\/[^']+)'/g)];
+assert.equal(airlineUrls.length,28,'expected 28 official airline pages');
+for(const entry of airlineUrls)found.add(entry[2]);
 const urls=[...found].sort();
-const allowedHosts=new Set(['www.puntacanainternationalairport.com','aeropuertocibao.com.do','www.romanaairport.com','aerodom.com','eticket.migracion.gob.do','www.aduanas.gob.do']);
+const allowedHosts=new Set(["www.puntacanainternationalairport.com","aeropuertocibao.com.do","www.romanaairport.com","aerodom.com","eticket.migracion.gob.do","www.aduanas.gob.do","www.condor.com","www.jetblue.com","www.iberia.com","www.aa.com","www.aircanada.com","www.arajet.com","www.copaair.com","www.delta.com","www.united.com","www.airtransat.com","www.aireuropa.com","www.discover-airlines.com","www.avianca.com","www.airfrance.com","www.britishairways.com","www.flyfrontier.com","www.southwest.com","www.westjet.com","www.spirit.com","www.aerolineas.com.ar","www.aeromexico.com","www.latamairlines.com","www.w2fly.es","www.iberojet.com","www.wingo.com","www.skyairline.com","www.voegol.com.br","www.suncountry.com"]);
 for(const url of urls)assert.ok(allowedHosts.has(new URL(url).hostname),'Only vetted operator/authority hosts: '+url);
 async function probe(url){
  for(let attempt=0;attempt<2;attempt++){
