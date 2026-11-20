@@ -48,6 +48,7 @@ jobs:
           assert 'id="travel-assist"' in s and 'id="travelAssistAirport"' in s and 'function renderTravelAssist()' in s, 'DEPLOYMENT STALE: new practical travel guide missing'
           assert 'id="airport-deep-guide"' in s and 'function renderAirportDeepGuide(code)' in s, 'DEPLOYMENT STALE: service and accessibility detail cards missing'
           assert 'id="airport-compare"' in s and 'id="compareSearch"' in s and 'id="compareFilter"' in s, 'DEPLOYMENT STALE: airport comparison missing'
+          assert 'id="airport-orientation"' in s and 'function airportGuidePath(code)' in s, 'DEPLOYMENT STALE: orientation and airport guide routes missing'
           assert 'id="passenger-hub"' in s and 'id="passenger-checklist"' in s, 'DEPLOYMENT STALE: traveler checklists missing'
           assert 'id="journey-wizard"' in s and 'id="journeyAirport"' in s and 'id="journeyStage"' in s, 'DEPLOYMENT STALE: integrated journey assistant missing'
           assert 'function renderJourneyAssistant()' in s and 'id="journey-airline-source"' in s, 'DEPLOYMENT STALE: linked official airline journey source missing'
@@ -98,34 +99,53 @@ jobs:
             sleep 8
           done
           curl --fail --location --silent --show-error --max-time 15 "https://vuelosrd.pages.dev/robots.txt" | grep -q 'User-agent'
-      - name: Verify canonical language pages and XML sitemap on Cloudflare
+      - name: Verify 40 canonical URLs and all 35 airport pages on Cloudflare
         shell: bash
         run: |
           set -euo pipefail
-          curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --max-time 20 "https://vuelosrd.pages.dev/sitemap.xml" -o /tmp/vuelosrd-sitemap.xml
+          base="https://vuelosrd.pages.dev"
+          curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --max-time 20 "$base/sitemap.xml" -o /tmp/vuelosrd-sitemap.xml
           for lang in en de fr ht; do
-            curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --max-time 20 "https://vuelosrd.pages.dev/$lang/" -o "/tmp/vuelosrd-$lang.html"
+            curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --max-time 20 "$base/$lang/" -o "/tmp/vuelosrd-$lang.html"
+          done
+          for code in puj sdq sti pop lrm azs jbq; do
+            for lang in es en de fr ht; do
+              if [[ "$lang" == es ]]; then url="$base/airports/$code/"; else url="$base/$lang/airports/$code/"; fi
+              curl --fail --location --silent --show-error --retry 3 --retry-delay 2 --max-time 20 "$url" -o "/tmp/vuelosrd-airport-$code-$lang.html"
+            done
           done
           python3 - <<'PY'
           from pathlib import Path
           from html.parser import HTMLParser
           from xml.etree import ElementTree as ET
+          import json,re
           base='https://vuelosrd.pages.dev/'
-          locales=('es','en','de','fr','ht')
+          langs=('es','en','de','fr','ht')
+          codes=('puj','sdq','sti','pop','lrm','azs','jbq')
+          uri=lambda lang,code=None: base+('' if lang=='es' else lang+'/')+('airports/'+code+'/' if code else '')
           ns={'s':'http://www.sitemaps.org/schemas/sitemap/0.9'}
           root=ET.fromstring(Path('/tmp/vuelosrd-sitemap.xml').read_bytes())
-          urls=[elem.text for elem in root.findall('.//s:loc',ns)]
-          expected=[base]+[base+x+'/' for x in ('en','de','fr','ht')]
-          assert set(urls)==set(expected),f'Cloudflare sitemap URL mismatch: {urls}'
+          urls=[e.text for e in root.findall('.//s:loc',ns)]
+          expected=[uri(lang) for lang in langs]+[uri(lang,code) for code in codes for lang in langs]
+          assert len(urls)==40 and set(urls)==set(expected),f'Cloudflare sitemap URLs wrong: {len(urls)}'
           for lang in ('en','de','fr','ht'):
               html=Path(f'/tmp/vuelosrd-{lang}.html').read_text(encoding='utf-8')
               HTMLParser().feed(html)
-              assert '<html lang="'+lang+'">' in html, 'Wrong language content: '+lang
-              assert '<link rel="canonical" href="'+base+lang+'/">' in html, 'Canonical absent: '+lang
-              assert '<script type="application/ld+json">' in html, 'JSON-LD missing: '+lang
-              for alternate in locales:
-                  target=base if alternate=='es' else base+alternate+'/'
-                  assert 'hreflang="'+alternate+'" href="'+target+'"' in html, 'Language backlink missing: '+lang+' -> '+alternate
-          print('Cloudflare published five canonical pages and reciprocal hreflang sitemap.')
+              assert '<html lang="'+lang+'">' in html, 'Wrong hub language '+lang
+              assert '<link rel="canonical" href="'+uri(lang)+'">' in html,'Hub canonical absent: '+lang
+              for code in codes:
+                  assert 'href="/'+lang+'/airports/'+code+'/"' in html,'Hub guide link missing: '+lang+' '+code
+          for code in codes:
+              for lang in langs:
+                  html=Path(f'/tmp/vuelosrd-airport-{code}-{lang}.html').read_text(encoding='utf-8')
+                  HTMLParser().feed(html)
+                  url=uri(lang,code)
+                  assert '<html lang="'+lang+'">' in html, 'Wrong guide language '+url
+                  assert '<link rel="canonical" href="'+url+'">' in html, 'Guide canonical '+url
+                  match=re.search(r'<script type="application/ld\+json">([^<]+)</script>',html)
+                  assert match and json.loads(match.group(1))['about']['iataCode']==code.upper(),'Airport schema invalid: '+url
+                  assert 'class="source missing"' in html or code in ('puj','sti','lrm'),'Missing-source disclosure: '+url
+                  for alternate in langs:
+                      assert 'hreflang="'+alternate+'" href="'+uri(alternate,code)+'"' in html,'Guide backlink: '+lang+' '+code+' '+alternate
+          print('Cloudflare SEO PASS: 40 sitemap URLs, 35 airport HTML pages, canonical, schema, local links and five-language reciprocity.')
           PY
-
