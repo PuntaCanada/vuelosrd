@@ -704,7 +704,7 @@ function renderAirlines(){
    link.textContent=airline.name+' · '+w.link;
    card.append(head,alert,link);
   }else card.append(head,desc,searchButton,link);if(verificationNotice)card.append(verificationNotice);
-  if(verifiedOfficialAlternatives[airline.url]){
+  if(typeof verifiedOfficialAlternatives!=='undefined'&&verifiedOfficialAlternatives[airline.url]){
    const alt=document.createElement('a');alt.className='source-alternative';alt.href=verifiedOfficialAlternatives[airline.url];
    alt.rel='noopener noreferrer';alt.target='_blank';alt.textContent=(typeof sourceStatusWords==='undefined'?'Official alternative':sourceStatusWords[current].alternate)+' ↗';card.append(alt);
   }
