@@ -10,6 +10,39 @@ const assert = require('node:assert/strict');
   try {
    await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
    await page.locator('#boardRows tr').first().waitFor();
+   // VuelosRD 2.0: a single visible journey workflow, not merely isolated links.
+   const consolePanel=page.locator('#v2-console');
+   assert.equal(await consolePanel.isVisible(),true,'2.0 console visible at '+viewport.width);
+   assert.equal(await page.locator('#v2-airport option').count(),7,'all seven airports in unified trip selector');
+   const consolePosition=await consolePanel.boundingBox(),boardPosition=await page.locator('#flight-board').boundingBox();
+   assert.ok(consolePosition.y<boardPosition.y,'new trip workflow is visibly ahead of demo flight board');
+   await page.locator('#v2-airport').selectOption('STI');
+   assert.equal(await page.locator('#airport').inputValue(),'STI','2.0 airport syncs flight search');
+   assert.equal(await page.locator('#boardAirport').inputValue(),'STI','2.0 airport syncs board');
+   assert.equal(await page.locator('#journeyAirport').inputValue(),'STI','2.0 airport syncs trip assistant');
+   assert.equal(await page.locator('#v2-guide').getAttribute('href'),'/airports/sti/','2.0 links to correct SEO guide');
+   assert.match(await page.locator('#v2-official').getAttribute('href'),/aeropuertocibao.com.do/,'2.0 official operator');
+   await page.locator('#v2-arrival').click();
+   assert.equal(await page.locator('#journeyStage').inputValue(),'arrival','2.0 arrival step drives checklist');
+   assert.equal(await page.locator('#v2-arrival').getAttribute('aria-pressed'),'true','2.0 stage state accessible');
+   await page.locator('#v2-airline-search').fill('arajet');
+   await page.locator('#v2-airline-search').press('Enter');
+   assert.equal(await page.locator('#journeyAirline').inputValue(),'DM','2.0 airline filter selects active carrier');
+   assert.equal(await page.locator('#passengerAirline').inputValue(),'DM','2.0 airline selects baggage helper');
+   assert.match(await page.locator('#v2-airline-link').getAttribute('href'),/arajet.com/,'2.0 exposes official airline website');
+   assert.match(await page.locator('#v2-summary').innerText(),/Arajet/,'2.0 visibly summarizes carrier');
+   await page.locator('#v2-airline-search').fill('Spirit');
+   assert.equal(await page.locator('#v2-airline').locator('option[value="NK"]').count(),0,'ceased operator cannot be selected');
+   await page.locator('#v2-airline-search').fill('');
+   await page.locator('#v2-airline').selectOption('');
+   await page.locator('#v2-departure').click();
+   await page.locator('#v2-airport').selectOption('PUJ');
+   await page.locator('#langMenu summary').click();
+   await page.locator('[data-choose-lang="de"]').click();
+   assert.match(await page.locator('#v2-title').innerText(),/Plane deine Reise/,'2.0 title localized into German');
+   assert.equal(await page.locator('#v2-guide').getAttribute('href'),'/de/airports/puj/','2.0 uses selected language');
+   await page.locator('[data-lang="es"]').click();
+
    assert.match(await page.locator('#boardWarning').innerText(),/DEMO|DEMOSTRA|fictici/i);
    assert.ok((await page.locator('#boardRows tr').count())>0,'demo board rendered');
    // Search is accent-insensitive, has useful live results and synchronizes the flight, board, and journey.
