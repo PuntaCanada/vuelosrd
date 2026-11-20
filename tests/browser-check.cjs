@@ -28,7 +28,21 @@ const {chromium} = require('playwright');
       assert.ok((await guide.locator('.source').first().locator('a').getAttribute('href')).startsWith('https://'),'official source');
       const overflow=await guide.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
       assert.ok(overflow<=2,'public airport page mobile overflow '+path+' '+width);
+      assert.equal(await guide.locator('#quick-travel').count(),1,'published guide quick travel available');
+      assert.equal(await guide.locator('.quick-flight-form input[name="airport"]').inputValue(),code.toUpperCase(),'published form airport');
+      assert.equal(await guide.locator('.quick-flight-form input[name="lang"]').inputValue(),lang,'published form language');
+      assert.equal(await guide.locator('.quick-travel-links a').count(),4,'four guide shortcuts');
+      assert.equal(await guide.locator('#airport-sources').count(),1,'official source anchor resolves');
       if(code==='puj')await guide.screenshot({path:'airlines-airport-seo.png',fullPage:true});
+      if(code==='sti'&&lang==='de'){
+        await guide.locator('#quick-flight-number').fill('DE 1234');
+        await guide.locator('.quick-flight-form button').click();
+        await guide.waitForURL(u=>u.pathname==='/'&&u.searchParams.get('flight')==='DE 1234',{timeout:15000});
+        assert.equal(await guide.locator('html').getAttribute('lang'),'de','published guide search keeps German');
+        assert.equal(await guide.locator('#airport').inputValue(),'STI','published guide search keeps airport');
+        assert.equal(await guide.locator('#flight').inputValue(),'DE1234','published guide search normalizes flight');
+        assert.equal(await guide.locator('#track').getAttribute('aria-disabled'),'false','prepared external flight lookup only');
+      }
       await guide.close();
     }
     // Journey assistant in real system Chrome: airport, airline, stage, external sources and privacy.
