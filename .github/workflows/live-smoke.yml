@@ -53,6 +53,7 @@ jobs:
           assert 'id="journey-wizard"' in s and 'id="journeyAirport"' in s and 'id="journeyStage"' in s, 'DEPLOYMENT STALE: integrated journey assistant missing'
           assert 'function renderJourneyAssistant()' in s and 'id="journey-airline-source"' in s, 'DEPLOYMENT STALE: linked official airline journey source missing'
           assert 'id="mobileGoJourney"' in s and 'id="journey-flight-link"' in s, 'DEPLOYMENT STALE: mobile trip/flight shortcuts missing'
+          assert "inactiveAirlineWords=" in s and "spiritrestructuring.com" in s, 'DEPLOYMENT STALE: verified ceased-Spirit airline status missing'
           assert "journey:'Meine Reise'" in s and 'function prepareAirlineFlight(code)' in s, 'DEPLOYMENT STALE: five-language journey navigation missing'
           assert 'function renderPassengerIssue()' in s and 'const passengerSources=' in s, 'DEPLOYMENT STALE: official baggage source routing missing'
           assert 'romanaairport.com/lost-and-found/' in s and 'puntacanainternationalairport.com/en/airport-services/item/lost-found' in s, 'DEPLOYMENT STALE: official airport lost and found links missing'
@@ -135,6 +136,9 @@ jobs:
               HTMLParser().feed(html)
               assert '<html lang="'+lang+'">' in html, 'Wrong hub language '+lang
               assert '<link rel="canonical" href="'+uri(lang)+'">' in html,'Hub canonical absent: '+lang
+              assert 'class="hub-shortcuts"' in html, 'DEPLOYMENT STALE: localized hub shortcuts missing '+lang
+              for target in ('journey-wizard','airlines','passenger-help-title'):
+                  assert 'href="/?lang='+lang+'#'+target+'"' in html,'Hub quick navigation broken: '+lang+' '+target
               for code in codes:
                   assert 'href="/'+lang+'/airports/'+code+'/"' in html,'Hub guide link missing: '+lang+' '+code
           for code in codes:
