@@ -54,4 +54,16 @@ for(const lang of ['es','en','de','fr','ht']){
  assert.equal(deepWords[lang].sti.length,3,'STI descriptions '+lang);
  assert.equal(deepWords[lang].lrm.length,3,'LRM descriptions '+lang);
 }
+// Comparison uses only the same operator sources already vetted for the detail cards.
+assert.ok(html.includes('id="airport-compare"')&&html.includes('id="compareSearch"')&&html.includes('id="compareFilter"'),'accessible comparison controls');
+assert.ok(html.includes("const airportCompareDetailed=['PUJ','STI','LRM'];"),'verified source group, not inferred airport features');
+const compareBegin=html.indexOf('const airportCompareWords=');
+const compareEnd=html.indexOf(';\nconst airportCompareDetailed=',compareBegin);
+assert.ok(compareBegin>0&&compareEnd>compareBegin,'comparison translations present');
+const compareLocales=JSON.parse(html.slice(compareBegin+'const airportCompareWords='.length,compareEnd));
+for(const lang of ['es','en','de','fr','ht']){
+ assert.equal(compareLocales[lang].length,21,'all comparison labels localized '+lang);
+ assert.ok(compareLocales[lang].every(x=>typeof x==='string'&&x.length>2),'nonempty comparison translations '+lang);
+}
+assert.ok(html.includes("textContent=hasDetails?w[16]:w[15]"),'unverified services clearly labeled');
 console.log('Travel assistant audit OK: seven airports, five translated languages and grounded free source links.');
