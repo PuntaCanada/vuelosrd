@@ -20,6 +20,11 @@ async function scenario(name,statuses,expected,methods){
   [{outcome:'uncertain',status:502},'temporary-server'],
   [{outcome:'uncertain',status:'ENOTFOUND'},'dns-failure'],
   [{outcome:'uncertain',status:'EAI_AGAIN'},'dns-failure'],
+  [{outcome:'uncertain',status:'ENETUNREACH'},'network-error'],
+  [{outcome:'uncertain',status:'CERT_HAS_EXPIRED'},'tls-failure'],
+  [{outcome:'uncertain',status:'ERR_TLS_CERT_ALTNAME_INVALID'},'tls-failure'],
+  [{outcome:'uncertain',status:'AbortError'},'timeout'],
+  [{outcome:'uncertain',status:'ETIMEDOUT'},'timeout'],
   [{outcome:'uncertain',status:'23'},'network-error'],
   [{outcome:'broken',status:404},'confirmed-missing']
  ];
@@ -41,5 +46,5 @@ async function scenario(name,statuses,expected,methods){
  await scenario('503 server failure repeated',[503,503],'uncertain',['HEAD','HEAD']);
  await scenario('503 recovers',[503,200],'ok',['HEAD','HEAD']);
  await scenario('connection error',[new Error('network'),new Error('network')],'uncertain',['HEAD','HEAD']);
- console.log('SOURCE HEALTH UNIT PASS: 11 HTTP/network scenarios plus 9 warning categories and array-map argument regression, including false-404 prevention and safe bot-block classification.');
+ console.log('SOURCE HEALTH UNIT PASS: 11 HTTP/network scenarios plus 14 warning categories and array-map argument regression, including false-404 prevention and safe bot-block classification.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
