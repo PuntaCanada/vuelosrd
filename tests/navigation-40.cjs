@@ -11,7 +11,7 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  let checked=0;
  try{
-  for(const width of [320,1280]){
+  for(const width of [320,390,1280]){
    const page=await browser.newPage({viewport:{width,height:800},reducedMotion:'reduce'});
    try{
     for(const lang of languages){
@@ -66,6 +66,6 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
    }finally{await page.close();}
   }
  }finally{await browser.close();}
- assert.equal(checked,80);
- console.log('CHROME NAVIGATION PASS: 40 pages x desktop/mobile, 35 guide flight handoffs, language links, keyboard focus, source jumps and no horizontal overflow.');
+ assert.equal(checked,120);
+ console.log('CHROME NAVIGATION PASS: 40 pages x three desktop/mobile widths, 35 guide flight handoffs, language links, keyboard focus, source jumps and no horizontal overflow.');
 })().catch(error=>{console.error(error);process.exitCode=1;});
