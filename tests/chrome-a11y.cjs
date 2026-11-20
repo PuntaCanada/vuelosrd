@@ -207,6 +207,22 @@ const assert = require('node:assert/strict');
    assert.ok(official.startsWith('https://'),'official operator source');
    const portal=await page.locator('a.button').first().getAttribute('href');
    assert.ok(portal.includes('airport='+code.toUpperCase()),'deep link opens selected airport');
+   assert.equal(await page.locator('#quick-travel').count(),1,'one guide quick-navigation region');
+   assert.equal(await page.locator('.quick-flight-form input[name="airport"]').inputValue(),code.toUpperCase(),'guide flight form airport');
+   assert.equal(await page.locator('.quick-flight-form input[name="lang"]').inputValue(),lang,'guide flight form language');
+   assert.equal(await page.locator('.quick-travel-links a').count(),4,'journey, baggage, transport and official sources');
+   const link=await page.locator('.quick-travel-links a').nth(1).getAttribute('href');
+   assert.equal(link,'/?lang='+lang+'&airport='+code.toUpperCase()+'#passenger-help-title','localized baggage deep link');
+   assert.equal(await page.locator('#airport-sources').count(),1,'real official-source anchor');
+   if(code==='sti'&&lang==='de'){
+     await page.locator('#quick-flight-number').fill('DE 1234');
+     await page.locator('.quick-flight-form button[type="submit"]').click();
+     await page.waitForURL(url=>url.pathname==='/'&&url.searchParams.get('flight')==='DE 1234',{timeout:10000});
+     assert.equal(await page.locator('html').getAttribute('lang'),'de','guide flight form preserves German');
+     assert.equal(await page.locator('#airport').inputValue(),'STI','guide flight form preserves Cibao airport');
+     assert.equal(await page.locator('#flight').inputValue(),'DE1234','guide flight form normalizes number');
+     assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'false','valid flight search may open external verification');
+   }
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
    assert.ok(overflow<=2,'airport landing page mobile overflow '+code+' '+lang+' '+width+'px: '+overflow);
    if(width<=390){
