@@ -9,6 +9,8 @@ on:
       - 'tests/source-health-unit.cjs'
       - '.github/workflows/source-health.yml'
       - 'data/source-independent-review.json'
+      - 'scripts/publish-source-health.cjs'
+      - 'tests/source-persistence-unit.cjs'
   push:
     branches: [main]
     paths:
@@ -21,7 +23,10 @@ on:
     # Twice weekly at 08:27 UTC (Monday and Thursday); no hourly probing or bypass of rate limits.
     - cron: '27 8 * * 1,4'
 permissions:
-  contents: read
+  contents: write
+concurrency:
+  group: vuelosrd-source-health-main
+  cancel-in-progress: false
 jobs:
   source-health:
     runs-on: ubuntu-latest
@@ -33,5 +38,25 @@ jobs:
           node-version: '24'
       - name: Verify source classification without network
         run: node tests/source-health-unit.cjs
+      - name: Verify persistence and bounded history without network
+        run: node tests/source-persistence-unit.cjs
       - name: Check official airport, customs and immigration links
+        env:
+          VUELOSRD_HEALTH_REPORT: ${{ runner.temp }}/vuelosrd-source-report.json
         run: node tests/source-health.cjs
+      - name: Build dated snapshot and bounded history
+        run: node scripts/publish-source-health.cjs "${{ runner.temp }}/vuelosrd-source-report.json" data/source-health-latest.json data/source-health-history.json
+      - name: Persist actual checks for the public site on main
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/source-health-latest.json data/source-health-history.json
+          if git diff --cached --quiet; then
+            echo "No new verified data to publish"
+            exit 0
+          fi
+          git commit -m "data: publish dated official source-health snapshot [skip ci]"
+          git push origin HEAD:main
+          echo "Source snapshots committed to main; verify Cloudflare deployment separately"
