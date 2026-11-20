@@ -192,6 +192,7 @@ const assert = require('node:assert/strict');
     assert.equal(await page.locator('#mobileBottomNav a').count(),4,'four thumb-friendly mobile navigation destinations');
     await page.locator('#mobileGoJourney').click();
     assert.equal(await page.evaluate(()=>location.hash),'#journey-wizard','mobile journey shortcut navigates to assistant');
+    await page.waitForFunction(()=>document.getElementById('mobileGoJourney').getAttribute('aria-current')==='location',{timeout:10000});
     assert.equal(await page.locator('#mobileGoJourney').getAttribute('aria-current'),'location','mobile destination has current state');
     const overflows=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
     assert.equal(overflows,false,'document has horizontal overflow');
