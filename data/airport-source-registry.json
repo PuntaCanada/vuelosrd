@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-11-20",
+  "notes": "Only official operator or Dominican-government public URLs; specific claims and live schedules are not copied or implied. Missing-specific-link means no verified direct document.",
+  "airports": {
+    "PUJ": {
+      "name": "Punta Cana International Airport",
+      "operator": "Grupo Puntacana",
+      "official": "https://www.puntacanainternationalairport.com/en/",
+      "services": "https://www.puntacanainternationalairport.com/en/airport-services",
+      "transport": "https://www.puntacanainternationalairport.com/en/services/transportations",
+      "lostProperty": "https://www.puntacanainternationalairport.com/en/airport-services/item/lost-found",
+      "baggage": null,
+      "arrivals": null,
+      "departures": null
+    },
+    "SDQ": {
+      "name": "Las Américas International Airport José Francisco Peña Gómez",
+      "operator": "Aerodom / VINCI Airports",
+      "official": "https://aerodom.com/en/airports/santo-domingo-2/",
+      "services": null,
+      "transport": null,
+      "lostProperty": null,
+      "baggage": null,
+      "arrivals": null,
+      "departures": null
+    },
+    "STI": {
+      "name": "Cibao International Airport",
+      "operator": "Aeropuerto Internacional del Cibao",
+      "official": "https://aeropuertocibao.com.do/en/",
+      "services": "https://aeropuertocibao.com.do/en/servicios-a-pasajeros/",
+      "transport": null,
+      "lostProperty": null,
+      "baggage": null,
+      "arrivals": "https://aeropuertocibao.com.do/en/llegadas/",
+      "departures": "https://aeropuertocibao.com.do/en/salidas/"
+    },
+    "POP": {
+      "name": "Gregorio Luperón International Airport",
+      "operator": "Aerodom / VINCI Airports",
+      "official": "https://aerodom.com/en/airports/puerto-plata-2/",
+      "services": null,
+      "transport": null,
+      "lostProperty": null,
+      "baggage": null,
+      "arrivals": null,
+      "departures": null
+    },
+    "LRM": {
+      "name": "La Romana International Airport / Casa de Campo",
+      "operator": "Airport Management Services / Central Romana",
+      "official": "https://www.romanaairport.com/",
+      "services": "https://www.romanaairport.com/service/",
+      "transport": "https://www.romanaairport.com/taxi-services/",
+      "lostProperty": "https://www.romanaairport.com/lost-and-found/",
+      "baggage": "https://www.romanaairport.com/luggage/",
+      "arrivals": null,
+      "departures": null
+    },
+    "AZS": {
+      "name": "El Catey International Airport – Presidente Juan Bosch",
+      "operator": "Aerodom / VINCI Airports",
+      "official": "https://aerodom.com/en/airports/el-catey-samana-2/",
+      "services": null,
+      "transport": null,
+      "lostProperty": null,
+      "baggage": null,
+      "arrivals": null,
+      "departures": null
+    },
+    "JBQ": {
+      "name": "La Isabela International Airport – Doctor Joaquín Balaguer",
+      "operator": "Aerodom / VINCI Airports",
+      "official": "https://aerodom.com/en/airports/el-higuero/",
+      "services": null,
+      "transport": null,
+      "lostProperty": null,
+      "baggage": null,
+      "arrivals": null,
+      "departures": null
+    }
+  }
+}
