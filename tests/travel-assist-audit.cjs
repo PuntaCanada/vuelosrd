@@ -14,6 +14,8 @@ assert.ok(html.includes('https://www.aduanas.gob.do/manual-del-viajero/'),'Domin
 assert.ok(html.includes('https://www.godominicanrepublic.com/travel/getting-around'),'official tourism transfer guidance');
 assert.ok(html.includes('https://www.puntacanainternationalairport.com/en/services/transportations'),'PUJ official transfer guidance');
 assert.ok(html.includes('https://aeropuertocibao.com.do/en/'),'STI official airport website');
+assert.ok(html.includes('https://aeropuertocibao.com.do/llegadas/'),'STI operator arrivals link');
+assert.ok(html.includes('https://aeropuertocibao.com.do/salidas/'),'STI operator departures link');
 assert.ok(html.includes('https://www.romanaairport.com/'),'LRM official airport website');
 for(const code of required)assert.ok(html.includes('<option value="'+code+'">'),'airport selector includes '+code);
 const start=html.indexOf('const travelAssistWords=');
