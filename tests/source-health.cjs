@@ -47,6 +47,9 @@ async function probe(url,fetcher=fetch){
    if(response.body)await response.body.cancel();
    if([404,410].includes(response.status)){if(attempt===0)continue;return {url,status:response.status,outcome:'broken'};}
    if(response.ok||response.status===206)return {url,status:response.status,outcome:'ok'};
+   // A 5xx response is inconclusive. One repeated probe distinguishes a brief
+   // upstream hiccup from a persistent temporary failure without deleting URLs.
+   if(response.status>=500&&response.status<=599&&attempt===0)continue;
    return {url,status:response.status,outcome:'uncertain'};
   }catch(e){
    if(attempt===0)continue;
