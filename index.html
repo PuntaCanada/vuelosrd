@@ -570,7 +570,7 @@ html{scroll-padding-top:18px}#flight-board,#flightTitle,#airlines{scroll-margin-
 </nav>
 <nav class="seo-language-links" aria-label="Otras versiones de idiomas"><a href="/" lang="es">Español</a><a href="/en/" lang="en">English</a><a href="/de/" lang="de">Deutsch</a><a href="/fr/" lang="fr">Français</a><a href="/ht/" lang="ht">Kreyòl</a></nav>
 <footer class="footer"><div class="wrap flex"><span>© <span id="year"></span> VuelosRD · <span data-i="pilot">Proyecto piloto independiente</span></span><span data-i="nonofficial">No afiliado a aeropuertos, aerolíneas ni proveedores de seguimiento.</span></div><div class="shared-project-contact" style="padding:12px 16px;max-width:1100px;margin:8px auto;font-size:14px;line-height:1.5;text-align:center;"><span>Contacto general compartido para consultas sobre VuelosRD (vorübergehend / temporal): </span><a style="color:inherit;text-decoration:underline;text-underline-offset:3px;" href="mailto:comparanetrd@outlook.com?subject=vuelosrd%20-%20Kontakt%20%2F%20Contacto">comparanetrd@outlook.com</a></div></footer>
-<script src="/js/source-monitor.js"></script>
+<script src="/js/source-monitor.js" defer></script>
 <script>
 'use strict';
 const airports=[['PUJ','Punta Cana'],['SDQ','Santo Domingo / Las Américas'],['STI','Santiago / Cibao'],['POP','Puerto Plata'],['LRM','La Romana'],['AZS','Samaná / El Catey'],['JBQ','La Isabela / El Higüero']];
@@ -678,8 +678,8 @@ function renderAirlines(){
   if(airline.logo){const img=document.createElement('img');img.alt=airline.name+' logo';img.width=120;img.height=64;img.loading='lazy';img.decoding='async';img.fetchPriority='low';img.referrerPolicy='no-referrer';img.addEventListener('load',()=>{if(!img.naturalWidth){img.hidden=true;logoFrame.classList.add('is-fallback');}});img.addEventListener('error',()=>{img.hidden=true;logoFrame.classList.add('is-fallback');});logoFrame.append(img);img.src=airline.logo;}
   const name=document.createElement('div');name.className='airline-card-heading';const h=document.createElement('h3');h.textContent=airline.name;const label=document.createElement('div');label.className='airline-code';label.textContent=airline.code;name.append(h,label);head.append(logoFrame,name);
   const verification=airlineSourceReviews.find(r=>r.url===airline.url);
-  const currentWarning=sourceLatest?.warnings?.find(r=>r.url===airline.url);
-  const currentStatus=sourceLatest&&sourceCheckRecent(sourceLatest.checkedAt)&&sourceLatest.monitorStatus!=='network-unavailable';
+  const currentWarning=typeof sourceLatest==='undefined'?null:sourceLatest?.warnings?.find(r=>r.url===airline.url);
+  const currentStatus=typeof sourceLatest!=='undefined'&&sourceLatest&&sourceCheckRecent(sourceLatest.checkedAt)&&sourceLatest.monitorStatus!=='network-unavailable';
 
   const sourceWords=airlineCheckWords[current];
   const verificationNotice=verification?document.createElement('p'):null;
@@ -706,7 +706,7 @@ function renderAirlines(){
   }else card.append(head,desc,searchButton,link);if(verificationNotice)card.append(verificationNotice);
   if(verifiedOfficialAlternatives[airline.url]){
    const alt=document.createElement('a');alt.className='source-alternative';alt.href=verifiedOfficialAlternatives[airline.url];
-   alt.rel='noopener noreferrer';alt.target='_blank';alt.textContent=sourceStatusWords[current].alternate+' ↗';card.append(alt);
+   alt.rel='noopener noreferrer';alt.target='_blank';alt.textContent=(typeof sourceStatusWords==='undefined'?'Official alternative':sourceStatusWords[current].alternate)+' ↗';card.append(alt);
   }
   if(airline.credit){const credit=document.createElement('a');credit.className='airline-credit';credit.href=airline.credit;credit.target='_blank';credit.rel='noopener noreferrer';credit.textContent=logoWords.source;card.append(credit);}root.append(card);
  }
@@ -1362,7 +1362,7 @@ function renderFlightStatus(){
  if(airline){const words=airlineWords[current];$('statusAirlineHint').textContent=words.hint.replace('{code}',airline.code).replace('{name}',airline.name);$('statusAirlineLink').href=airline.url;$('statusAirlineLink').textContent=words.match;}
  $('statusTrackLink').setAttribute('aria-disabled',String(!valid));if(valid){$('statusTrackLink').href='https://www.flightradar24.com/data/flights/'+encodeURIComponent(raw.toLowerCase());}else{$('statusTrackLink').removeAttribute('href');}
 }
-function language(v){current=I[v]?v:'es';document.documentElement.lang=current;document.querySelector('.skip-link').textContent=skipLinkText[current];for(const el of document.querySelectorAll('[data-i]'))el.textContent=I[current][el.dataset.i];for(const el of document.querySelectorAll('.lang')){const active=el.dataset.lang===current;el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}const activeOther=$('activeOther');activeOther.replaceChildren();if(['de','fr','ht'].includes(current)){const icon=document.querySelector('[data-choose-lang="'+current+'"] .flag-icon').cloneNode(true);activeOther.append(icon,document.createTextNode(' '+current.toUpperCase()));}else activeOther.textContent='+';$('goCompare').textContent=airportCompareWords[current][0];$('goPassenger').textContent=passengerWords[current].title;const navigation=navI[current];['goBoard','goStatus','goAirports','goDetail','goAirlines','goTools'].forEach((id,i)=>$(id).textContent=navigation[i]);$('shareFlight').textContent=shareI[current][0];$('shareMsg').textContent='';renderAirportOrientation();cards();details();renderAirportCompare();renderExtras();renderBoard();renderAirlines();renderFlightAirlineShortcuts();renderAirportQuickSearch();renderV2Console();renderSourceHealthPanel();updateMobileNavigation();renderFlightFAQ();links();renderFlightStatus();try{localStorage.setItem('vuelosrd_lang',current)}catch{};clock();}
+function language(v){current=I[v]?v:'es';document.documentElement.lang=current;document.querySelector('.skip-link').textContent=skipLinkText[current];for(const el of document.querySelectorAll('[data-i]'))el.textContent=I[current][el.dataset.i];for(const el of document.querySelectorAll('.lang')){const active=el.dataset.lang===current;el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}const activeOther=$('activeOther');activeOther.replaceChildren();if(['de','fr','ht'].includes(current)){const icon=document.querySelector('[data-choose-lang="'+current+'"] .flag-icon').cloneNode(true);activeOther.append(icon,document.createTextNode(' '+current.toUpperCase()));}else activeOther.textContent='+';$('goCompare').textContent=airportCompareWords[current][0];$('goPassenger').textContent=passengerWords[current].title;const navigation=navI[current];['goBoard','goStatus','goAirports','goDetail','goAirlines','goTools'].forEach((id,i)=>$(id).textContent=navigation[i]);$('shareFlight').textContent=shareI[current][0];$('shareMsg').textContent='';renderAirportOrientation();cards();details();renderAirportCompare();renderExtras();renderBoard();renderAirlines();renderFlightAirlineShortcuts();renderAirportQuickSearch();renderV2Console();if(typeof renderSourceHealthPanel==='function')renderSourceHealthPanel();updateMobileNavigation();renderFlightFAQ();links();renderFlightStatus();try{localStorage.setItem('vuelosrd_lang',current)}catch{};clock();}
 function clock(){try{const locale=current==='ht'?'fr-HT':current;const formatter=(zone)=>new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());$('clock').textContent=formatter('America/Santo_Domingo');$('boardClock').textContent=formatter('America/Santo_Domingo');const myZone=Intl.DateTimeFormat().resolvedOptions().timeZone;$('homeclock').textContent=myZone&&myZone!=='America/Santo_Domingo'?shareI[current][3]+': '+formatter(myZone):'';}catch{$('clock').textContent='UTC−4';$('homeclock').textContent='';}}
 const skipLinkText={es:'Saltar al tablero de vuelos',en:'Skip to flight board',de:'Zur Flugtafel springen',fr:'Aller au tableau des vols',ht:'Ale nan tablo vòl'};
 for(const btn of document.querySelectorAll('.lang'))btn.addEventListener('click',()=>language(btn.dataset.lang));
@@ -1415,7 +1415,6 @@ const qcountry=(originalLink.searchParams.get('country')||'').toLowerCase();cons
 const qfilter=(originalLink.searchParams.get('filter')||'').trim().slice(0,30);
 if(/^[a-z0-9 _.-]{1,30}$/i.test(qfilter)||/^[\p{L}\p{M}\p{N} _.-]{1,30}$/u.test(qfilter))$('boardFilter').value=qfilter;
 language(I[qlang]?qlang:saved);
-loadSourceHealth();
 if(['de','us','es','ca','do'].includes(qcountry)&&[...$('boardCountry').options].some(o=>o.value===qcountry)){$('boardCountry').value=qcountry;renderBoard();}
 if(['0','1','2'].includes(qstatus)){$('boardStatusFilter').value=qstatus;renderBoard();}
 if(['time-desc','city'].includes(qsort)){$('boardSort').value=qsort;renderBoard();}setInterval(clock,30000);
