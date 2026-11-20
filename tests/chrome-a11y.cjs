@@ -287,7 +287,7 @@ const assert = require('node:assert/strict');
    assert.equal(await page.locator('#airlineCards .airline-inactive-notice').count(),1,'historical status warning shown');
    assert.match(await page.locator('#airlineCards .airline-inactive-notice').innerText(),/2026/);
    assert.equal(await page.locator('#airlineCards .airline-start-search').count(),0,'ceased carrier has no new-flight action');
-   assert.match(await page.locator('#airlineCards a[href*="spiritrestructuring.com"]').getAttribute('href'),/spiritrestructuring/);
+   assert.match(await page.locator('#airlineCards a[href*="spiritrestructuring.com"]').first().getAttribute('href'),/spiritrestructuring/);
    await page.locator('#airlineFilter').fill('');
    await page.locator('#flightAirlineQuickFilter').fill('not-an-airline');
    assert.equal(await airlineButtons.count(),0,'empty state');
@@ -371,6 +371,7 @@ const assert = require('node:assert/strict');
      assert.equal(await page.locator('html').getAttribute('lang'),'de','guide flight form preserves German');
      assert.equal(await page.locator('#airport').inputValue(),'STI','guide flight form preserves Cibao airport');
      assert.equal(await page.locator('#flight').inputValue(),'DE1234','guide flight form normalizes number');
+     await page.waitForFunction(()=>document.getElementById('track')?.getAttribute('aria-disabled')==='false',null,{timeout:10000});
      assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'false','valid flight search may open external verification');
    }
   }catch(e){failures.push('Airport guide '+code+' '+lang+': '+e.stack);}
