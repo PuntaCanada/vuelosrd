@@ -101,6 +101,8 @@ jobs:
         run: node tests/passenger-hub-audit.cjs
       - name: Audit practical airport sources and five-language guidance
         run: node tests/travel-assist-audit.cjs
+      - name: Enforce static performance budgets and nonblocking assets
+        run: node tests/performance-budget.cjs
       - name: Audit multilingual SEO, sitemap, canonicals and JSON-LD
         run: node tests/seo-audit.cjs
       - name: Verify required static deployment files
