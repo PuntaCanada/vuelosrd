@@ -1025,6 +1025,38 @@ function renderJourneyAssistant(){
  $('journey-transfer-link').textContent=w.transfer;
  $('journey-baggage-link').textContent=w.baggage;
 }
+// VuelosRD 2.0: One shared journey state for homepage, airport board and baggage helper.
+const v2Words={
+ es:{kicker:'VUELOSRD 2.0 · TU VIAJE',title:'Organiza tu viaje en 3 pasos',lead:'Elige un aeropuerto, una aerolínea y si sales o llegas. Todos los enlaces útiles aparecen aquí.',badge:'Guía gratuita · No hay datos en directo',airport:'01 · Aeropuerto',airline:'02 · Aerolínea',stage:'03 · ¿Qué necesitas?',departure:'↗ Salida',arrival:'↘ Llegada',hint:'Todos los aeropuertos dominicanos disponibles',placeholder:'Filtrar por nombre o código',all:'Todas las aerolíneas',count:'{n} compañías disponibles',empty:'No hay coincidencias',result:'Tus próximos pasos',summary:'{airport} · {stage}{airline}',guide:'Guía del aeropuerto',official:'Web oficial del aeropuerto',airlineLink:'Web oficial de la aerolínea',flight:'Buscar vuelo',checklist:'Lista de viaje',warning:'No son horarios en directo. Confirma vuelos y servicios con los operadores oficiales.'},
+ en:{kicker:'VUELOSRD 2.0 · YOUR TRIP',title:'Plan your trip in 3 steps',lead:'Choose an airport, airline and departure or arrival. Your useful links come together here.',badge:'Free guide · No live flight data',airport:'01 · Airport',airline:'02 · Airline',stage:'03 · What do you need?',departure:'↗ Departure',arrival:'↘ Arrival',hint:'All seven covered Dominican airports',placeholder:'Filter by name or code',all:'Any airline',count:'{n} airlines available',empty:'No matches',result:'Your next steps',summary:'{airport} · {stage}{airline}',guide:'Airport guide',official:'Official airport website',airlineLink:'Official airline website',flight:'Find a flight',checklist:'Travel checklist',warning:'No live schedules are provided. Confirm flights and services with the official operators.'},
+ de:{kicker:'VUELOSRD 2.0 · DEINE REISE',title:'Plane deine Reise in 3 Schritten',lead:'Flughafen, Airline und Ankunft oder Abflug wählen – die passenden Informationen stehen sofort bereit.',badge:'Kostenlos · Keine Live-Flugdaten',airport:'01 · Flughafen',airline:'02 · Airline',stage:'03 · Was benötigst du?',departure:'↗ Abflug',arrival:'↘ Ankunft',hint:'Sieben dominikanische Flughäfen zur Auswahl',placeholder:'Nach Name oder Code filtern',all:'Alle Airlines',count:'{n} Airlines verfügbar',empty:'Keine Treffer',result:'Deine nächsten Schritte',summary:'{airport} · {stage}{airline}',guide:'Flughafenführer',official:'Offizielle Flughafenseite',airlineLink:'Offizielle Airline-Seite',flight:'Flug suchen',checklist:'Reise-Checkliste',warning:'Keine Live-Flugzeiten. Bitte Flüge und Angebote bei den offiziellen Betreibern prüfen.'},
+ fr:{kicker:'VUELOSRD 2.0 · VOTRE VOYAGE',title:'Préparez votre voyage en 3 étapes',lead:'Choisissez un aéroport, une compagnie, puis départ ou arrivée. Retrouvez les liens utiles au même endroit.',badge:'Guide gratuit · Sans vols en direct',airport:'01 · Aéroport',airline:'02 · Compagnie',stage:'03 · Votre besoin',departure:'↗ Départ',arrival:'↘ Arrivée',hint:'Sept aéroports dominicains couverts',placeholder:'Filtrer par nom ou code',all:'Toutes les compagnies',count:'{n} compagnies disponibles',empty:'Aucun résultat',result:'Vos prochaines étapes',summary:'{airport} · {stage}{airline}',guide:"Guide de l'aéroport",official:"Site officiel de l'aéroport",airlineLink:'Site officiel de la compagnie',flight:'Chercher un vol',checklist:'Liste de voyage',warning:'Aucun horaire en direct. Vérifiez les vols et services auprès des exploitants officiels.'},
+ ht:{kicker:'VUELOSRD 2.0 · VWAYAJ OU',title:'Prepare vwayaj ou an 3 etap',lead:'Chwazi ayewopò, konpayi avyon, epi depa oswa arive. Tout lyen itil yo ansanm.',badge:'Gid gratis · Pa gen done vòl an dirèk',airport:'01 · Ayewopò',airline:'02 · Konpayi avyon',stage:'03 · Sa ou bezwen',departure:'↗ Depa',arrival:'↘ Arive',hint:'Sèt ayewopò dominiken disponib',placeholder:'Filtre pa non oswa kòd',all:'Tout konpayi avyon',count:'{n} konpayi disponib',empty:'Pa gen rezilta',result:'Pwochen etap ou',summary:'{airport} · {stage}{airline}',guide:'Gid ayewopò',official:'Sit ofisyèl ayewopò',airlineLink:'Sit ofisyèl konpayi',flight:'Chèche vòl',checklist:'Lis vwayaj',warning:'Pa gen orè vòl an dirèk. Verifye vòl ak sèvis yo ak operatè ofisyèl yo.'}
+};
+function renderV2Console(){
+ const w=v2Words[current],airport=$('journeyAirport').value||$('airport').value;
+ const stage=$('journeyStage').value||'departure',carrier=$('journeyAirline').value;
+ const chosen=airlineDirectory.find(a=>a.code===carrier&&!a.inactive);
+ const labels={'v2-kicker':w.kicker,'v2-title':w.title,'v2-lead':w.lead,'v2-badge':w.badge,'v2-airport-label':w.airport,'v2-airline-label':w.airline,'v2-stage-label':w.stage,'v2-departure':w.departure,'v2-arrival':w.arrival,'v2-airport-hint':w.hint,'v2-result-title':w.result,'v2-warning':w.warning,'v2-guide':w.guide,'v2-official':w.official,'v2-airline-link':w.airlineLink,'v2-flight':w.flight,'v2-checklist':w.checklist};
+ for(const [id,label] of Object.entries(labels))$(id).textContent=label;
+ $('v2-airport').value=airport;
+ $('v2-departure').setAttribute('aria-pressed',String(stage==='departure'));
+ $('v2-arrival').setAttribute('aria-pressed',String(stage==='arrival'));
+ const input=$('v2-airline-search'),select=$('v2-airline'),filter=normalizeSearchText(input.value);
+ input.placeholder=w.placeholder;select.setAttribute('aria-label',w.airline);
+ const found=airlineDirectory.filter(a=>!a.inactive&&normalizeSearchText(a.name+' '+a.code).includes(filter));
+ const old=carrier;select.replaceChildren();
+ const all=document.createElement('option');all.value='';all.textContent=w.all;select.append(all);
+ for(const a of found){const o=document.createElement('option');o.value=a.code;o.textContent=a.name+' ('+a.code+')';select.append(o)}
+ if(old&&found.some(a=>a.code===old))select.value=old;else select.value='';
+ $('v2-airline-count').textContent=(found.length?w.count.replace('{n}',String(found.length)):w.empty);
+ const airportName=(airports.find(a=>a[0]===airport)||airports[0])[1];
+ $('v2-summary').textContent=w.summary.replace('{airport}',airport+' · '+airportName).replace('{stage}',stage==='departure'?w.departure:w.arrival).replace('{airline}',chosen?' · '+chosen.name:'');
+ $('v2-guide').href=airportGuidePath(airport);
+ $('v2-official').href=airportInfo[airport].url;
+ $('v2-airline-link').hidden=!chosen;
+ if(chosen)$('v2-airline-link').href=chosen.url;else $('v2-airline-link').removeAttribute('href');
+}
 function chooseJourneyAirport(code){
  if(!airports.some(a=>a[0]===code))return;
  $('journeyAirport').value=code;$('airport').value=code;$('boardAirport').value=code;
