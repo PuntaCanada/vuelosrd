@@ -18,6 +18,25 @@ const assert=require('node:assert/strict');
     assert.equal(await page.locator('#boardWarning').isVisible(),true,'fictional board clearly disclosed');
     // Published main must include the prior de7c6d6 navigation and 34663a36 safety changes.
     assert.equal(await page.locator('#journey-wizard').count(),1,'published five-language assistant');
+    // Independent release verification: real Cloudflare page, not checked-out PR source.
+    // The new VuelosRD 2.0 console first appears in main commit 66dca01a.
+    await page.locator('#v2-console').waitFor({timeout:8000});
+    assert.equal(await page.locator('#v2-console').isVisible(),true,'66dca01a dashboard actually served by Cloudflare');
+    assert.equal(await page.locator('#v2-airport option').count(),7,'66dca01a seven-airport selector published');
+    await page.locator('#v2-airport').selectOption('STI');
+    assert.equal(await page.locator('#journeyAirport').inputValue(),'STI','published 2.0 console syncs journey airport');
+    assert.equal(await page.locator('#v2-guide').getAttribute('href'),'/airports/sti/','published 2.0 links correct SEO page');
+    await page.locator('#v2-arrival').click();
+    assert.equal(await page.locator('#journeyStage').inputValue(),'arrival','published 2.0 stage selection works');
+    await page.locator('#v2-airline-search').fill('Arajet');
+    await page.locator('#v2-airline-search').press('Enter');
+    assert.equal(await page.locator('#journeyAirline').inputValue(),'DM','published 2.0 integrates active airline');
+    assert.equal(await page.locator('#v2-airline-link').isVisible(),true,'published 2.0 shows official airline source');
+    await page.locator('#v2-airline-search').fill('');
+    await page.locator('#v2-airline').selectOption('');
+    await page.locator('#v2-departure').click();
+    await page.locator('#v2-airport').selectOption('PUJ');
+
     // Verify that the independently published d8e0d747 release really supports the airport finder.
     assert.equal(await page.locator('#airportQuickFilter').isVisible(),true,'prior d8e0d747 airport search actually published');
     await page.locator('#airportQuickFilter').fill('samana');
