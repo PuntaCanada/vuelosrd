@@ -1024,6 +1024,7 @@ function renderJourneyAssistant(){
  $('journey-checklist-link').textContent=w.checklist;
  $('journey-transfer-link').textContent=w.transfer;
  $('journey-baggage-link').textContent=w.baggage;
+ renderV2Console();
 }
 // VuelosRD 2.0: One shared journey state for homepage, airport board and baggage helper.
 const v2Words={
@@ -1322,13 +1323,29 @@ function renderFlightStatus(){
  if(airline){const words=airlineWords[current];$('statusAirlineHint').textContent=words.hint.replace('{code}',airline.code).replace('{name}',airline.name);$('statusAirlineLink').href=airline.url;$('statusAirlineLink').textContent=words.match;}
  $('statusTrackLink').setAttribute('aria-disabled',String(!valid));if(valid){$('statusTrackLink').href='https://www.flightradar24.com/data/flights/'+encodeURIComponent(raw.toLowerCase());}else{$('statusTrackLink').removeAttribute('href');}
 }
-function language(v){current=I[v]?v:'es';document.documentElement.lang=current;document.querySelector('.skip-link').textContent=skipLinkText[current];for(const el of document.querySelectorAll('[data-i]'))el.textContent=I[current][el.dataset.i];for(const el of document.querySelectorAll('.lang')){const active=el.dataset.lang===current;el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}const activeOther=$('activeOther');activeOther.replaceChildren();if(['de','fr','ht'].includes(current)){const icon=document.querySelector('[data-choose-lang="'+current+'"] .flag-icon').cloneNode(true);activeOther.append(icon,document.createTextNode(' '+current.toUpperCase()));}else activeOther.textContent='+';$('goCompare').textContent=airportCompareWords[current][0];$('goPassenger').textContent=passengerWords[current].title;const navigation=navI[current];['goBoard','goStatus','goAirports','goDetail','goAirlines','goTools'].forEach((id,i)=>$(id).textContent=navigation[i]);$('shareFlight').textContent=shareI[current][0];$('shareMsg').textContent='';renderAirportOrientation();cards();details();renderAirportCompare();renderExtras();renderBoard();renderAirlines();renderFlightAirlineShortcuts();renderAirportQuickSearch();updateMobileNavigation();renderFlightFAQ();links();renderFlightStatus();try{localStorage.setItem('vuelosrd_lang',current)}catch{};clock();}
+function language(v){current=I[v]?v:'es';document.documentElement.lang=current;document.querySelector('.skip-link').textContent=skipLinkText[current];for(const el of document.querySelectorAll('[data-i]'))el.textContent=I[current][el.dataset.i];for(const el of document.querySelectorAll('.lang')){const active=el.dataset.lang===current;el.classList.toggle('active',active);el.setAttribute('aria-pressed',String(active));}const activeOther=$('activeOther');activeOther.replaceChildren();if(['de','fr','ht'].includes(current)){const icon=document.querySelector('[data-choose-lang="'+current+'"] .flag-icon').cloneNode(true);activeOther.append(icon,document.createTextNode(' '+current.toUpperCase()));}else activeOther.textContent='+';$('goCompare').textContent=airportCompareWords[current][0];$('goPassenger').textContent=passengerWords[current].title;const navigation=navI[current];['goBoard','goStatus','goAirports','goDetail','goAirlines','goTools'].forEach((id,i)=>$(id).textContent=navigation[i]);$('shareFlight').textContent=shareI[current][0];$('shareMsg').textContent='';renderAirportOrientation();cards();details();renderAirportCompare();renderExtras();renderBoard();renderAirlines();renderFlightAirlineShortcuts();renderAirportQuickSearch();renderV2Console();updateMobileNavigation();renderFlightFAQ();links();renderFlightStatus();try{localStorage.setItem('vuelosrd_lang',current)}catch{};clock();}
 function clock(){try{const locale=current==='ht'?'fr-HT':current;const formatter=(zone)=>new Intl.DateTimeFormat(locale,{timeZone:zone,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());$('clock').textContent=formatter('America/Santo_Domingo');$('boardClock').textContent=formatter('America/Santo_Domingo');const myZone=Intl.DateTimeFormat().resolvedOptions().timeZone;$('homeclock').textContent=myZone&&myZone!=='America/Santo_Domingo'?shareI[current][3]+': '+formatter(myZone):'';}catch{$('clock').textContent='UTC−4';$('homeclock').textContent='';}}
 const skipLinkText={es:'Saltar al tablero de vuelos',en:'Skip to flight board',de:'Zur Flugtafel springen',fr:'Aller au tableau des vols',ht:'Ale nan tablo vòl'};
 for(const btn of document.querySelectorAll('.lang'))btn.addEventListener('click',()=>language(btn.dataset.lang));
 for(const button of document.querySelectorAll('[data-choose-lang]'))button.addEventListener('click',()=>{language(button.dataset.chooseLang);$('langMenu').open=false;});document.addEventListener('click',e=>{if(!$('langMenu').contains(e.target))$('langMenu').open=false;});
 $('compareSearch').addEventListener('input',renderAirportCompare);$('compareFilter').addEventListener('change',renderAirportCompare);$('compare-reset').addEventListener('click',()=>{$('compareSearch').value='';$('compareFilter').value='all';renderAirportCompare();$('compareSearch').focus();});$('journeyAirport').addEventListener('change',()=>chooseJourneyAirport($('journeyAirport').value));
 $('journey-flight-link').addEventListener('click',e=>{e.preventDefault();const code=$('journeyAirline').value;if(airlineDirectory.some(a=>a.code===code)){prepareAirlineFlight(code);}else{$('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('flight').focus({preventScroll:true});}history.replaceState(null,'','#flightTitle');});
+// Home console controls drive the existing board, passenger checklist and official-source routing.
+$('v2-airport').addEventListener('change',()=>chooseJourneyAirport($('v2-airport').value));
+for(const btn of document.querySelectorAll('#v2-console [data-stage]'))btn.addEventListener('click',()=>chooseJourneyStage(btn.dataset.stage));
+$('v2-airline-search').addEventListener('input',renderV2Console);
+$('v2-airline-search').addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&event.currentTarget.value){event.preventDefault();event.currentTarget.value='';renderV2Console();return;}
+ if(event.key==='Enter'){const q=normalizeSearchText(event.currentTarget.value);const found=airlineDirectory.filter(a=>!a.inactive&&normalizeSearchText(a.name+' '+a.code).includes(q));if(q&&found.length===1){event.preventDefault();$('v2-airline').value=found[0].code;$('journeyAirline').value=found[0].code;$('passengerAirline').value=found[0].code;renderPassengerHub();$('v2-airline').focus();}}
+});
+$('v2-airline').addEventListener('change',()=>{$('journeyAirline').value=$('v2-airline').value;$('passengerAirline').value=$('v2-airline').value;renderPassengerHub();});
+$('v2-flight').addEventListener('click',e=>{
+ e.preventDefault();const code=$('journeyAirline').value;
+ if(airlineDirectory.some(a=>a.code===code&&!a.inactive))prepareAirlineFlight(code);
+ else{$('flight').scrollIntoView({block:'center',behavior:'auto'});$('flight').focus({preventScroll:true});}
+ history.replaceState(null,'','#flightTitle');
+});
+$('v2-checklist').addEventListener('click',()=>chooseJourneyStage($('journeyStage').value));
 $('journeyAirline').addEventListener('change',()=>{const code=$('journeyAirline').value;$('passengerAirline').value=code;renderPassengerHub();});
 $('journeyStage').addEventListener('change',()=>chooseJourneyStage($('journeyStage').value));
 $('journey-checklist-link').addEventListener('click',()=>{chooseJourneyStage($('journeyStage').value);});
