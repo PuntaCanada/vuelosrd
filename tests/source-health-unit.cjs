@@ -38,7 +38,8 @@ async function scenario(name,statuses,expected,methods){
  await scenario('403 bot block',[403,403],'uncertain',['HEAD','GET']);
  await scenario('401 access denied',[401],'uncertain',['HEAD']);
  await scenario('429 throttling',[429],'uncertain',['HEAD']);
- await scenario('503 server failure',[503],'uncertain',['HEAD']);
+ await scenario('503 server failure repeated',[503,503],'uncertain',['HEAD','HEAD']);
+ await scenario('503 recovers',[503,200],'ok',['HEAD','HEAD']);
  await scenario('connection error',[new Error('network'),new Error('network')],'uncertain',['HEAD','HEAD']);
- console.log('SOURCE HEALTH UNIT PASS: 10 HTTP/network scenarios plus 9 warning categories and array-map argument regression, including false-404 prevention and safe bot-block classification.');
+ console.log('SOURCE HEALTH UNIT PASS: 11 HTTP/network scenarios plus 9 warning categories and array-map argument regression, including false-404 prevention and safe bot-block classification.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
