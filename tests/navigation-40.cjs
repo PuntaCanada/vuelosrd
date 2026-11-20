@@ -65,7 +65,23 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
     }
    }finally{await page.close();}
   }
+  // Follow a real guide flight form through to the interactive assistant in all five languages.
+  const handoff=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});
+  try{
+   for(const [lang,code] of [['es','puj'],['en','sdq'],['de','sti'],['fr','pop'],['ht','lrm']]){
+    await handoff.goto(site+path(lang,code),{waitUntil:'domcontentloaded'});
+    await handoff.locator('#quick-flight-number').fill('DE1234');
+    await Promise.all([handoff.waitForURL(u=>u.pathname==='/'&&u.searchParams.has('flight')),handoff.locator('.quick-flight-form button').click()]);
+    const result=new URL(handoff.url());
+    assert.equal(result.searchParams.get('lang'),lang,'flight handoff language');
+    assert.equal(result.searchParams.get('airport'),code.toUpperCase(),'flight handoff airport');
+    assert.equal(result.searchParams.get('flight'),'DE1234','flight number preserved');
+    assert.equal(await handoff.locator('#flight').inputValue(),'DE1234','interactive flight input populated');
+    assert.equal(await handoff.locator('#airport').inputValue(),code.toUpperCase(),'interactive airport synchronized');
+    assert.equal(await handoff.locator('#track').getAttribute('aria-disabled'),'false','only valid flight numbers enable external lookup');
+   }
+  }finally{await handoff.close();}
  }finally{await browser.close();}
  assert.equal(checked,120);
- console.log('CHROME NAVIGATION PASS: 40 pages x three desktop/mobile widths, 35 guide flight handoffs, language links, keyboard focus, source jumps and no horizontal overflow.');
+ console.log('CHROME NAVIGATION PASS: 40 pages x three desktop/mobile widths, 35 guide forms plus five real five-language flight handoffs, language links, keyboard focus, source jumps and no horizontal overflow.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

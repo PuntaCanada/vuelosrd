@@ -16,6 +16,25 @@ const assert=require('node:assert/strict');
     await page.locator('#flightAirlineQuickFilter').waitFor({timeout:8000});
     assert.equal(await page.locator('#flightAirlineShortcutButtons [data-airline]').count(),28,'production must contain latest 28-airline directory');
     assert.equal(await page.locator('#boardWarning').isVisible(),true,'fictional board clearly disclosed');
+    // Published main must include the prior de7c6d6 navigation and 34663a36 safety changes.
+    assert.equal(await page.locator('#journey-wizard').count(),1,'published five-language assistant');
+    await page.locator('#flightAirlineQuickFilter').fill('Spirit');
+    const spirit=page.locator('#flightAirlineShortcutButtons [data-airline="NK"]');
+    assert.equal(await spirit.count(),1,'historical Spirit entry published');
+    assert.equal(await spirit.isDisabled(),true,'deployed 34663a36 safety change: Spirit flight search disabled');
+    await page.locator('#flightAirlineQuickFilter').fill('');
+    if(viewport.width>600){
+     for(const lang of ['en','de','fr','ht']){
+      const hub=await browser.newPage({viewport,locale:'es-DO'});
+      try{
+       const url=new URL('/'+lang+'/',base).href;
+       const result=await hub.goto(url,{waitUntil:'domcontentloaded',timeout:20000});
+       assert.equal(result.status(),200,'published language hub '+lang);
+       assert.equal(await hub.locator('nav.hub-shortcuts a').count(),3,'de7c6d6 localized navigation published: '+lang);
+      }finally{await hub.close();}
+     }
+    }
+
     await page.locator('#flightAirlineQuickFilter').fill('Arajet');
     assert.equal(await page.locator('#flightAirlineShortcutButtons [data-airline]').count(),1,'production airline search');
     await page.locator('#flightAirlineShortcutButtons [data-airline]').click();

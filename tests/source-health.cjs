@@ -26,6 +26,16 @@ for(const entry of airlineUrls)register(entry[2],entry[1]+' airline / official w
 const urls=[...found].sort();
 const allowedHosts=new Set(["www.puntacanainternationalairport.com","aeropuertocibao.com.do","www.romanaairport.com","aerodom.com","eticket.migracion.gob.do","www.aduanas.gob.do","www.condor.com","www.jetblue.com","www.iberia.com","www.aa.com","www.aircanada.com","www.arajet.com","www.copaair.com","www.delta.com","www.united.com","www.airtransat.com","www.aireuropa.com","www.discover-airlines.com","www.avianca.com","www.airfrance.com","www.britishairways.com","www.flyfrontier.com","www.southwest.com","www.westjet.com","www.spiritrestructuring.com","www.aerolineas.com.ar","www.aeromexico.com","www.latamairlines.com","www.w2fly.es","www.iberojet.com","www.wingo.com","www.skyairline.com","www.voegol.com.br","www.suncountry.com"]);
 for(const url of urls)assert.ok(allowedHosts.has(new URL(url).hostname),'Only vetted operator/authority hosts: '+url);
+// Classifications describe automated checks, not whether a visitor can open a page.
+function classifyWarning(x){
+ const status=x.status,code=String(status).toUpperCase();
+ if(x.outcome==='broken')return {category:'confirmed-missing',reason:'HTTP 404/410 confirmed by repeated GET requests'};
+ if([401,403,429].includes(status))return {category:'access-restricted',reason:'Automated request denied or rate limited; bot protection possible'};
+ if(typeof status==='number'&&status>=500)return {category:'temporary-server',reason:'HTTP '+status+' from upstream; transient service or gateway failure possible'};
+ if(['ENOTFOUND','EAI_AGAIN','ENODATA','ENETUNREACH'].includes(code))return {category:'dns-failure',reason:'DNS name resolution or network routing failed in the runner; not proof of a dead site'};
+ if(typeof status!=='number')return {category:'network-error',reason:'Network, TLS, timeout or transport error in automated runner; review separately'};
+ return {category:'other-http',reason:'Inconclusive HTTP status '+status};
+}
 async function probe(url,fetcher=fetch){
  for(let attempt=0;attempt<2;attempt++){
   try{
@@ -57,24 +67,22 @@ async function run(){
  if(monitorUnavailable)console.error('MONITOR ENVIRONMENT FAILURE: all external requests failed at the network layer; NO official URL was verified. Check runner DNS/proxy/egress before interpreting source warnings.');
  const checkedAt=new Date().toISOString(),lastReviewed=data.verifiedOn||'not documented';
  const ok=results.length-broken-unknown;
- const reasonFor=x=>{
-  if(x.outcome==='broken')return 'repeated HTTP 404/410 after GET confirmation';
-  if([401,403,429].includes(x.status))return 'access denied or rate limited (possible bot protection)';
-  if(typeof x.status==='number')return 'HTTP response inconclusive (temporary/server-side)';
-  return 'connection, timeout or TLS/network error (inconclusive)';
- };
  const warning=results.filter(x=>x.outcome!=='ok').map(x=>({
-  ...x,reason:reasonFor(x),usedBy:[...(origins.get(x.url)||[])]
+  ...x,...classifyWarning(x),usedBy:[...(origins.get(x.url)||[])]
  }));
+ const warningCategories=Object.fromEntries(
+  ['access-restricted','temporary-server','dns-failure','network-error','confirmed-missing','other-http']
+  .map(category=>[category,warning.filter(w=>w.category===category).length])
+ );
  const report={
   schemaVersion:1,checkedAt,sourceCatalogLastReviewed:lastReviewed,monitorStatus:monitorUnavailable?'network-unavailable':'partial-or-complete',
-  total:urls.length,ok,uncertain:unknown,broken,
+  total:urls.length,ok,uncertain:unknown,broken,warningCategories,
   limitations:'Automated 403/401/429/timeout responses do not prove a broken URL; 200 confirms HTTP reachability only, not accuracy of travel content.',
   warnings:warning
  };
  const summaryPath=process.env.GITHUB_STEP_SUMMARY;
  if(summaryPath){
-  const rows=warning.map(x=>'| '+x.outcome.toUpperCase()+' | '+String(x.status).replace(/\\|/g,'/')+' | '+x.reason+' | '+x.usedBy.join(', ').replace(/\\|/g,'/')+' | '+x.url.replace(/\\|/g,'%7C')+' |');
+  const rows=warning.map(x=>'| '+x.outcome.toUpperCase()+' | '+String(x.status).replace(/\\|/g,'/')+' | '+x.category+' | '+x.reason+' | '+x.usedBy.join(', ').replace(/\\|/g,'/')+' | '+x.url.replace(/\\|/g,'%7C')+' |');
   const markdown=[
    '## VuelosRD official link health',
    '',
@@ -84,9 +92,11 @@ async function run(){
    '',
    'Source catalog last human-reviewed: '+lastReviewed+'; automated run: '+checkedAt,
    '',
+   '**Warning categories (automated; not verified dead links):** '+Object.entries(warningCategories).map(([k,v])=>k+': '+v).join(' · '),
+   '',
    '**Monitor status:** '+(monitorUnavailable?'NETWORK UNAVAILABLE — no links verified; check runner network/proxy.':'Checks completed; ambiguous responses remain unverified.'),
    '',
-   ...(warning.length?['| Outcome | HTTP / error | Interpretation | Used by | URL |','|---|---|---|---|---|',...rows]:['No URL warnings.']),
+   ...(warning.length?['| Outcome | HTTP / error | Category | Interpretation | Used by | URL |','|---|---|---|---|---|---|',...rows]:['No URL warnings.']),
    '',
    '**Interpretation:** 401/403/429 and network errors may indicate bot blocking. Manually investigate uncertain results; a successful HTTP response does not prove current schedules or services.',
    ''
@@ -99,4 +109,4 @@ async function run(){
  if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
 }
 if(require.main===module)run().catch(e=>{console.error(e);process.exitCode=1});
-module.exports={probe,probeBatch};
+module.exports={probe,probeBatch,classifyWarning};
