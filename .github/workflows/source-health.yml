@@ -1,6 +1,12 @@
 name: Official airport source health
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'data/airport-source-registry.json'
+      - 'tests/source-health.cjs'
+      - 'tests/source-health-unit.cjs'
+      - '.github/workflows/source-health.yml'
   push:
     branches: [main]
     paths:
@@ -20,5 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Verify source classification without network
+        run: node tests/source-health-unit.cjs
       - name: Check official airport, customs and immigration links
         run: node tests/source-health.cjs
