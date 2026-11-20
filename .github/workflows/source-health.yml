@@ -8,6 +8,7 @@ on:
       - 'tests/source-health.cjs'
       - 'tests/source-health-unit.cjs'
       - '.github/workflows/source-health.yml'
+      - 'data/source-independent-review.json'
   push:
     branches: [main]
     paths:
@@ -15,8 +16,10 @@ on:
       - 'index.html'
       - 'tests/source-health.cjs'
       - '.github/workflows/source-health.yml'
+      - 'data/source-independent-review.json'
   schedule:
-    - cron: '27 8 * * 1'
+    # Twice weekly at 08:27 UTC (Monday and Thursday); no hourly probing or bypass of rate limits.
+    - cron: '27 8 * * 1,4'
 permissions:
   contents: read
 jobs:
