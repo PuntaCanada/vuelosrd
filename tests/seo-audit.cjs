@@ -78,6 +78,11 @@ assert.equal(registryNames.length,7,'one registry record per airport');
 assert.ok(home.includes('function airportGuidePath(code)'),'internal dynamic airport guide route exists');
 assert.ok(home.includes('id="airport-orientation"'),'first-time visitor orientation exists');
 assert.ok(home.includes('airportSeoLabels[current].guide'),'airport guide is linked from the cards');
+assert.ok(home.includes('id="mobileGoJourney"')&&home.includes('href="#journey-wizard" id="mobileGoJourney"'),'mobile shortcut to travel assistant');
+assert.ok(home.includes('id="journey-flight-link" href="#flightTitle"'),'assistant has flight-search exit');
+assert.ok(home.includes('const mobileNavLabels=')&&home.includes("journey:'Meine Reise'"),'all mobile nav destinations have translations');
+assert.ok(home.includes("function prepareAirlineFlight(code)")&&home.includes("$('passengerAirline').value=code"),'airline choice synchronizes baggage helper');
+
 for(const code of registryNames){
  const pattern=new RegExp('\\n'+code+':\\{desc:\\{[^\\n]+\\},url:\\x27([^\\x27]+)\\x27');
  const found=home.match(pattern);
