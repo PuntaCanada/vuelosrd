@@ -49,6 +49,8 @@ jobs:
           assert 'id="airport-deep-guide"' in s and 'function renderAirportDeepGuide(code)' in s, 'DEPLOYMENT STALE: service and accessibility detail cards missing'
           assert 'id="airport-compare"' in s and 'id="compareSearch"' in s and 'id="compareFilter"' in s, 'DEPLOYMENT STALE: airport comparison missing'
           assert 'id="passenger-hub"' in s and 'id="passenger-checklist"' in s, 'DEPLOYMENT STALE: traveler checklists missing'
+          assert 'id="journey-wizard"' in s and 'id="journeyAirport"' in s and 'id="journeyStage"' in s, 'DEPLOYMENT STALE: integrated journey assistant missing'
+          assert 'function renderJourneyAssistant()' in s and 'id="journey-airline-source"' in s, 'DEPLOYMENT STALE: linked official airline journey source missing'
           assert 'function renderPassengerIssue()' in s and 'const passengerSources=' in s, 'DEPLOYMENT STALE: official baggage source routing missing'
           assert 'romanaairport.com/lost-and-found/' in s and 'puntacanainternationalairport.com/en/airport-services/item/lost-found' in s, 'DEPLOYMENT STALE: official airport lost and found links missing'
           assert 'id="goCompare"' in s and 'function renderAirportCompare()' in s, 'DEPLOYMENT STALE: comparison navigation missing'
