@@ -13,6 +13,23 @@ const {chromium} = require('playwright');
     await page.goto(base+'?lang=de#airlines',{waitUntil:'domcontentloaded',timeout:30000});
     await page.locator('#airlineCards .airline-card').first().waitFor({timeout:15000});
     await page.locator('#goAirlines').waitFor();
+    // Verify the seven-airport comparison using system Chrome, including selection and source filters.
+    assert.equal(await page.locator('#compare-grid .compare-card').count(),7);
+    await page.locator('#compareSearch').fill('PUJ');
+    assert.equal(await page.locator('#compare-grid .compare-card').count(),1);
+    await page.locator('#compareSearch').fill('no-airport-123');
+    assert.equal(await page.locator('#compare-empty').isVisible(),true);
+    await page.locator('#compare-reset').click();
+    assert.equal(await page.locator('#compare-grid .compare-card').count(),7);
+    await page.locator('#compareFilter').selectOption('detail');
+    assert.equal(await page.locator('#compare-grid .compare-card').count(),3);
+    await page.locator('#compareFilter').selectOption('overview');
+    assert.equal(await page.locator('#compare-grid .compare-card').count(),4);
+    await page.locator('#compareFilter').selectOption('all');
+    await page.locator('#compare-grid button[data-airport="STI"]').click();
+    assert.equal(await page.locator('#airport').inputValue(),'STI');
+    await page.locator('#compare-grid button[data-airport="PUJ"]').click();
+    await page.locator('#airport-compare').screenshot({path:'airlines-airport-compare.png'});
     // Practical travel assistance: real desktop Chrome, seven-airport navigation and real sources.
     assert.equal(await page.locator('#travelAssistAirport option').count(),7);
     assert.match(await page.locator('#travel-assist-title').innerText(),/Flughafenführer/);
