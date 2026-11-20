@@ -58,6 +58,7 @@ jobs:
           assert 'id="flightAirportGuide"' in s and 'id="journey-guide-link"' in s and 'function updateAirportQuickGuide()' in s, 'DEPLOYMENT STALE: localized airport guide handoffs missing'
           assert 'const airlineEnterHint=' in s and "event.key==='Enter'" in s, 'DEPLOYMENT STALE: airline keyboard selection missing'
           assert 'id="airportQuickFilter"' in s and 'function renderAirportQuickSearch()' in s and 'function selectQuickAirport(code)' in s, 'DEPLOYMENT STALE: five-language airport quick search missing'
+          assert 'id="v2-console"' in s and 'id="v2-airline"' in s and 'id="v2-airport"' in s and 'const v2Words=' in s and 'function renderV2Console()' in s, 'DEPLOYMENT STALE: integrated VuelosRD 2.0 travel console missing'
           assert "journey:'Meine Reise'" in s and 'function prepareAirlineFlight(code)' in s, 'DEPLOYMENT STALE: five-language journey navigation missing'
           assert 'function renderPassengerIssue()' in s and 'const passengerSources=' in s, 'DEPLOYMENT STALE: official baggage source routing missing'
           assert 'romanaairport.com/lost-and-found/' in s and 'puntacanainternationalairport.com/en/airport-services/item/lost-found' in s, 'DEPLOYMENT STALE: official airport lost and found links missing'
