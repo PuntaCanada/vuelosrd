@@ -46,6 +46,16 @@ for(const code of groups){
    assert.ok(html.includes('href="'+registry.airports[code.toUpperCase()].official+'"'),'official operator for '+code);
    assert.ok(html.includes('class="source missing"')||code==='puj'||code==='sti'||code==='lrm','no invented source completeness '+code);
    assert.ok(html.includes('href="'+url(lang,null)+'"'),'locale hub backlink');
+   assert.ok(html.includes('id="quick-travel"')&&html.includes('class="quick-flight-form"'),'airport travel shortcuts visible '+canonical);
+   assert.ok(html.includes('action="/#flightTitle" method="get"'),'no-cost first-party GET flight preparation '+canonical);
+   assert.ok(html.includes('name="lang" value="'+lang+'"'),'language sent through flight form '+canonical);
+   assert.ok(html.includes('name="airport" value="'+code.toUpperCase()+'"'),'airport sent through flight form '+canonical);
+   assert.ok(html.includes('name="flight"')&&html.includes('pattern="[A-Za-z0-9]{2,3}'),'bounded flight entry '+canonical);
+   for(const hash of ['#journey-wizard','#passenger-help-title','#travel-assist']){
+    assert.ok(html.includes('/?lang='+lang+'&amp;airport='+code.toUpperCase()+hash),'guide link to appropriate live app section '+hash+' '+canonical);
+   }
+   assert.ok(html.includes('href="#airport-sources"')&&html.includes('id="airport-sources"'),'source navigation resolved '+canonical);
+
   }else{
    assert.equal(schema['@type'],lang==='es'?'WebSite':'WebPage','home schema');
    assert.ok(html.includes('VuelosRD'),'site brand');
