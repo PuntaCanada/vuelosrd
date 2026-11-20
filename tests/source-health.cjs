@@ -48,16 +48,24 @@ async function run(){
  };
  const summaryPath=process.env.GITHUB_STEP_SUMMARY;
  if(summaryPath){
-  const rows=warning.map(x=>'| '+x.outcome.toUpperCase()+' | '+String(x.status).replace(/\\|/g,'/')+' | '+x.url.replace(/\\|/g,'%7C')+' |').join('\\n');
-  fs.appendFileSync(summaryPath,
-   '## VuelosRD official-link health\\n\\n'+
-   '| Checked | HTTP reachable | Uncertain | Confirmed 404/410 |\\n|---:|---:|---:|---:|\\n'+
-   '| '+report.total+' | '+report.ok+' | '+report.uncertain+' | '+report.broken+' |\\n\\n'+
-   'Source catalog last human-reviewed: '+lastReviewed+'; automated run: '+checkedAt+'\\n\\n'+
-   (warning.length?'| Outcome | HTTP / error | URL |\\n|---|---|---|\\n'+rows+'\\n':'No URL warnings.\\n')+
-   '\\n**Interpretation:** 403/401/429 and network errors may be bot blocking; these URLs need manual follow-up. HTTP 200 is not proof that details are current or correct.\\n');
+  const rows=warning.map(x=>'| '+x.outcome.toUpperCase()+' | '+String(x.status).replace(/\|/g,'/')+' | '+x.url.replace(/\|/g,'%7C')+' |');
+  const markdown=[
+   '## VuelosRD official link health',
+   '',
+   '| Checked | HTTP reachable | Uncertain | Confirmed 404/410 |',
+   '|---:|---:|---:|---:|',
+   '| '+report.total+' | '+report.ok+' | '+report.uncertain+' | '+report.broken+' |',
+   '',
+   'Source catalog last human-reviewed: '+lastReviewed+'; automated run: '+checkedAt,
+   '',
+   ...(warning.length?['| Outcome | HTTP / error | URL |','|---|---|---|',...rows]:['No URL warnings.']),
+   '',
+   '**Interpretation:** 401/403/429 and network errors may indicate bot blocking. Manually investigate uncertain results; a successful HTTP response does not prove current schedules or services.',
+   ''
+  ].join('\n');
+  fs.appendFileSync(summaryPath,markdown+'\n');
  }
- if(process.env.VUELOSRD_HEALTH_REPORT)fs.writeFileSync(process.env.VUELOSRD_HEALTH_REPORT,JSON.stringify(report,null,2)+'\\n');
+ if(process.env.VUELOSRD_HEALTH_REPORT)fs.writeFileSync(process.env.VUELOSRD_HEALTH_REPORT,JSON.stringify(report,null,2)+'\n');
 
  if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
 }
