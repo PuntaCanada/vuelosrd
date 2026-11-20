@@ -640,6 +640,13 @@ const airlineQuickWords={
  fr:{label:'Rechercher une compagnie par nom ou code',placeholder:'Rechercher parmi 28 compagnies',count:'{n} sur {total} compagnies',empty:'Aucun résultat. Essayez un autre nom ou code.',clear:'Effacer la recherche'},
  ht:{label:'Chèche konpayi pa non oswa kòd',placeholder:'Chèche nan 28 konpayi',count:'{n} sou {total} konpayi',empty:'Pa gen rezilta. Eseye yon lòt non oswa kòd.',clear:'Efase rechèch'}
 };
+const airlineEnterHint={
+es:'Pulsa Intro para elegir la única aerolínea encontrada.',
+en:'Press Enter to choose the single matching airline.',
+de:'Mit Enter die einzige gefundene Airline auswählen.',
+fr:'Appuyez sur Entrée pour choisir la seule compagnie trouvée.',
+ht:'Peze Antre pou chwazi sèl konpayi ki jwenn nan.'
+};
 let showAllAirlineShortcuts=true;
 function renderFlightAirlineShortcuts(){
  const words=flightAirlineShortcutWords[current],root=$('flightAirlineShortcutButtons'),search=$('flightAirlineQuickFilter'),quick=airlineQuickWords[current];
@@ -651,6 +658,7 @@ function renderFlightAirlineShortcuts(){
  $('flightFocusAirline').textContent=flightQuickNavWords[current].airline;$('flightFocusJourney').textContent=flightQuickNavWords[current].journey;
  const needle=normalizeSearchText(search.value);
  const found=airlineDirectory.filter(airline=>normalizeSearchText(airline.code+' '+airline.name).includes(needle));
+ if(needle&&found.length===1&&!found[0].inactive)$('flightAirlineShortcutNote').textContent=words.note+' '+airlineEnterHint[current];
  const visible=needle?found:(showAllAirlineShortcuts?airlineDirectory:airlineDirectory.slice(0,5));
  $('flightAirlineQuickCount').textContent=quick.count.replace('{n}',String(found.length)).replace('{total}',String(airlineDirectory.length));
  if(!found.length){
@@ -1223,7 +1231,7 @@ $('passengerAirport').addEventListener('change',()=>{chooseJourneyAirport($('pas
 $('passengerAirline').addEventListener('change',()=>{$('journeyAirline').value=$('passengerAirline').value;renderPassengerHub();});
 $('airport').addEventListener('change',()=>{links();details();$('boardAirport').value=$('airport').value;renderBoard();});$('travelAssistAirport').addEventListener('change',()=>{const code=$('travelAssistAirport').value;$('airport').value=code;$('boardAirport').value=code;links();details();renderBoard();});$('boardAirport').addEventListener('change',()=>{$('airport').value=$('boardAirport').value;links();details();renderBoard();});$('boardFilter').addEventListener('input',renderBoard);$('boardCountry').addEventListener('change',renderBoard);$('boardStatusFilter').addEventListener('change',renderBoard);$('boardSort').addEventListener('change',renderBoard);$('boardClearFilters').addEventListener('click',()=>{$('boardFilter').value='';$('boardCountry').value='';$('boardStatusFilter').value='';renderBoard();$('boardFilter').focus();});$('airlineFilter').addEventListener('input',renderAirlines);$('flightFocusAirline').addEventListener('click',e=>{e.preventDefault();const input=$('flightAirlineQuickFilter');input.scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});input.focus({preventScroll:true});history.replaceState(null,'','#flightAirlineQuickFilter');});
 $('flightFocusJourney').addEventListener('click',e=>{e.preventDefault();const input=$('journeyAirport');input.scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});input.focus({preventScroll:true});history.replaceState(null,'','#journey-wizard');});
-$('flightAirlineQuickFilter').addEventListener('input',renderFlightAirlineShortcuts);$('flightAirlineQuickFilter').addEventListener('keydown',event=>{if(event.key==='Escape'&&event.currentTarget.value){event.preventDefault();event.currentTarget.value='';renderFlightAirlineShortcuts();}});$('airlineFilter').addEventListener('keydown',e=>{if(e.key==='Escape'&&e.currentTarget.value){e.preventDefault();e.currentTarget.value='';renderAirlines();}});$('shareBoard').addEventListener('click',shareBoard);let mobileNavScheduled=false;
+$('flightAirlineQuickFilter').addEventListener('input',renderFlightAirlineShortcuts);$('flightAirlineQuickFilter').addEventListener('keydown',event=>{if(event.key==='Escape'&&event.currentTarget.value){event.preventDefault();event.currentTarget.value='';renderFlightAirlineShortcuts();return;}if(event.key==='Enter'){const needle=normalizeSearchText(event.currentTarget.value);if(!needle)return;const found=airlineDirectory.filter(a=>normalizeSearchText(a.code+' '+a.name).includes(needle)&&!a.inactive);if(found.length===1&&airlineDirectory.filter(a=>normalizeSearchText(a.code+' '+a.name).includes(needle)).length===1){event.preventDefault();prepareAirlineFlight(found[0].code);}}});$('airlineFilter').addEventListener('keydown',e=>{if(e.key==='Escape'&&e.currentTarget.value){e.preventDefault();e.currentTarget.value='';renderAirlines();}});$('shareBoard').addEventListener('click',shareBoard);let mobileNavScheduled=false;
 function scheduleMobileNavUpdate(){if(mobileNavScheduled)return;mobileNavScheduled=true;requestAnimationFrame(()=>{mobileNavScheduled=false;updateMobileActiveSection();});}
 window.addEventListener('scroll',scheduleMobileNavUpdate,{passive:true});
 window.addEventListener('resize',scheduleMobileNavUpdate);

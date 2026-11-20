@@ -56,6 +56,7 @@ jobs:
           assert "inactiveAirlineWords=" in s and "spiritrestructuring.com" in s, 'DEPLOYMENT STALE: verified ceased-Spirit airline status missing'
           assert 'id="flightFocusAirline"' in s and 'id="flightFocusJourney"' in s and 'const flightQuickNavWords=' in s, 'DEPLOYMENT STALE: localized flight search shortcuts missing'
           assert 'id="flightAirportGuide"' in s and 'id="journey-guide-link"' in s and 'function updateAirportQuickGuide()' in s, 'DEPLOYMENT STALE: localized airport guide handoffs missing'
+          assert 'const airlineEnterHint=' in s and "event.key==='Enter'" in s, 'DEPLOYMENT STALE: airline keyboard selection missing'
           assert "journey:'Meine Reise'" in s and 'function prepareAirlineFlight(code)' in s, 'DEPLOYMENT STALE: five-language journey navigation missing'
           assert 'function renderPassengerIssue()' in s and 'const passengerSources=' in s, 'DEPLOYMENT STALE: official baggage source routing missing'
           assert 'romanaairport.com/lost-and-found/' in s and 'puntacanainternationalairport.com/en/airport-services/item/lost-found' in s, 'DEPLOYMENT STALE: official airport lost and found links missing'

@@ -18,6 +18,14 @@ const assert=require('node:assert/strict');
     assert.equal(await page.locator('#boardWarning').isVisible(),true,'fictional board clearly disclosed');
     // Published main must include the prior de7c6d6 navigation and 34663a36 safety changes.
     assert.equal(await page.locator('#journey-wizard').count(),1,'published five-language assistant');
+    // The prior b371ae2c release includes selected-airport guides at both entry points.
+    assert.equal(await page.locator('#flightAirportGuide').count(),1,'b371ae2c flight-to-guide control deployed');
+    assert.equal(await page.locator('#journey-guide-link').count(),1,'b371ae2c journey-to-guide control deployed');
+    await page.locator('#airport').selectOption('SDQ');
+    assert.equal(await page.locator('#flightAirportGuide').getAttribute('href'),'/airports/sdq/','published guide follows airport change');
+    await page.locator('#journeyAirport').selectOption('STI');
+    assert.equal(await page.locator('#journey-guide-link').getAttribute('href'),'/airports/sti/','published guide follows journey airport');
+
     assert.equal(await page.locator('#flightFocusAirline').isVisible(),true,'a7227cd9 airline shortcut published');
     assert.equal(await page.locator('#flightFocusJourney').isVisible(),true,'a7227cd9 journey shortcut published');
     await page.locator('#flightFocusAirline').click();

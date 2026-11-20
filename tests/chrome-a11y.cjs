@@ -12,6 +12,17 @@ const assert = require('node:assert/strict');
    await page.locator('#boardRows tr').first().waitFor();
    assert.match(await page.locator('#boardWarning').innerText(),/DEMO|DEMOSTRA|fictici/i);
    assert.ok((await page.locator('#boardRows tr').count())>0,'demo board rendered');
+   // Single-match airline search supports hardware/soft keyboard Enter without selecting retired carriers.
+   await page.locator('#flightAirlineQuickFilter').fill('Arajet');
+   assert.match(await page.locator('#flightAirlineShortcutNote').innerText(),/Intro|Enter|Entrée|Antre/,'single result announces Enter shortcut');
+   await page.locator('#flightAirlineQuickFilter').press('Enter');
+   assert.equal(await page.locator('#flight').inputValue(),'DM ','one matching active airline selected with Enter');
+   assert.equal(await page.evaluate(()=>document.activeElement.id),'flight','Enter selection focuses flight number');
+   await page.locator('#flightAirlineQuickFilter').fill('Spirit');
+   await page.locator('#flightAirlineQuickFilter').press('Enter');
+   assert.equal(await page.locator('#flight').inputValue(),'DM ','retired airline never changes flight number');
+   await page.locator('#flightAirlineQuickFilter').fill('');
+
    // Visible mobile-friendly actions connect flight search, airline code search and the journey assistant.
    assert.equal(await page.locator('#flightFocusAirline').isVisible(),true,'flight-to-airline action visible');
    assert.equal(await page.locator('#flightFocusJourney').isVisible(),true,'flight-to-journey action visible');
