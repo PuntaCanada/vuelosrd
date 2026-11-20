@@ -12,6 +12,27 @@ const assert = require('node:assert/strict');
    await page.locator('#boardRows tr').first().waitFor();
    assert.match(await page.locator('#boardWarning').innerText(),/DEMO|DEMOSTRA|fictici/i);
    assert.ok((await page.locator('#boardRows tr').count())>0,'demo board rendered');
+   // Search is accent-insensitive, has useful live results and synchronizes the flight, board, and journey.
+   await page.locator('#airportQuickFilter').fill('samana');
+   assert.equal(await page.locator('#airportQuickResults button').count(),1,'accent-free airport search yields one result');
+   await page.locator('#airportQuickFilter').press('Enter');
+   assert.equal(await page.locator('#airport').inputValue(),'AZS','airport search Enter updates main airport');
+   assert.equal(await page.locator('#journeyAirport').inputValue(),'AZS','airport search updates journey');
+   assert.equal(await page.locator('#boardAirport').inputValue(),'AZS','airport search updates flight board');
+   assert.equal(await page.evaluate(()=>document.activeElement.id),'airport','airport picker returns keyboard focus');
+   await page.locator('#airportQuickFilter').fill('no-such-airport');
+   assert.equal(await page.locator('#airportQuickResults button').count(),0,'no imaginary airports');
+   await page.locator('#airportQuickFilter').press('Escape');
+   assert.equal(await page.locator('#airportQuickFilter').inputValue(),'','Escape clears airport search');
+   await page.locator('#langMenu summary').click();
+   await page.locator('[data-choose-lang="de"]').click();
+   assert.match(await page.locator('#airportQuickLabel').innerText(),/Flughafen/,'airport search localized');
+   await page.locator('#airportQuickFilter').fill('Cibao');
+   await page.locator('#airportQuickResults [data-airport="STI"]').click();
+   assert.equal(await page.locator('#flightAirportGuide').getAttribute('href'),'/de/airports/sti/','search routes to localized guide');
+   await page.locator('#airportQuickFilter').fill('');
+   await page.locator('[data-lang="es"]').click();
+
    // Single-match airline search supports hardware/soft keyboard Enter without selecting retired carriers.
    await page.locator('#flightAirlineQuickFilter').fill('Arajet');
    assert.match(await page.locator('#flightAirlineShortcutNote').innerText(),/Intro|Enter|Entrée|Antre/,'single result announces Enter shortcut');
