@@ -19,7 +19,7 @@ assert.ok(html.includes('https://aeropuertocibao.com.do/salidas/'),'STI operator
 assert.ok(html.includes('https://www.romanaairport.com/'),'LRM official airport website');
 for(const code of required)assert.ok(html.includes('<option value="'+code+'">'),'airport selector includes '+code);
 const start=html.indexOf('const travelAssistWords=');
-const end=html.indexOf(';\nconst travelAssistTransport=',start);
+const end=html.indexOf(';\nconst travelAssistFlightLinks=',start);
 assert.ok(start>=0&&end>start,'guide locale dataset present');
 const locales=JSON.parse(html.slice(start+'const travelAssistWords='.length,end));
 for(const lang of ['es','en','de','fr','ht']){
