@@ -41,21 +41,36 @@ function renderSourceHealthPanel(){
  }
  history.append(list);
 }
-async function loadSourceHealth(){
+// Published status is public in this repository. GitHub's own raw endpoint keeps
+// scheduled updates fresh even when Cloudflare does not build bot-generated commits.
+const sourceDataMirror='https://raw.githubusercontent.com/PuntaCanada/vuelosrd/main/';
+async function readSourceSnapshot(url,kind){
  try{
-  const responses=await Promise.all([
-   fetch('/data/source-health-latest.json',{cache:'no-store'}),
-   fetch('/data/source-health-history.json',{cache:'no-store'})
-  ]);
-  if(responses[0].ok){const latest=await responses[0].json();
-   if(latest.schemaVersion===1&&latest.total===47&&Array.isArray(latest.warnings)&&Number.isFinite(Date.parse(latest.checkedAt)))sourceLatest=latest;
-  }
-  if(responses[1].ok){const history=await responses[1].json();
-   if(history.schemaVersion===1&&Array.isArray(history.entries))sourceHistory=history;
-  }
- }catch{sourceLatest=null;sourceHistory=null}
+  const response=await fetch(url,{cache:'no-store',signal:AbortSignal.timeout(7000)});
+  if(!response.ok)return null;
+  const data=await response.json();
+  if(kind==='latest'){
+   if(data.schemaVersion!==1||data.total!==47||!Array.isArray(data.warnings)||!Number.isFinite(Date.parse(data.checkedAt)))return null;
+   if(data.ok+data.uncertain+data.broken!==47)return null;
+  }else if(data.schemaVersion!==1||!Array.isArray(data.entries))return null;
+  return data;
+ }catch{return null}
+}
+async function loadSourceHealth(){
+ const urls=[
+  '/data/source-health-latest.json',
+  sourceDataMirror+'data/source-health-latest.json',
+  '/data/source-health-history.json',
+  sourceDataMirror+'data/source-health-history.json'
+ ];
+ const [localLatest,githubLatest,localHistory,githubHistory]=await Promise.all([
+  readSourceSnapshot(urls[0],'latest'),readSourceSnapshot(urls[1],'latest'),
+  readSourceSnapshot(urls[2],'history'),readSourceSnapshot(urls[3],'history')
+ ]);
+ const latest=[localLatest,githubLatest].filter(Boolean).sort((a,b)=>Date.parse(b.checkedAt)-Date.parse(a.checkedAt))[0]||null;
+ const histories=[localHistory,githubHistory].filter(Boolean).sort((a,b)=>Date.parse(b.entries.at(-1)?.checkedAt||0)-Date.parse(a.entries.at(-1)?.checkedAt||0));
+ sourceLatest=latest;sourceHistory=histories[0]||null;
  renderSourceHealthPanel();renderAirlines();
 }
-
 // Defer dynamic loading until the existing inline VuelosRD app and its language state are ready.
 window.addEventListener('DOMContentLoaded',()=>loadSourceHealth(),{once:true});
