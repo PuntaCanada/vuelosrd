@@ -93,3 +93,21 @@ The overview pages provide independent, translated airport/flight-search explana
 Verification after deploying: run `node tests/seo-audit.cjs` locally; GitHub's static checks and public smoke workflow validate the published pages and XML. Keep any future custom domain change consistent across canonical, hreflang, sitemap, structured data, robots.txt and Cloudflare before activating it.
 
 **Google Search Console (manual owner authentication required):** open https://search.google.com/search-console/ and select or verify the **URL-prefix property** `https://vuelosrd.pages.dev/` (or use a verified Domain property where applicable). In **Sitemaps**, submit `sitemap.xml`. Inspect the five exact URLs using **URL Inspection**, then request indexing if appropriate. Ownership verification, sitemap submission and actual indexed/not-indexed reporting require the site owner's authenticated Google account, and cannot be claimed from code commits or public GitHub checks. Recheck coverage over subsequent days, not minutes.
+
+## Practical airport guide (November 2026)
+
+The interactive VuelosRD homepage now includes a responsive practical travel section with an airport dropdown synchronized to the existing seven-airport selector. It covers **PUJ, SDQ, STI, POP, LRM, AZS, JBQ**, in Spanish, English, German, French, and Haitian Creole. Its four guidance cards provide official operator information, transport research, customs/baggage and immigration/e-ticket links. They do not display unverified taxi prices, invent connections, make bookings or collect identity details.
+
+Grounded official or authority-controlled links (public pages checked in November 2026):
+- PUJ operator: https://www.puntacanainternationalairport.com/en/ — airport transport details: https://www.puntacanainternationalairport.com/en/services/transportations
+- STI operator: https://aeropuertocibao.com.do/en/ — arrivals and departures can be checked on the operator's own website; VuelosRD does not copy live flight tables.
+- LRM operator: https://www.romanaairport.com/
+- SDQ, POP, AZS, JBQ operator network: https://aerodom.com/en/our-airports/ (Aerodom/VINCI)
+- Dominican tourism authority transport guide: https://www.godominicanrepublic.com/travel/getting-around
+- Dominican Customs official travel and personal baggage guide: https://www.aduanas.gob.do/manual-del-viajero/
+- Dominican Immigration free arrival/departure e-ticket: https://eticket.migracion.gob.do/
+- Dominican Tourism official entry requirements: https://www.godominicanrepublic.com/travel/entry-requirements
+
+Baggage size/weight is airline and fare-specific. The site does not generalize allowances or guarantee commercial transfer availability and rates, and links the responsible sources instead. The e-ticket is free on the Dominican government's site; users should avoid copycat charging services. All four guidance cards are available in five languages with graceful mobile stacking and keyboard-focus affordances.
+
+Validation: `node tests/travel-assist-audit.cjs` checks seven airport options, five full translations and authoritative sources; `tests/chrome-a11y.cjs` tests actual guide selection and links at three desktop/phone viewport sizes; GitHub's public smoke check verifies the new content on the deployed Cloudflare site. No new recurring charges.
