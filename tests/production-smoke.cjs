@@ -18,6 +18,16 @@ const assert=require('node:assert/strict');
     assert.equal(await page.locator('#boardWarning').isVisible(),true,'fictional board clearly disclosed');
     // Published main must include the prior de7c6d6 navigation and 34663a36 safety changes.
     assert.equal(await page.locator('#journey-wizard').count(),1,'published five-language assistant');
+    // Verify that the independently published d8e0d747 release really supports the airport finder.
+    assert.equal(await page.locator('#airportQuickFilter').isVisible(),true,'prior d8e0d747 airport search actually published');
+    await page.locator('#airportQuickFilter').fill('samana');
+    assert.equal(await page.locator('#airportQuickResults [data-airport="AZS"]').count(),1,'deployed accent-free search works');
+    await page.locator('#airportQuickFilter').press('Enter');
+    assert.equal(await page.locator('#airport').inputValue(),'AZS','deployed airport quick search syncs selection');
+    await page.locator('#airportQuickFilter').fill('');
+    await page.locator('#airport').selectOption('PUJ');
+    await page.locator('#boardAirport').selectOption('PUJ');
+
     // Verify the exact prior 050d82f7 user-visible airline keyboard feature on Cloudflare.
     await page.locator('#flightAirlineQuickFilter').fill('Arajet');
     assert.match(await page.locator('#flightAirlineShortcutNote').innerText(),/Intro|Enter|Entrée|Antre/,'050d82f7 keyboard hint published');
