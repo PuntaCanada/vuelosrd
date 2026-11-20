@@ -8,8 +8,23 @@ const assert = require('node:assert/strict');
  for (const viewport of [{width:1440,height:900},{width:390,height:844},{width:320,height:700}]) {
   const page=await browser.newPage({viewport, reducedMotion:'reduce'});
   try {
+   // Mock only within Chromium regression: this is never published as live data.
+   const checkedAt=new Date().toISOString();
+   const sample={schemaVersion:1,checkedAt,total:47,ok:34,uncertain:13,broken:0,
+    monitorStatus:'partial-or-complete',actionableAlertCount:0,monitorLimitationCount:13,
+    warnings:[{url:'https://www.airfrance.com/',status:403,category:'access-restricted',actionable:false}]};
+   const history={schemaVersion:1,entries:[{checkedAt,total:47,ok:34,actionableAlertCount:0}]};
+   await page.route('**/data/source-health-latest.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(sample)}));
+   await page.route('**/data/source-health-history.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(history)}));
    await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
    await page.locator('#boardRows tr').first().waitFor();
+   await page.locator('#sourceHealthMetrics span').first().waitFor();
+   assert.match(await page.locator('#sourceHealthDate').innerText(),/Última comprobación automática/,'dated live source data shown');
+   assert.match(await page.locator('#sourceHealthMetrics').innerText(),/34/,'actual automated counts in snapshot');
+   assert.equal(await page.locator('#sourceHealthHistory li').count(),1,'only genuine stored snapshots shown');
+   assert.match(await page.locator('#airlineCards .airline-card').filter({has:page.locator('h3',{hasText:'Air France'})}).locator('.airline-source-check').innerText(),/Acceso automático limitado/,'request failure is not labelled a broken link');
+   assert.equal(await page.locator('.source-alternative').count(),3,'only three verified first-party alternative links');
+
    // Users see explicit dated verification notes, not blanket 'broken link' warnings.
    assert.equal(await page.locator('#airlineCards .airline-source-check').count(),12,'12 reviewed airline URLs have visible notes');
    const airFrance=page.locator('#airlineCards .airline-card').filter({has:page.locator('h3', {hasText:'Air France'})});
