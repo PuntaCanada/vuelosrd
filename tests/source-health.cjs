@@ -38,7 +38,7 @@ async function probe(url,fetcher=fetch){
    if([404,410].includes(response.status)){if(attempt===0)continue;return {url,status:response.status,outcome:'broken'};}
    if(response.ok||response.status===206)return {url,status:response.status,outcome:'ok'};
    return {url,status:response.status,outcome:'uncertain'};
-  }catch(e){if(attempt===0)continue;return {url,status:String(e.name||e),outcome:'uncertain'};}
+  }catch(e){if(attempt===0)continue;return {url,status:String(e.cause?.code||e.code||e.name||e),outcome:'uncertain'};}
  }
 }
 async function run(){
@@ -47,6 +47,8 @@ async function run(){
  let broken=0,unknown=0;
  for(const x of results){console.log(x.outcome.toUpperCase()+' ['+x.status+'] '+x.url);if(x.outcome==='broken')broken++;if(x.outcome==='uncertain')unknown++;}
  console.log('OFFICIAL LINK HEALTH: '+urls.length+' checked; '+broken+' confirmed missing (404/410); '+unknown+' uncertain (site blocks or transient failures).');
+ const monitorUnavailable=results.length>0&&results.every(x=>x.outcome==='uncertain'&&typeof x.status==='string');
+ if(monitorUnavailable)console.error('MONITOR ENVIRONMENT FAILURE: all external requests failed at the network layer; NO official URL was verified. Check runner DNS/proxy/egress before interpreting source warnings.');
  const checkedAt=new Date().toISOString(),lastReviewed=data.verifiedOn||'not documented';
  const ok=results.length-broken-unknown;
  const reasonFor=x=>{
@@ -59,7 +61,7 @@ async function run(){
   ...x,reason:reasonFor(x),usedBy:[...(origins.get(x.url)||[])]
  }));
  const report={
-  schemaVersion:1,checkedAt,sourceCatalogLastReviewed:lastReviewed,
+  schemaVersion:1,checkedAt,sourceCatalogLastReviewed:lastReviewed,monitorStatus:monitorUnavailable?'network-unavailable':'partial-or-complete',
   total:urls.length,ok,uncertain:unknown,broken,
   limitations:'Automated 403/401/429/timeout responses do not prove a broken URL; 200 confirms HTTP reachability only, not accuracy of travel content.',
   warnings:warning
@@ -74,7 +76,7 @@ async function run(){
    '|---:|---:|---:|---:|',
    '| '+report.total+' | '+report.ok+' | '+report.uncertain+' | '+report.broken+' |',
    '',
-   'Source catalog last human-reviewed: '+lastReviewed+'; automated run: '+checkedAt,
+   'Source catalog last human-reviewed: '+lastReviewed+'; automated run: '+checkedAt,\n   '',\n   '**Monitor status:** '+(monitorUnavailable?'NETWORK UNAVAILABLE — no links verified; check runner network/proxy.':'Checks completed; ambiguous responses remain unverified.'),
    '',
    ...(warning.length?['| Outcome | HTTP / error | Interpretation | Used by | URL |','|---|---|---|---|---|',...rows]:['No URL warnings.']),
    '',
@@ -85,7 +87,7 @@ async function run(){
  }
  if(process.env.VUELOSRD_HEALTH_REPORT)fs.writeFileSync(process.env.VUELOSRD_HEALTH_REPORT,JSON.stringify(report,null,2)+'\n');
 
- if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
+ if(monitorUnavailable)process.exitCode=1;\n if(broken){console.error('Official source URLs returned confirmed 404/410 on repeated checks. Investigate before changing user-facing source claims.');process.exitCode=1;}
 }
 if(require.main===module)run().catch(e=>{console.error(e);process.exitCode=1});
 module.exports={probe};
