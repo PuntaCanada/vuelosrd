@@ -8,7 +8,7 @@ const beginning=html.indexOf('const airlineDirectory=[');
 const ending=html.indexOf('];',beginning);
 assert.ok(beginning>0&&ending>beginning,'airline directory found');
 const listing=html.slice(beginning,ending);
-const entries=[...listing.matchAll(/\{code:'([A-Z0-9]{2})',name:'([^']+)',url:'([^']+)'(?:,logo:'([^']+)',credit:'([^']+)')?\}/g)]
+const entries=[...listing.matchAll(/\{code:'([A-Z0-9]{2})',name:'([^']+)',url:'([^']+)'(?:,inactive:true)?(?:,logo:'([^']+)',credit:'([^']+)')?\}/g)]
  .map(([,code,name,url,logo,credit])=>({code,name,url,logo,credit}));
 assert.equal(entries.length,28,'expected 28 airline entries');
 assert.equal(new Set(entries.map(x=>x.code)).size,entries.length,'duplicate airline codes');
@@ -26,6 +26,7 @@ for(const item of entries){
  }
 }
 assert.equal(entries.filter(x=>x.logo).length,26,'logo references documented');
+assert.ok(listing.includes("name:'Spirit Airlines',url:'https://www.spiritrestructuring.com/',inactive:true"),'ceased carrier must be clearly marked');
 assert.ok(!entries.find(x=>x.code==='AC').logo,'Air Canada is text-only pending brand permission');
 assert.match(html,/img\.addEventListener\('error',\(\)=>img\.remove\(\)\)/,'shortcut image failure fallback');
 console.log('Airline directory audit OK: '+entries.length+' codes, '+entries.filter(x=>x.logo).length+' attributed image references, 2 code fallbacks.');

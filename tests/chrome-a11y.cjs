@@ -159,6 +159,16 @@ const assert = require('node:assert/strict');
    assert.equal(await page.locator('#track').getAttribute('aria-disabled'),'false','complete number enables external link');
    assert.match(await page.locator('#track').getAttribute('href'),/\/data\/flights\/dm1234/);
 
+   // A ceased carrier must remain transparently documented without offering new flight preparation.
+   await page.locator('#flightAirlineQuickFilter').fill('Spirit');
+   assert.equal(await airlineButtons.count(),1,'historic carrier still documented');
+   assert.equal(await airlineButtons.first().isDisabled(),true,'ceased carrier cannot start a new flight');
+   await page.locator('#airlineFilter').fill('Spirit');
+   assert.equal(await page.locator('#airlineCards .airline-inactive-notice').count(),1,'historical status warning shown');
+   assert.match(await page.locator('#airlineCards .airline-inactive-notice').innerText(),/2026/);
+   assert.equal(await page.locator('#airlineCards .airline-start-search').count(),0,'ceased carrier has no new-flight action');
+   assert.match(await page.locator('#airlineCards a[href*="spiritrestructuring.com"]').getAttribute('href'),/spiritrestructuring/);
+   await page.locator('#airlineFilter').fill('');
    await page.locator('#flightAirlineQuickFilter').fill('not-an-airline');
    assert.equal(await airlineButtons.count(),0,'empty state');
    await page.locator('#flightAirlineQuickFilter').fill('');
