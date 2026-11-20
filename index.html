@@ -372,13 +372,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible,.l
 /* Compact mobile airport navigation remains reachable without long scrolling. */
 .mobile-bottom-nav{display:none}
 @media(max-width:680px){
- .mobile-bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:60;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:8px max(10px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));background:#08283a;border-top:1px solid #567a90;box-shadow:0 -7px 24px #061a2b38}
+ .mobile-bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:60;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px max(10px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));background:#08283a;border-top:1px solid #567a90;box-shadow:0 -7px 24px #061a2b38}
  .mobile-bottom-nav a{display:grid;justify-items:center;align-content:center;gap:4px;padding:7px 3px;min-height:48px;text-align:center;text-decoration:none;color:#f4faff;font-size:11px;font-weight:750;border-radius:10px;line-height:1.2;min-width:0}
  .mobile-bottom-nav a:hover,.mobile-bottom-nav a:focus-visible{background:#1e536b}
  .mobile-bottom-nav a span:first-child{font-size:21px;line-height:1}
  .mobile-bottom-nav a:focus-visible{outline:2px solid #eecf86;outline-offset:1px}
  body{padding-bottom:calc(85px + env(safe-area-inset-bottom))}
- #flight-board,#flightTitle,#airlines{scroll-margin-top:18px}
+ #flight-board,#flightTitle,#airlines,#journey-wizard{scroll-margin-top:18px}
 }
 
 /* Crisp airport split-flap feel with readable keyboard focus and calm motion. */
@@ -474,6 +474,7 @@ html{scroll-padding-top:18px}#flight-board,#flightTitle,#airlines{scroll-margin-
   <div class="journey-links" aria-label="Journey actions">
     <a id="journey-airport-source" target="_blank" rel="noopener noreferrer"></a>
     <a id="journey-airline-source" target="_blank" rel="noopener noreferrer" hidden></a>
+    <a id="journey-flight-link" href="#flightTitle"></a>
     <a id="journey-checklist-link" href="#passenger-check-title"></a>
     <a id="journey-transfer-link" href="#travel-assist"></a>
     <a id="journey-baggage-link" href="#passenger-help-title"></a>
@@ -507,6 +508,7 @@ html{scroll-padding-top:18px}#flight-board,#flightTitle,#airlines{scroll-margin-
  <a href="#flight-board" id="mobileGoBoard"><span aria-hidden="true">▦</span><span>Tablero</span></a>
  <a href="#flightTitle" id="mobileGoSearch"><span aria-hidden="true">⌕</span><span>Buscar</span></a>
  <a href="#airlines" id="mobileGoAirlines"><span aria-hidden="true">✈</span><span>Aerolíneas</span></a>
+ <a href="#journey-wizard" id="mobileGoJourney"><span aria-hidden="true">☑</span><span>Viaje</span></a>
 </nav>
 <nav class="seo-language-links" aria-label="Otras versiones de idiomas"><a href="/" lang="es">Español</a><a href="/en/" lang="en">English</a><a href="/de/" lang="de">Deutsch</a><a href="/fr/" lang="fr">Français</a><a href="/ht/" lang="ht">Kreyòl</a></nav>
 <footer class="footer"><div class="wrap flex"><span>© <span id="year"></span> VuelosRD · <span data-i="pilot">Proyecto piloto independiente</span></span><span data-i="nonofficial">No afiliado a aeropuertos, aerolíneas ni proveedores de seguimiento.</span></div><div class="shared-project-contact" style="padding:12px 16px;max-width:1100px;margin:8px auto;font-size:14px;line-height:1.5;text-align:center;"><span>Contacto general compartido para consultas sobre VuelosRD (vorübergehend / temporal): </span><a style="color:inherit;text-decoration:underline;text-underline-offset:3px;" href="mailto:comparanetrd@outlook.com?subject=vuelosrd%20-%20Kontakt%20%2F%20Contacto">comparanetrd@outlook.com</a></div></footer>
@@ -695,7 +697,7 @@ ht:{empty:'Antre nimewo vòl la pou pare swivi sou yon sèvis ekstèn.',ready:'V
 function normalizeFlightInput(value){return value.trim().replace(/[\s\-]+/g,'').toUpperCase();}
 function flightNumberValue(){return normalizeFlightInput($('flight').value);}
 function isPartialAirlineCode(code){return airlineDirectory.some(airline=>airline.code===code);}
-function prepareAirlineFlight(code){$('flight').value=code+' ';$('flight').placeholder=code+' 1234';links();$('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('flight').focus({preventScroll:true});$('flight').setSelectionRange($('flight').value.length,$('flight').value.length);}
+function prepareAirlineFlight(code){$('flight').value=code+' ';$('flight').placeholder=code+' 1234';if(airlineDirectory.some(a=>a.code===code)){$('journeyAirline').value=code;$('passengerAirline').value=code;renderPassengerHub();}links();$('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('flight').focus({preventScroll:true});$('flight').setSelectionRange($('flight').value.length,$('flight').value.length);}
 function updateFlightSearch(){
  const msg=flightSearchMessages[current],number=flightNumberValue();
  $('flight').setAttribute('autocapitalize','characters');
@@ -811,21 +813,21 @@ function airportDeepLink(code,view,section){const u=new URL(window.location.orig
 function details(){const code=$('airport').value;if($('journeyAirport')&&$('journeyAirport').value!==code){$('journeyAirport').value=code;renderJourneyAssistant();}if($('passengerAirport')){$('passengerAirport').value=code;renderPassengerIssue();}if($('travelAssistAirport')){$('travelAssistAirport').value=code;renderTravelAssist();}const item=airportInfo[code];renderAirportDeepGuide(code);if($('compare-grid'))for(const card of $('compare-grid').children){const active=card.dataset.airport===code;card.classList.toggle('selected',active);const button=card.querySelector('button[data-airport]');button.setAttribute('aria-pressed',String(active));button.textContent=active?airportCompareWords[current][18]:airportCompareWords[current][17];}const L=infoUi[current];$('details-title').textContent=L[0];$('details-subtitle').textContent=L[1];$('detail-code').textContent=code;$('detail-name').textContent=airports.find(a=>a[0]===code)[1];$('detail-text').textContent=item.desc[current];$('detail-official').href=item.url;$('detail-official').textContent=L[2];$('detail-travel').textContent=L[3];const D=airportDetailWords[current];$('detail-timezone').textContent='UTC−4 · RD';$('detail-live').textContent=D[0];$('detail-board-link').textContent=D[1];$('detail-depart-link').textContent=D[2];$('detail-tracking-link').textContent=D[3];$('detail-check-title').textContent=D[4];$('detail-check-1').textContent=D[5];$('detail-check-2').textContent=D[6];$('detail-check-3').textContent=D[7];$('detail-board-link').href=airportDeepLink(code,'arrivals','flight-board');$('detail-depart-link').href=airportDeepLink(code,'departures','flight-board');$('detail-tracking-link').href=airportDeepLink(code,null,'flight-status');const tipTexts=[[L[4],L[5]],[L[6],L[7]],[L[8],L[9]]];$('tips').replaceChildren();for(const pair of tipTexts){const div=document.createElement('div');div.className='tip';const title=document.createElement('strong');title.textContent=pair[0];const body=document.createElement('span');body.textContent=pair[1];div.append(title,body);$('tips').append(div)}}
 
 const mobileNavLabels={
-es:{nav:'Navegación rápida',board:'Tablero',search:'Buscar vuelo',airlines:'Aerolíneas'},
-en:{nav:'Quick navigation',board:'Flight board',search:'Find flight',airlines:'Airlines'},
-de:{nav:'Schnellnavigation',board:'Flugtafel',search:'Flug suchen',airlines:'Airlines'},
-fr:{nav:'Navigation rapide',board:'Tableau',search:'Chercher un vol',airlines:'Compagnies'},
-ht:{nav:'Navigasyon rapid',board:'Tablo vòl',search:'Chèche vòl',airlines:'Konpayi'}
+es:{nav:'Navegación rápida',board:'Tablero',search:'Buscar vuelo',airlines:'Aerolíneas',journey:'Mi viaje'},
+en:{nav:'Quick navigation',board:'Flight board',search:'Find flight',airlines:'Airlines',journey:'My trip'},
+de:{nav:'Schnellnavigation',board:'Flugtafel',search:'Flug suchen',airlines:'Airlines',journey:'Meine Reise'},
+fr:{nav:'Navigation rapide',board:'Tableau',search:'Chercher un vol',airlines:'Compagnies',journey:'Mon voyage'},
+ht:{nav:'Navigasyon rapid',board:'Tablo vòl',search:'Chèche vòl',airlines:'Konpayi',journey:'Vwayaj mwen'}
 };
 function updateMobileNavigation(){
  const w=mobileNavLabels[current],nav=$('mobileBottomNav');nav.setAttribute('aria-label',w.nav);
- for(const [id,label] of [['mobileGoBoard',w.board],['mobileGoSearch',w.search],['mobileGoAirlines',w.airlines]]){
+ for(const [id,label] of [['mobileGoBoard',w.board],['mobileGoSearch',w.search],['mobileGoAirlines',w.airlines],['mobileGoJourney',w.journey]]){
    const a=$(id);a.lastElementChild.textContent=label;a.setAttribute('aria-label',label);
  }
  updateMobileActiveSection();
 }
 function updateMobileActiveSection(){
- const ids=[['mobileGoBoard','flight-board'],['mobileGoSearch','flightTitle'],['mobileGoAirlines','airlines']];
+ const ids=[['mobileGoBoard','flight-board'],['mobileGoSearch','flightTitle'],['mobileGoAirlines','airlines'],['mobileGoJourney','journey-wizard']];
  let selected='mobileGoBoard',distance=Infinity;
  for(const [id,target] of ids){
   const node=$(target);if(!node)continue;
@@ -833,7 +835,8 @@ function updateMobileActiveSection(){
   if(score<distance){distance=score;selected=id;}
  }
  const viewportHalf=window.innerHeight*.45;
- if($('airlines').getBoundingClientRect().top<viewportHalf)selected='mobileGoAirlines';
+ if($('journey-wizard').getBoundingClientRect().top<viewportHalf)selected='mobileGoJourney';
+ else if($('airlines').getBoundingClientRect().top<viewportHalf)selected='mobileGoAirlines';
  else if($('flightTitle').getBoundingClientRect().top<viewportHalf)selected='mobileGoSearch';
  for(const [id] of ids){const link=$(id),active=id===selected;link.classList.toggle('is-current',active);if(active)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');}
 }
@@ -893,6 +896,7 @@ function renderJourneyAssistant(){
  const source=$('journey-airport-source');source.href=airportInfo[airport].url;source.textContent=w.airportSource;
  const airlineLink=$('journey-airline-source');airlineLink.hidden=!chosen;
  if(chosen){airlineLink.href=chosen.url;airlineLink.textContent=w.airlineSource;}
+ $('journey-flight-link').textContent=mobileNavLabels[current].search;
  $('journey-checklist-link').textContent=w.checklist;
  $('journey-transfer-link').textContent=w.transfer;
  $('journey-baggage-link').textContent=w.baggage;
@@ -1168,6 +1172,7 @@ const skipLinkText={es:'Saltar al tablero de vuelos',en:'Skip to flight board',d
 for(const btn of document.querySelectorAll('.lang'))btn.addEventListener('click',()=>language(btn.dataset.lang));
 for(const button of document.querySelectorAll('[data-choose-lang]'))button.addEventListener('click',()=>{language(button.dataset.chooseLang);$('langMenu').open=false;});document.addEventListener('click',e=>{if(!$('langMenu').contains(e.target))$('langMenu').open=false;});
 $('compareSearch').addEventListener('input',renderAirportCompare);$('compareFilter').addEventListener('change',renderAirportCompare);$('compare-reset').addEventListener('click',()=>{$('compareSearch').value='';$('compareFilter').value='all';renderAirportCompare();$('compareSearch').focus();});$('journeyAirport').addEventListener('change',()=>chooseJourneyAirport($('journeyAirport').value));
+$('journey-flight-link').addEventListener('click',e=>{e.preventDefault();const code=$('journeyAirline').value;if(airlineDirectory.some(a=>a.code===code)){prepareAirlineFlight(code);}else{$('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('flight').focus({preventScroll:true});}history.replaceState(null,'','#flightTitle');});
 $('journeyAirline').addEventListener('change',()=>{const code=$('journeyAirline').value;$('passengerAirline').value=code;renderPassengerHub();});
 $('journeyStage').addEventListener('change',()=>chooseJourneyStage($('journeyStage').value));
 $('journey-checklist-link').addEventListener('click',()=>{chooseJourneyStage($('journeyStage').value);});
@@ -1184,7 +1189,7 @@ function scheduleMobileNavUpdate(){if(mobileNavScheduled)return;mobileNavSchedul
 window.addEventListener('scroll',scheduleMobileNavUpdate,{passive:true});
 window.addEventListener('resize',scheduleMobileNavUpdate);
 window.addEventListener('hashchange',scheduleMobileNavUpdate);
-for(const id of ['mobileGoBoard','mobileGoAirlines'])$(id).addEventListener('click',scheduleMobileNavUpdate);
+for(const id of ['mobileGoBoard','mobileGoAirlines','mobileGoJourney'])$(id).addEventListener('click',scheduleMobileNavUpdate);
 $('mobileGoSearch').addEventListener('click',e=>{e.preventDefault();$('flight').scrollIntoView({block:'center',behavior:'smooth'});$('flight').focus({preventScroll:true});history.replaceState(null,'','#flightTitle');});
 $('boardStatusLink').addEventListener('click',e=>{e.preventDefault();$('flight').scrollIntoView({behavior:'smooth',block:'center'});$('flight').focus({preventScroll:true});history.replaceState(null,'','#flightTitle');});$('boardArrivals').addEventListener('click',()=>setBoardMode('arrivals'));$('boardDepartures').addEventListener('click',()=>setBoardMode('departures'));$('flight').addEventListener('input',links);$('flight').addEventListener('keydown',e=>{if(e.key==='Escape'&&$('flight').value){e.preventDefault();$('flight').value='';links();return;}if(e.key==='Enter'&&$('track').getAttribute('aria-disabled')==='false'){e.preventDefault();window.open($('track').href,'_blank','noopener,noreferrer');}});$('clearFlight').addEventListener('click',()=>{$('flight').value='';links();$('flight').focus();});$('shareFlight').addEventListener('click',shareLink);$('year').textContent=new Date().getFullYear();let saved='es';try{saved=localStorage.getItem('vuelosrd_lang')||'es'}catch{}const qlang=originalLink.searchParams.get('lang');const qairport=(originalLink.searchParams.get('airport')||'').toUpperCase();const qflight=normalizeFlightInput(originalLink.searchParams.get('flight')||'');if(airports.some(a=>a[0]===qairport))$('airport').value=qairport;$('boardAirport').value=$('airport').value;if(isFlightNumber(qflight))$('flight').value=qflight;const qview=originalLink.searchParams.get('view');if(qview==='arrivals'||qview==='departures')boardMode=qview;
 const qcountry=(originalLink.searchParams.get('country')||'').toLowerCase();const qstatus=(originalLink.searchParams.get('status')||'');const qsort=(originalLink.searchParams.get('sort')||'');
