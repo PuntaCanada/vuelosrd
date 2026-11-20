@@ -14,14 +14,21 @@ const assert = require('node:assert/strict');
     monitorStatus:'partial-or-complete',actionableAlertCount:0,monitorLimitationCount:13,
     warnings:[{url:'https://www.airfrance.com/',status:403,category:'access-restricted',actionable:false}]};
    const history={schemaVersion:1,entries:[{checkedAt,total:47,ok:34,actionableAlertCount:0}]};
-   await page.route('**/data/source-health-latest.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(sample)}));
-   await page.route('**/data/source-health-history.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(history)}));
+   const fallback=viewport.width===320;
+   const local='http://127.0.0.1:8765/data/';
+   const mirror='https://raw.githubusercontent.com/PuntaCanada/vuelosrd/main/data/';
+   await page.route(local+'source-health-latest.json',route=>route.fulfill({status:fallback?404:200,contentType:'application/json',body:fallback?'missing':JSON.stringify(sample)}));
+   await page.route(local+'source-health-history.json',route=>route.fulfill({status:fallback?404:200,contentType:'application/json',body:fallback?'missing':JSON.stringify(history)}));
+   await page.route(mirror+'source-health-latest.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(sample)}));
+   await page.route(mirror+'source-health-history.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(history)}));
+
    await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
    await page.locator('#boardRows tr').first().waitFor();
    await page.locator('#sourceHealthMetrics span').first().waitFor();
    assert.match(await page.locator('#sourceHealthDate').innerText(),/Última comprobación automática/,'dated live source data shown');
    assert.match(await page.locator('#sourceHealthMetrics').innerText(),/34/,'actual automated counts in snapshot');
    assert.equal(await page.locator('#sourceHealthHistory li').count(),1,'only genuine stored snapshots shown');
+   if(viewport.width===320)assert.match(await page.locator('#sourceHealthDate').innerText(),/Última comprobación automática/,'GitHub mirror recovers dated source status when Cloudflare JSON is missing');
    assert.match(await page.locator('#airlineCards .airline-card').filter({has:page.locator('h3',{hasText:'Air France'})}).locator('.airline-source-check').innerText(),/Acceso automático limitado/,'request failure is not labelled a broken link');
    assert.equal(await page.locator('.source-alternative').count(),3,'only three verified first-party alternative links');
 
