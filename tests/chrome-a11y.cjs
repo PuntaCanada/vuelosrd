@@ -20,6 +20,21 @@ const assert = require('node:assert/strict');
    assert.equal(await page.locator('#boardRows tr').count(),1);
    await page.locator('#boardClearFilters').click();
    assert.ok((await page.locator('#boardRows tr').count())>1);
+   // Practical airport travel guide, official external links, selection and localized content.
+   assert.equal(await page.locator('#travelAssistAirport option').count(),7,'seven supported airports');
+   await page.locator('#travelAssistAirport').selectOption('STI');
+   assert.equal(await page.locator('#airport').inputValue(),'STI','travel guide synchronized');
+   assert.ok((await page.locator('#assist-operator-link').getAttribute('href')).includes('aeropuertocibao.com.do'));
+   assert.ok((await page.locator('#assist-flight-link').getAttribute('href')).includes('/data/airports/sti'));
+   await page.locator('#travelAssistAirport').selectOption('LRM');
+   assert.ok((await page.locator('#assist-operator-link').getAttribute('href')).includes('romanaairport.com'));
+   await page.locator('#travelAssistAirport').selectOption('PUJ');
+   assert.ok((await page.locator('#assist-transport-link').getAttribute('href')).includes('puntacanainternationalairport.com'));
+   assert.ok((await page.locator('#assist-baggage-link').getAttribute('href')).includes('aduanas.gob.do'));
+   assert.ok((await page.locator('#assist-eticket-link').getAttribute('href')).includes('eticket.migracion.gob.do'));
+   await page.locator('[data-lang="de"]').click();
+   assert.ok((await page.locator('#travel-assist-title').innerText()).includes('Flughafenführer'));
+   await page.locator('[data-lang="es"]').click();
    // Real Chrome smoke test: the full airline selection is visible, filterable and keyboard-operable.
    const airlineButtons=page.locator('#flightAirlineShortcutButtons [data-airline]');
    assert.equal(await airlineButtons.count(),28,'all directory airlines displayed initially');
