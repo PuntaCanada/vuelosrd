@@ -166,7 +166,7 @@ const assert = require('node:assert/strict');
    await page.locator('#airlineFilter').fill('Spirit');
    assert.equal(await page.locator('#airlineCards .airline-inactive-notice').count(),1,'historical status warning shown');
    assert.match(await page.locator('#airlineCards .airline-inactive-notice').innerText(),/2026/);
-   assert.equal(await page.locator('#airlineCards .airline-start-search').isDisabled(),true);
+   assert.equal(await page.locator('#airlineCards .airline-start-search').count(),0,'ceased carrier has no new-flight action');
    assert.match(await page.locator('#airlineCards a[href*="spiritrestructuring.com"]').getAttribute('href'),/spiritrestructuring/);
    await page.locator('#airlineFilter').fill('');
    await page.locator('#flightAirlineQuickFilter').fill('not-an-airline');
