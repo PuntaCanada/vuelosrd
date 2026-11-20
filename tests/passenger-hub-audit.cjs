@@ -42,4 +42,18 @@ assert.ok(html.includes('id="passenger-checklist"'),'accessible checklist');
 assert.ok(html.includes('id="passengerIssue"'),'baggage versus terminal selector');
 assert.ok(html.includes('id="passengerAirline"'),'airline contact selector');
 assert.ok(!html.includes('fetch(passenger'),'no external personal-data requests');
+// Integrated journey guide uses the already curated airport and airline source lists.
+const journey=getJson('journeyWords',';\nfunction renderJourneyAssistant()');
+for(const lang of ['es','en','de','fr','ht']){
+ const w=journey[lang];assert.ok(w,'journey translation '+lang);
+ for(const key of ['title','intro','airport','airline','stage','choose','departure','arrival','withoutAirline','airportSource','airlineSource','checklist','transfer','baggage','notice']){
+  assert.ok(typeof w[key]==='string'&&w[key].length>4,'missing journey text '+lang+' '+key);
+ }
+}
+for(const id of ['journey-wizard','journeyAirport','journeyAirline','journeyStage','journey-summary','journey-airport-source','journey-airline-source','journey-transfer-link','journey-baggage-link','journey-checklist-link']){
+ assert.ok(html.includes('id="'+id+'"'),'journey control missing '+id);
+}
+assert.ok(html.includes('chosen.url'),'airline links originate from existing official directory');
+assert.ok(html.includes('airportInfo[airport].url'),'airport links originate from existing official directory');
+assert.ok(!html.includes('localStorage.setItem(\'journey'),'no personal journey choices stored');
 console.log('PASS: 5 languages x 10 checklist items; 7 airports, official baggage / lost-property routes and local-only checkmarks.');
