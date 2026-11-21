@@ -2,6 +2,7 @@
 // Uses only local static files and checks navigation without requesting external travel sites.
 'use strict';
 const {chromium}=require('playwright');
+const {newTrackingFreePage,blockCloudflareAnalytics}=require('./block-cloudflare-analytics.cjs');
 const assert=require('node:assert/strict');
 const languages=['es','en','de','fr','ht'];
 const airports=['puj','sdq','sti','pop','lrm','azs','jbq'];
@@ -12,7 +13,7 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
  let checked=0;
  try{
   for(const width of [320,390,1280]){
-   const page=await browser.newPage({viewport:{width,height:800},reducedMotion:'reduce'});
+   const page=await newTrackingFreePage(browser,{viewport:{width,height:800},reducedMotion:'reduce'});
    try{
     for(const lang of languages){
      for(const code of [null,...airports]){
@@ -66,7 +67,7 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
    }finally{await page.close();}
   }
   // Follow a real guide flight form through to the interactive assistant in all five languages.
-  const handoff=await browser.newPage({viewport:{width:390,height:844},reducedMotion:'reduce'});
+  const handoff=await newTrackingFreePage(browser,{viewport:{width:390,height:844},reducedMotion:'reduce'});
   try{
    for(const [lang,code] of [['es','puj'],['en','sdq'],['de','sti'],['fr','pop'],['ht','lrm']]){
     await handoff.goto(site+path(lang,code),{waitUntil:'domcontentloaded'});
