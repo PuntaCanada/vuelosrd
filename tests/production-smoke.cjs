@@ -2,6 +2,7 @@
 // Never assumes the demo departure board is live operational flight data.
 // Run: node tests/production-smoke.cjs (requires Playwright Chromium).
 const {chromium}=require('playwright');
+const {newTrackingFreePage,blockCloudflareAnalytics}=require('./block-cloudflare-analytics.cjs');
 const assert=require('node:assert/strict');
 (async()=>{
  const base=process.env.VUELOSRD_PRODUCTION_URL||'https://vuelosrd.pages.dev/';
@@ -9,7 +10,7 @@ const assert=require('node:assert/strict');
  let failed=false;
  try{
   for(const viewport of [{width:1365,height:900},{width:390,height:844}]){
-   const page=await browser.newPage({viewport,locale:'es-DO'});
+   const page=await newTrackingFreePage(browser,{viewport,locale:'es-DO'});
    try{
     const response=await page.goto(base,{waitUntil:'domcontentloaded',timeout:20000});
     assert.ok(response&&response.status()===200,'production page must return HTTP 200');
@@ -107,7 +108,7 @@ const assert=require('node:assert/strict');
     await page.locator('#flightAirlineQuickFilter').fill('');
     if(viewport.width>600){
      for(const lang of ['en','de','fr','ht']){
-      const hub=await browser.newPage({viewport,locale:'es-DO'});
+      const hub=await newTrackingFreePage(browser,{viewport,locale:'es-DO'});
       try{
        const url=new URL('/'+lang+'/',base).href;
        const result=await hub.goto(url,{waitUntil:'domcontentloaded',timeout:20000});
