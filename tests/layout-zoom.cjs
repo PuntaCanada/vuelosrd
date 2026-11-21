@@ -40,6 +40,7 @@ const assert=require('node:assert/strict');
      assert.ok(d.warningHeight>=12&&d.warningVisible&&d.warningText.length>40,'warning must be visible and translated: '+label);
      assert.ok(d.linkHeight>=40,'planner guide link must remain a usable tap target: '+label);
      // At 200% zoom the usable CSS viewport is smaller; do not clip the key planner.
+     if(d.overflow>2){const offenders=await page.evaluate(()=>[...document.querySelectorAll('body *')].map(e=>({tag:e.tagName,id:e.id,cls:String(e.className).slice(0,60),right:Math.round(e.getBoundingClientRect().right),left:Math.round(e.getBoundingClientRect().left)})).filter(x=>x.right>innerWidth+2||x.left< -2).slice(0,15));console.error('OVERFLOW DETAILS '+label,JSON.stringify(offenders));}
      assert.ok(d.overflow<=2,'horizontal document overflow: '+label+' '+d.overflow);
      assert.ok(d.title.length>8,'planner title translated: '+label);
      count++;
