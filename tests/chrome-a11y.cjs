@@ -1,12 +1,13 @@
 // Chromium browser regression and automated axe checks. No flight API or paid service.
 const { chromium } = require('playwright');
+const {newTrackingFreePage,blockCloudflareAnalytics}=require('./block-cloudflare-analytics.cjs');
 const axe = require('axe-core');
 const assert = require('node:assert/strict');
 (async () => {
  const browser = await chromium.launch({ headless:true, args:['--no-sandbox'] });
  const failures=[];
  for (const viewport of [{width:1440,height:900},{width:390,height:844},{width:320,height:700}]) {
-  const page=await browser.newPage({viewport, reducedMotion:'reduce'});
+  const page=await newTrackingFreePage(browser,{viewport, reducedMotion:'reduce'});
   try {
    // Mock only within Chromium regression: this is never published as live data.
    const checkedAt=new Date().toISOString();
@@ -340,7 +341,7 @@ const assert = require('node:assert/strict');
  // Independently crawl real static multilingual airport guides in Chromium.
  const airportCases=[['puj','es',320],['sdq','en',390],['sti','de',390],['pop','fr',320],['lrm','ht',390],['azs','es',1440],['jbq','de',320]];
  for(const [code,lang,width] of airportCases){
-  const page=await browser.newPage({viewport:{width,height:780},reducedMotion:'reduce'});
+  const page=await newTrackingFreePage(browser,{viewport:{width,height:780},reducedMotion:'reduce'});
   try{
    const uri='http://127.0.0.1:8765/'+(lang==='es'?'':lang+'/')+'airports/'+code+'/';
    const result=await page.goto(uri,{waitUntil:'domcontentloaded'});
