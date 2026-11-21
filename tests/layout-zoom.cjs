@@ -1,6 +1,7 @@
 // Targeted real-Chromium regression for the planner/flight-board overlap.
 // Also covers all five interface languages and 200% browser-zoom equivalent reflow.
 const {chromium}=require('playwright');
+const {newTrackingFreePage,blockCloudflareAnalytics}=require('./block-cloudflare-analytics.cjs');
 const assert=require('node:assert/strict');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
@@ -13,7 +14,7 @@ const assert=require('node:assert/strict');
    {width:720,height:900,zoom:2},{width:512,height:800,zoom:2},
    {width:390,height:900,zoom:2},{width:320,height:900,zoom:2}
   ]) {
-   const page=await browser.newPage({viewport:{width:spec.width,height:spec.height},reducedMotion:'reduce'});
+   const page=await newTrackingFreePage(browser,{viewport:{width:spec.width,height:spec.height},reducedMotion:'reduce'});
    try {
     await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
     for(const lang of ['es','en','de','fr','ht']) {
