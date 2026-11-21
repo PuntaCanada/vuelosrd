@@ -2,6 +2,7 @@
 // 4G-style throttled local static server; no Lighthouse, API keys or paid service.
 'use strict';
 const {chromium}=require('playwright');
+const {newTrackingFreePage,blockCloudflareAnalytics}=require('./block-cloudflare-analytics.cjs');
 const assert=require('node:assert/strict');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
@@ -14,6 +15,7 @@ const assert=require('node:assert/strict');
   ];
   for(const sc of scenarios){
    const context=await browser.newContext({viewport:{width:sc.width,height:sc.height},deviceScaleFactor:1,reducedMotion:'reduce'});
+   await blockCloudflareAnalytics(context);
    const page=await context.newPage();
    await page.addInitScript(()=>{
     window.__vuelosLab={lcp:0,cls:0};
