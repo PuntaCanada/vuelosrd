@@ -27,6 +27,7 @@ jobs:
           sleep 2
           node tests/chrome-a11y.cjs
           node tests/navigation-40.cjs
+          node tests/layout-zoom.cjs
           node tests/lab-performance.cjs
       - name: Verify published Cloudflare Pages in real Chromium
         shell: bash
