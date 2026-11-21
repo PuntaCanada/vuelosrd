@@ -476,6 +476,12 @@ html{scroll-padding-top:18px}#flight-board,#flightTitle,#airlines{scroll-margin-
 @media(max-width:850px){.v2-guide-badge{display:none}.v2-steps{grid-template-columns:1fr 1fr}.v2-step:last-child{grid-column:1/-1}}
 @media(max-width:620px){.v2-console{margin:12px -4px 22px;padding:18px 13px;border-radius:18px}.v2-head{margin-bottom:15px}.v2-head p{font-size:14px}.v2-steps{grid-template-columns:1fr;gap:9px}.v2-step:last-child{grid-column:auto}.v2-step{padding:12px 14px}.v2-stage button{min-height:47px}.v2-result{padding:14px}.v2-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.v2-actions a{overflow-wrap:anywhere;padding:9px 7px}}
 .airline-source-check{font-size:12px;line-height:1.5;padding:9px 11px;border-radius:9px;margin:10px 0 0;background:#edf7f9;color:#184d60;border-left:3px solid #288091}.airline-source-check[data-status=restricted],.airline-source-check[data-status=timeout]{background:#fff6e6;color:#684918;border-left-color:#d5a348}.airline-source-check[data-status=readable]{background:#ebf7f0;color:#1c6646;border-left-color:#4b9c78}
+
+/* Keep the flight board below the three-step planner. The board's old negative
+   hero-overlap margin otherwise covers the planner warning and its links. */
+#v2-console + .air-board{margin-top:24px}
+@media(max-width:760px){#v2-console + .air-board{margin-top:18px}}
+@media(max-width:560px){#v2-console + .air-board{margin-top:16px}}
 </style><link rel="stylesheet" href="/css/source-health.css"></head>
 <body>
 <a class="skip-link" href="#flight-board">Ir al tablero de vuelos / Skip to flight board</a>
