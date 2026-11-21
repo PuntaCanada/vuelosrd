@@ -25,6 +25,7 @@ jobs:
         run: |
           python3 -m http.server 8765 --bind 127.0.0.1 &
           sleep 2
+          node tests/analytics-isolation.cjs
           node tests/chrome-a11y.cjs
           node tests/navigation-40.cjs
           node tests/layout-zoom.cjs
