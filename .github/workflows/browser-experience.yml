@@ -24,7 +24,20 @@ jobs:
         run: |
           for attempt in $(seq 1 12); do
             if curl --fail --location --silent --show-error --max-time 15 https://vuelosrd.pages.dev/ -o /tmp/vuelosrd-public.html &&
-               cmp -s index.html /tmp/vuelosrd-public.html; then
+               python3 - <<'PY'
+          from pathlib import Path
+          import re
+          expected = Path('index.html').read_bytes()
+          actual = Path('/tmp/vuelosrd-public.html').read_bytes()
+          # Pages may add the existing analytics beacon after serving the HTML.
+          actual = re.sub(
+              rb'<!-- Cloudflare Pages Analytics --><script\b[^>]*src=[\x22\x27]https://static\.cloudflareinsights\.com/beacon\.min\.js[\x22\x27][^>]*></script><!-- Cloudflare Pages Analytics -->',
+              b'',
+              actual,
+          )
+          raise SystemExit(0 if actual == expected else 1)
+          PY
+            then
               exit 0
             fi
             sleep 8
