@@ -3,7 +3,7 @@
 Portal piloto multilingüe de aeropuertos y seguimiento de vuelos de la República Dominicana.
 
 ## Estado
-**Piloto estático:** no hay datos de vuelos en directo propios. Los botones de llegadas, salidas y seguimiento abren Flightradar24, un proveedor externo. VuelosRD **no confirma** horarios, retrasos, cancelaciones ni posiciones en directo. No se copian ni se extraen automáticamente datos ajenos.
+**Portal estático:** VuelosRD enlaza primero a las fuentes oficiales de aeropuertos y aerolíneas. Punta Cana y Cibao tienen enlaces a paneles del operador. Para los otros aeropuertos se indica que no hay un enlace directo verificado. Flightradar24 se ofrece como fuente externa. VuelosRD no publica horarios, retrasos, cancelaciones ni posiciones en directo.
 
 ## Características
 - 5 idiomas: español, inglés, alemán, francés y kreyòl ayisyen.
@@ -37,7 +37,7 @@ No se almacena información personal en servidores VuelosRD. El idioma se recuer
 1. Abrir `index.html`.
 2. Cambiar entre ES, EN, Deutsch, Français y Kreyòl; comprobar navegación y etiquetas.
 3. Seleccionar aeropuertos, probar llegadas y salidas (abren nuevas pestañas).
-4. Introducir `DE 2228`; el botón de seguimiento enlaza a un proveedor externo.
+4. Introducir el número de un vuelo que desees consultar; el botón de seguimiento enlaza a un proveedor externo.
 5. Comprobar que cadenas inválidas no generan una búsqueda.
 6. Comprobar la hora dominicana y la interfaz en móvil.
 
@@ -62,11 +62,6 @@ The Wikimedia Commons file pages describe these images as public-domain text/sim
 **Air Canada:** Its published policy requires prior permission before using its brand assets or logo: https://www.aircanada.com/ca/en/aco/home/about/media/permission.html . Accordingly, the Air Canada card uses only the textual airline name and code while permission is not documented. Do not replace that fallback with the logo without resolving the permission requirement.
 
 No new paid services, hosted image accounts, trackers, or third-party scripts were added.
-
-## Country flags on the demonstration flight board
-
-The five locally hosted SVGs under `assets/flags/` (Germany `de`, United States `us`, Spain `es`, Canada `ca`, Dominican Republic `do`) are from [lipis/flag-icons](https://github.com/lipis/flag-icons), version retrieved from its public main branch. These files are MIT licensed; the complete license notice is retained in `assets/flags/LICENSE` (copyright Panayiotis Lipiridis). Their use introduces **no new API, tracking, or recurring costs**. City-to-country mappings are manually curated for the **fictional example destinations only**, and do not represent real routes, schedules, or flight operating information.
-
 
 ## Airline directory update (2026-11-19)
 
@@ -143,7 +138,7 @@ The public `#journey-wizard` inside `#passenger-hub` connects three explicit, op
 
 The airport selector is synchronized with the existing airport detail and example-board selectors, the airport-specific baggage-contact selector, and the trip transport guide. Airline selection is synchronized with the existing official-airline contact picker; if no airline is selected, the official-airline action is **hidden**, not an invented link. Arrival/departure selection is synchronized with the existing independent local-device travel checklists. The assistant links directly to the current airport operator, official selected airline website, existing checklist, airport transfer guide and baggage support. Buttons and links retain visible keyboard focus and adequate touch target sizes. The layout stacks into one column on small screens.
 
-**Evidence and limitations:** No new airport services, prices, schedules, airline/airport relationships, routes or live flight data were introduced. Operator sites are reused directly from `airportInfo` and airline sites from `airlineDirectory`; this is **not** a claim that any particular airline serves the selected airport, nor that the operator page contains a live flight board. The checked-baggage vs terminal-lost-property guidance continues to reuse existing official contact sources. Journey choices are never sent to a server or retained in localStorage; only the opt-in checklist ticks remain on device. The previously fictional airport flight board is still expressly marked DEMO.
+**Evidence and limitations:** No new airport services, prices, schedules, airline/airport relationships, routes or live flight data were introduced. Operator sites are reused directly from `airportInfo` and airline sites from `airlineDirectory`; this is **not** a claim that any particular airline serves the selected airport, nor that the operator page contains a live flight board. The checked-baggage vs terminal-lost-property guidance continues to reuse existing official contact sources. Journey choices are never sent to a server or retained in localStorage; only the opt-in checklist ticks remain on device. The flight board links to official sources.
 
 Tests: `tests/passenger-hub-audit.cjs` checks all five journey translations and link provenance. `tests/chrome-a11y.cjs` exercises linked airport/airline/stage choices, absent-airline state and language switching at desktop and narrow viewports. `tests/browser-check.cjs` checks the same on real Chrome and captures the wizard. Cloudflare smoke validates the published controls.
 
@@ -151,7 +146,7 @@ Tests: `tests/passenger-hub-audit.cjs` checks all five journey translations and 
 
 **35 new static HTML guides** are published at `/airports/{iata}/` (Spanish) and `/{lang}/airports/{iata}/` for English (`en`), German (`de`), French (`fr`) and Haitian Creole (`ht`). The IATA slugs are `puj`, `sdq`, `sti`, `pop`, `lrm`, `azs`, `jbq`. Each guide has a self-referencing canonical, locale title/description and text, 5 reciprocal HTML hreflang links plus x-default, static official source links, missing-source callouts, HTML landmarks, and a static `WebPage` JSON-LD object about that airport. The guides link to the app using `?lang=xx&airport=XXX#journey-wizard` and cross-link all seven airports in the selected language.
 
-The original 5-language hub pages now link directly to the seven airport guides in each language. The interactive Spanish home now links to language-matched guide pages from the airport cards and comparison panel, and has a first-visitor three-step orientation explaining the fictional DEMO board.
+The original 5-language hub pages now link directly to the seven airport guides in each language. The interactive Spanish home now links to language-matched guide pages from the airport cards and comparison panel, and has a first-visitor three-step orientation explaining where to check flight status.
 
 **Official source inventory**: `data/airport-source-registry.json`, checked 20 November 2026. It distinguishes *operator-specific published services* (Punta Cana / Cibao / La Romana) from *unverified specific services* (the four Aerodom airports). Importantly, we found and linked dedicated airport profile pages, not just the generic Aerodom home:
 - PUJ: https://www.puntacanainternationalairport.com/en/
@@ -184,7 +179,7 @@ To reproduce: run `node tests/performance-budget.cjs`, `node tests/seo-audit.cjs
 ## Five-language travel navigation quality package (2026-11-20)
 
 - **35 airport landing pages:** their locale-specific, accessible flight-number forms already hand off the airport code, language and proposed flight number through a first-party URL into the interactive (non-live) lookup. Every guide offers direct links to the appropriate journey assistant, baggage help, transport guide and its own official sources. The SEO test and the production Cloudflare smoke now verify these user paths for all 35 guides without altering any of their canonical URLs or hreflang clusters.
-- **Small-screen quick navigation:** the fixed bottom navigation has four destinations instead of three: example flight board, flight search, airlines and the journey assistant. All four labels are localized for Spanish, English, German, French and Haitian Creole. The journey destination retains a 44+ pixel tap target, an active state and reduced-motion-compatible in-page navigation. Explicit Chrome tests cover 320 and 390 px widths, keyboard focus, link anchors and page overflow.
+- **Small-screen quick navigation:** the fixed bottom navigation has four destinations instead of three: arrivals and departures sources, flight search, airlines and the journey assistant. All four labels are localized for Spanish, English, German, French and Haitian Creole. The journey destination retains a 44+ pixel tap target, an active state and reduced-motion-compatible in-page navigation. Explicit Chrome tests cover 320 and 390 px widths, keyboard focus, link anchors and page overflow.
 - **Airline-to-search handoff:** choosing a source-directory airline in the journey assistant and using its new flight-search shortcut prefills the published airline code and focuses the flight-number field; using an airline shortcut does the same and synchronizes the existing baggage/contact dropdown. It does **not** infer that the airline flies to the selected airport, that a booked flight exists, or that flight status is verified.
 - **Official source validation:** the GitHub source-health run checked 47 existing operator, government and airline URLs on 20 November 2026: 34 were HTTP-reachable, 13 inconclusive (401, 403, timeout or connection error), zero repeatedly confirmed HTTP 404/410. The 13 are **not** proven broken. The E-Ticket and some airline sites block automated requests; no official source was removed or replaced solely due to a bot-side response. The existing scheduled monitor records exceptions in the action summary.
 - **Verification:** static SEO and performance budgets, Chrome WCAG checks and reduced-motion tests, public system Chrome mobile/desktop interaction, and Cloudflare tests are required before treating changes as released. No paid services or changes outside this repository.

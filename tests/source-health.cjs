@@ -18,9 +18,11 @@ for(const entry of independent.reviews){
 
 const found=new Set(), origins=new Map();
 function register(url,origin){
- found.add(url);
- if(!origins.has(url))origins.set(url,new Set());
- origins.get(url).add(origin);
+ // Fragments identify sections in the browser and are omitted from HTTP requests.
+ const endpoint=url.split('#',1)[0];
+ found.add(endpoint);
+ if(!origins.has(endpoint))origins.set(endpoint,new Set());
+ origins.get(endpoint).add(origin);
 }
 register('https://eticket.migracion.gob.do/','Dominican immigration E-Ticket');
 register('https://www.aduanas.gob.do/manual-del-viajero/','Dominican customs passenger guide');

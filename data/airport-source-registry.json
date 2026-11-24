@@ -11,8 +11,8 @@
       "transport": "https://www.puntacanainternationalairport.com/en/services/transportations",
       "lostProperty": "https://www.puntacanainternationalairport.com/en/airport-services/item/lost-found",
       "baggage": null,
-      "arrivals": null,
-      "departures": null
+      "arrivals": "https://www.puntacanainternationalairport.com/en/#flight-info",
+      "departures": "https://www.puntacanainternationalairport.com/en/#flight-info"
     },
     "SDQ": {
       "name": "Las Américas International Airport José Francisco Peña Gómez",
