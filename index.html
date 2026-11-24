@@ -622,6 +622,7 @@ function renderAirlines(){
    const alert=document.createElement('p');alert.className='airline-inactive-notice';alert.textContent=inactiveAirlineWords[current];alert.setAttribute('role','note');
    searchButton.disabled=true;searchButton.setAttribute('aria-disabled','true');
    link.textContent=airline.name+' · '+w.link;
+   link.removeAttribute('aria-label');
    card.append(head,alert,link);
   }else card.append(head,desc,searchButton,link);if(verificationNotice)card.append(verificationNotice);
   if(typeof verifiedOfficialAlternatives!=='undefined'&&verifiedOfficialAlternatives[airline.url]){
