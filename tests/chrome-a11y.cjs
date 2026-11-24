@@ -287,7 +287,7 @@ const assert = require('node:assert/strict');
    await page.locator('#flightAirlineQuickFilter').fill('DM');
    assert.equal(await airlineButtons.count(),1,'airline code search');
    await airlineButtons.first().click();
-   assert.equal(await page.locator('#flight').getAttribute('placeholder'),'DM 1234','airline chip opens number entry');
+   assert.equal(await page.locator('#flight').getAttribute('placeholder'),'DM …','airline chip opens number entry');
    assert.equal(await page.locator('#flight').inputValue(),'DM ','airline chip pre-fills code');
    assert.equal(await page.locator('#airlineMatch').isVisible(),true,'recognized airline code is explained before digits');
    assert.equal(await page.locator('#flight').getAttribute('aria-invalid'),'false','partial code is not an error');

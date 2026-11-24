@@ -729,7 +729,7 @@ ht:{empty:'Antre nimewo vòl la pou pare swivi sou yon sèvis ekstèn.',ready:'V
 function normalizeFlightInput(value){return value.trim().replace(/[\s\-]+/g,'').toUpperCase();}
 function flightNumberValue(){return normalizeFlightInput($('flight').value);}
 function isPartialAirlineCode(code){return airlineDirectory.some(airline=>airline.code===code);}
-function prepareAirlineFlight(code){$('flight').value=code+' ';$('flight').placeholder=code+' 1234';if(airlineDirectory.some(a=>a.code===code)){$('journeyAirline').value=code;$('passengerAirline').value=code;renderPassengerHub();}links();$('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('flight').focus({preventScroll:true});$('flight').setSelectionRange($('flight').value.length,$('flight').value.length);}
+function prepareAirlineFlight(code){$('flight').value=code+' ';$('flight').placeholder=code+' …';if(airlineDirectory.some(a=>a.code===code)){$('journeyAirline').value=code;$('passengerAirline').value=code;renderPassengerHub();}links();$('flight').scrollIntoView({block:'center',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('flight').focus({preventScroll:true});$('flight').setSelectionRange($('flight').value.length,$('flight').value.length);}
 function updateFlightSearch(){
  const msg=flightSearchMessages[current],number=flightNumberValue();
  $('flight').setAttribute('autocapitalize','characters');
