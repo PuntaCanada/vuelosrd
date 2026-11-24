@@ -24,8 +24,16 @@ const assert = require('node:assert/strict');
    await page.route(mirror+'source-health-history.json',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(history)}));
 
    await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
-   await page.locator('#boardRows tr').first().waitFor();
    await page.locator('#sourceHealthMetrics span').first().waitFor();
+   // Santo Domingo crosses midnight at 04:00 UTC.
+   await page.clock.setFixedTime(new Date('2026-11-24T03:59:00Z'));
+   await page.evaluate(()=>clock());
+   assert.equal(await page.locator('#boardClock').innerText(),'23:59');
+   assert.equal(await page.locator('#boardDate').innerText(),'23 de noviembre de 2026');
+   await page.clock.setFixedTime(new Date('2026-11-24T04:00:00Z'));
+   await page.evaluate(()=>clock());
+   assert.equal(await page.locator('#boardClock').innerText(),'00:00');
+   assert.equal(await page.locator('#boardDate').innerText(),'24 de noviembre de 2026');
    assert.match(await page.locator('#sourceHealthDate').innerText(),/Última comprobación automática/,'dated live source data shown');
    assert.match(await page.locator('#sourceHealthMetrics').innerText(),/34/,'actual automated counts in snapshot');
    assert.equal(await page.locator('#sourceHealthHistory li').count(),1,'only genuine stored snapshots shown');
@@ -52,7 +60,7 @@ const assert = require('node:assert/strict');
    assert.equal(await consolePanel.isVisible(),true,'2.0 console visible at '+viewport.width);
    assert.equal(await page.locator('#v2-airport option').count(),7,'all seven airports in unified trip selector');
    const consolePosition=await consolePanel.boundingBox(),boardPosition=await page.locator('#flight-board').boundingBox();
-   assert.ok(consolePosition.y<boardPosition.y,'new trip workflow is visibly ahead of demo flight board');
+   assert.ok(consolePosition.y<boardPosition.y,'new trip workflow is visibly ahead of flight sources');
    await page.locator('#v2-airport').selectOption('STI');
    assert.equal(await page.locator('#airport').inputValue(),'STI','2.0 airport syncs flight search');
    assert.equal(await page.locator('#boardAirport').inputValue(),'STI','2.0 airport syncs board');
@@ -80,8 +88,7 @@ const assert = require('node:assert/strict');
    assert.equal(await page.locator('#v2-guide').getAttribute('href'),'/de/airports/puj/','2.0 uses selected language');
    await page.locator('[data-lang="es"]').click();
 
-   assert.match(await page.locator('#boardWarning').innerText(),/DEMO|DEMOSTRA|fictici/i);
-   assert.ok((await page.locator('#boardRows tr').count())>0,'demo board rendered');
+   assert.match(await page.locator('#boardWarning').innerText(),/no publica datos de vuelo en tiempo real/i);
    // Search is accent-insensitive, has useful live results and synchronizes the flight, board, and journey.
    await page.locator('#airportQuickFilter').fill('samana');
    assert.equal(await page.locator('#airportQuickResults button').count(),1,'accent-free airport search yields one result');
@@ -139,10 +146,12 @@ const assert = require('node:assert/strict');
    await page.locator('[data-lang="es"]').click();
    await page.locator('#boardDepartures').click();
    assert.equal(await page.locator('#boardDepartures').getAttribute('aria-pressed'),'true');
-   await page.locator('#boardFilter').fill('NO-MATCH-XYZ');
-   assert.equal(await page.locator('#boardRows tr').count(),1);
-   await page.locator('#boardClearFilters').click();
-   assert.ok((await page.locator('#boardRows tr').count())>1);
+   assert.match(await page.locator('#boardRealDesc').innerText(),/no tenemos un enlace verificado/i);
+   assert.match(await page.locator('#boardAirportOfficialLink').getAttribute('href'),/aerodom\.com/);
+   await page.locator('#boardAirport').selectOption('STI');
+   assert.equal(await page.locator('#boardAirportOfficialLink').getAttribute('href'),'https://aeropuertocibao.com.do/en/salidas/');
+   await page.locator('#boardArrivals').click();
+   assert.equal(await page.locator('#boardAirportOfficialLink').getAttribute('href'),'https://aeropuertocibao.com.do/en/llegadas/');
    // Five-language journey assistant: synchronizes existing airport, airline and stage controls.
    assert.equal(await page.locator('#journeyAirport option').count(),7);
    assert.equal(await page.locator('#journeyAirline option').count(),29,'28 official airlines plus optional choice');

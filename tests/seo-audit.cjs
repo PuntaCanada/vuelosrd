@@ -43,7 +43,11 @@ for(const code of groups){
    assert.equal(schema.about.iataCode,code.toUpperCase(),'airport IATA in schema');
    assert.equal(schema.inLanguage,lang,'language in schema');
    assert.ok(html.includes('href="/?lang='+lang+'&amp;airport='+code.toUpperCase()+'#journey-wizard"'),'working portal deep-link');
-   assert.ok(html.includes('href="'+registry.airports[code.toUpperCase()].official+'"'),'official operator for '+code);
+   const sources=registry.airports[code.toUpperCase()];
+   assert.ok(html.includes('href="'+sources.official+'"'),'official operator for '+code);
+   for(const mode of ['arrivals','departures']){
+    if(sources[mode]) assert.ok(html.includes('href="'+sources[mode]+'"'),'official '+mode+' link '+canonical);
+   }
    assert.ok(html.includes('class="source missing"')||code==='puj'||code==='sti'||code==='lrm','no invented source completeness '+code);
    assert.ok(html.includes('href="'+url(lang,null)+'"'),'locale hub backlink');
    assert.ok(html.includes('id="quick-travel"')&&html.includes('class="quick-flight-form"'),'airport travel shortcuts visible '+canonical);
@@ -60,6 +64,7 @@ for(const code of groups){
    assert.equal(schema['@type'],lang==='es'?'WebSite':'WebPage','home schema');
    assert.ok(html.includes('VuelosRD'),'site brand');
   }
+  assert.doesNotMatch(html,/\bD[EÉ]MO\b/i,'outdated flight demonstration copy '+canonical);
   checked++;
  }
 }

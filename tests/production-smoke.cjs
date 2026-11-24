@@ -1,5 +1,5 @@
 // Smoke test against the publicly published Cloudflare Pages site.
-// Never assumes the demo departure board is live operational flight data.
+// Validate the deployed flight-source portal.
 // Run: node tests/production-smoke.cjs (requires Playwright Chromium).
 const {chromium}=require('playwright');
 const {newTrackingFreePage,blockCloudflareAnalytics}=require('./block-cloudflare-analytics.cjs');
@@ -16,7 +16,7 @@ const assert=require('node:assert/strict');
     assert.ok(response&&response.status()===200,'production page must return HTTP 200');
     await page.locator('#flightAirlineQuickFilter').waitFor({timeout:8000});
     assert.equal(await page.locator('#flightAirlineShortcutButtons [data-airline]').count(),28,'production must contain latest 28-airline directory');
-    assert.equal(await page.locator('#boardWarning').isVisible(),true,'fictional board clearly disclosed');
+    assert.equal(await page.locator('#boardWarning').isVisible(),true,'flight-data limitation clearly disclosed');
     // Published main must include the prior de7c6d6 navigation and 34663a36 safety changes.
     assert.equal(await page.locator('#journey-wizard').count(),1,'published five-language assistant');
     // LIVE release verification: never substitute a CI fixture for the public JSON feed.
