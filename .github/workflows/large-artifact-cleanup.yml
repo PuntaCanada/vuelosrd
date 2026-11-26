@@ -1,0 +1,36 @@
+name: Confirmed large screenshot cleanup
+on:
+  pull_request:
+    branches: [main]
+    paths: ['.github/workflows/large-artifact-cleanup.yml']
+permissions: {}
+jobs:
+  cleanup:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'maintenance/large-artifact-cleanup'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      pull-requests: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Delete only approved obsolete screenshots
+        run: |
+          set -euo pipefail
+          total=0
+          while read -r pr run artifact name; do
+            gh api "repos/$REPO/pulls/$pr" > /tmp/pr.json
+            jq -e '.merged == true and .state == "closed"' /tmp/pr.json >/dev/null
+            gh api "repos/$REPO/actions/runs/$run" > /tmp/run.json
+            jq -e --arg sha "$(jq -r .head.sha /tmp/pr.json)" '.status == "completed" and .conclusion == "success" and .head_sha == $sha' /tmp/run.json >/dev/null
+            gh api "repos/$REPO/actions/runs/$run/artifacts" --paginate --jq '.artifacts[]' | jq -s --argjson id "$artifact" --arg name "$name" 'map(select(.id == $id and .name == $name and .expired == false))' > /tmp/a.json
+            if test "$(jq length /tmp/a.json)" != 1; then echo "Absent or mismatched: $artifact"; continue; fi
+            size=$(jq -er '.[0].size_in_bytes' /tmp/a.json)
+            gh api --method DELETE "repos/$REPO/actions/artifacts/$artifact"
+            echo "DELETED id=$artifact bytes=$size"
+            total=$((total+size))
+          done <<'APPROVED'
+          22 45675344384 15051666304 vuelosrd-browser-screenshots
+          APPROVED
+          echo "Deleted bytes: $total"
