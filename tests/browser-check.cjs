@@ -68,6 +68,35 @@ const {chromium} = require('playwright');
       assert.equal(await localized.locator('#airport').inputValue(),'STI');
       await localized.close();
     }
+    // Measure real optional artwork response bytes with cache disabled via fresh contexts.
+    const modeResults=[];
+    for(const lite of [false,true]){
+      const ctx=await browser.newContext({viewport:{width:390,height:844}});
+      await ctx.addInitScript(value=>{localStorage.setItem('vuelosrd_lite',value?'1':'0')},lite);
+      const p=await ctx.newPage();const artResponses=[];
+      p.on('response',res=>{if(new URL(res.url()).pathname==='/assets/airport-illustration.svg')artResponses.push(res)});
+      await p.goto(new URL('/de/',base).href,{waitUntil:'load'});
+      assert.equal(await p.locator('#portalLite').isChecked(),lite);
+      assert.equal(await p.locator('#cards .airport-card').count(),7);
+      assert.equal(await p.locator('#cards .airport-card-actions a').count(),21);
+      assert.equal(await p.locator('#airlineCards .airline-card').count(),28);
+      assert.equal(await p.locator('#airlineCards img').count(),0);
+      if(!lite){
+        await p.locator('#cards .airport-card').first().scrollIntoViewIfNeeded();
+        await p.waitForFunction(()=>{const i=document.querySelector('.airport-original-art');return i&&i.complete&&i.naturalWidth>0});
+      }
+      const sizes=await Promise.all(artResponses.map(res=>res.request().sizes()));
+      const bytes=sizes.reduce((n,s)=>n+s.responseBodySize,0);
+      assert.equal(await p.locator('.airport-original-art').count(),lite?0:7);
+      if(lite)assert.equal(bytes,0);else assert.ok(bytes>0);
+      modeResults.push({lite,bytes,requests:artResponses.length});
+      await p.locator('#portalLite').setChecked(!lite);
+      await p.reload({waitUntil:'domcontentloaded'});
+      assert.equal(await p.locator('#portalLite').isChecked(),!lite);
+      await ctx.close();
+    }
+    assert.ok(modeResults[0].bytes>modeResults[1].bytes);
+    console.log('DATA SAVER MEASURED:',JSON.stringify(modeResults));
     // Journey assistant in real system Chrome: airport, airline, stage, external sources and privacy.
     assert.equal(await page.locator('#journeyAirport option').count(),7);
     assert.equal(await page.locator('#journeyAirline option').count(),29);
