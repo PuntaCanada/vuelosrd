@@ -33,8 +33,12 @@ for(const lang of languages){
 }
 for(const lang of languages.filter(x=>x!=='es')){
  const path=lang+'/index.html',document=fs.readFileSync(path,'utf8');
- assert.ok(bytes(document)<16*1024,'Language hub exceeds 16KiB '+path);
- assert.ok(!/<script[^>]*src=/.test(document),'no external JS '+path);
+ // Locale routes now provide the same complete application, not static guides.
+ assert.ok(bytes(document)<250*1024,'Interactive locale exceeds same 250KiB budget '+path);
+ assert.equal(document.slice(document.indexOf('<style>')),html.slice(html.indexOf('<style>')),'identical application body across locale routes '+path);
+ const scripts=[...document.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g)];
+ assert.ok(scripts.length<=1,'same deferred dependency budget '+path);
+ for(const script of scripts)assert.ok(script[0].includes(' defer')&&script[1].startsWith('/js/'),'only deferred local JS '+path);
 }
 const largest=Math.max(...results.filter(r=>r.path!=='index.html').map(r=>r.bytes));
 console.log('PERF BUDGETS PASS: home '+size+' B (<250KiB), '+(results.length-1)+' guides each <16KiB (largest '+largest+' B), no blocking external scripts on any static SEO guide (homepage allows one deferred same-origin source monitor), intrinsic lazy airline logos.');
