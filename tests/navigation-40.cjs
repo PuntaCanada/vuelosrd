@@ -22,7 +22,7 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
       assert.equal(response.status(),200,'page reachable '+location);
       assert.equal(await page.locator('html').getAttribute('lang'),lang,'language '+location);
       assert.equal(await page.locator('h1').count(),1,'one page heading '+location);
-      if(lang==='es'&&!code){
+      if(!code){
        assert.equal(await page.locator('.languages [data-lang]').count(),2,'main language shortcut buttons');
        assert.ok(await page.locator('#langMenu').count(),'main additional language menu');
       }else{
@@ -41,24 +41,20 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
        assert.ok(await page.locator('.quick-flight-form').evaluate(form=>form.checkValidity()),'prepared flight format '+location);
        const inputs=await page.locator('nav.languages a').evaluateAll(links=>links.map(x=>new URL(x.href).pathname));
        assert.deepEqual(inputs,languages.map(l=>path(l,code)),'five correct locale guide routes '+location);
-      }else if(lang!=='es'){
-       assert.equal(await page.locator('.airport-links a').count(),7,'localized airport index '+location);
-       const shortcuts=page.locator('nav.hub-shortcuts a');
-       assert.equal(await shortcuts.count(),3,'localized journey/airline/baggage shortcuts '+location);
-       assert.deepEqual(await shortcuts.evaluateAll(links=>links.map(x=>new URL(x.href).hash)),['#journey-wizard','#airlines','#passenger-help-title'],'hub actions target supported sections '+location);
-       for(const link of await shortcuts.all()){
-        assert.ok((await link.boundingBox()).height>=44,'keyboard/touch friendly hub action '+location);
-       }
       }else{
-       assert.ok(await page.locator('#journey-wizard').count(),'main journey assistant available');
-       assert.ok(await page.locator('#flightTitle').count(),'main flight search available');
+       assert.equal(await page.locator('#cards .airport-card').count(),7,'seven interactive airport cards '+location);
+       assert.equal(await page.locator('#cards .airport-card-actions a').count(),21,'all airport actions '+location);
+       for(const id of ['journey-wizard','flightTitle','airlines','passenger-help-title'])assert.equal(await page.locator('#'+id).count(),1,'interactive target '+id+' '+location);
+       assert.equal(await page.locator('#langMenu [data-choose-lang]').count(),3,'three further language choices '+location);
+       assert.equal(await page.locator('.languages [data-lang]').count(),2,'two direct language choices '+location);
       }
-      const root=lang==='es'&&!code;
+      const root=!code;
       const first=root?page.locator('.languages [data-lang]').first():page.locator('nav.languages a').first();
       await first.focus();
       assert.equal(await page.evaluate(()=>document.activeElement.tagName),root?'BUTTON':'A','keyboard focus '+location);
       await page.keyboard.press('Tab');
       assert.equal(await page.evaluate(()=>document.activeElement.tagName),root?'BUTTON':'A','tab navigation '+location);
+      if(root){await page.locator('#langMenu summary').focus();await page.keyboard.press('Enter');assert.equal(await page.locator('#langMenu').getAttribute('open'),'');await page.keyboard.press('Escape');assert.equal(await page.locator('#langMenu').getAttribute('open'),null);}
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
       assert.equal(overflow,false,'no horizontal overflow '+width+'px '+location);
       checked++;
