@@ -66,6 +66,8 @@ const path=(lang,code)=>'/'+(lang==='es'?'':lang+'/')+(code?'airports/'+code+'/'
     }
    }finally{await page.close();}
   }
+  const networkPage=await newTrackingFreePage(browser,{viewport:{width:320,height:800},reducedMotion:'reduce'});
+  try{for(const lang of languages){const prefix=lang==='es'?'':lang+'/';await networkPage.goto(site+'/'+prefix,{waitUntil:'domcontentloaded'});await networkPage.locator('#project-network-link').click();assert.equal(new URL(networkPage.url()).pathname,'/'+prefix+'partners.html');assert.equal(await networkPage.locator('#partner-cards li').count(),14);assert.equal(await networkPage.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false);}}finally{await networkPage.close();}
   // Follow a real guide flight form through to the interactive assistant in all five languages.
   const handoff=await newTrackingFreePage(browser,{viewport:{width:390,height:844},reducedMotion:'reduce'});
   try{

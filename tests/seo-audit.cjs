@@ -10,7 +10,7 @@ assert.ok(robots.includes('User-agent: *')&&robots.includes('Allow: /'),'crawler
 assert.ok(!robots.includes('Disallow: /'),'root not excluded');
 assert.ok(robots.includes('Sitemap: '+base+'sitemap.xml'),'correct sitemap URI');
 assert.ok(sitemap.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'),'alternate namespace');
-assert.equal((sitemap.match(/<url>/g)||[]).length,40,'all five hubs and 35 airport pages in sitemap');
+assert.equal((sitemap.match(/<url>/g)||[]).length,45,'all five hubs, 35 airport pages and five partner pages in sitemap');
 const groups=[null,...codes];
 let checked=0;
 for(const code of groups){
@@ -98,3 +98,17 @@ for(const code of registryNames){
  assert.ok(landing.includes('href="'+registry.airports[code].official+'"'),'SEO page uses canonical operator source '+code);
 }
 console.log('SEO PASS: 40 canonical pages, reciprocal 5-language hreflang (HTML + sitemap), 35 Airport JSON-LD schemas and official-source completeness.');
+
+for(const lang of langs){
+ const prefix=lang==='es'?'':lang+'/';
+ const partner=fs.readFileSync(prefix+'partners.html','utf8');
+ const hub=fs.readFileSync(prefix+'index.html','utf8');
+ assert.ok(hub.includes('href="/'+prefix+'partners.html"'));
+ assert.ok(partner.includes('<html lang="'+lang+'">'));
+ assert.ok(partner.includes('<link rel="canonical" href="'+base+prefix+'partners.html">'));
+ const targets=[...partner.matchAll(/<li><a href="([^"]+)"/g)].map(m=>m[1]);
+ assert.equal(targets.length,14);assert.equal(new Set(targets).size,14);assert.ok(!targets.includes(base));
+ assert.match(partner,/simulat|simulaci|similasyon/i);
+ for(const l of [...langs,'x-default']){const path=(l==='es'||l==='x-default'?'':l+'/')+'partners.html';assert.ok(partner.includes('hreflang="'+l+'" href="'+base+path+'"'));assert.ok(sitemap.includes('<loc>'+base+prefix+'partners.html</loc>'));}
+}
+console.log('PARTNERS PASS: five languages and 14 distinct projects each');
