@@ -45,6 +45,29 @@ const {chromium} = require('playwright');
       }
       await guide.close();
     }
+    assert.equal(await page.locator('.airline-card .airline-monogram').count(),28);
+    assert.equal(await page.locator('.airline-card img').count(),0);
+    const fold=page.locator('#travel-tools details.portal-fold');
+    const summary=fold.locator('summary');
+    assert.equal(await fold.getAttribute('open'),'');
+    await summary.focus();await page.keyboard.press('Enter');
+    assert.equal(await fold.getAttribute('open'),null);
+    assert.equal(await page.locator('#et-link').isVisible(),false);
+    await page.keyboard.press('Space');
+    assert.equal(await page.locator('#et-link').isVisible(),true);
+    for(const lang of ['en','de','fr','ht']){
+      const localized=await context.newPage();
+      localized.on('pageerror',e=>errors.push(lang+': '+e.message));
+      const url=new URL('/'+lang+'/',base);
+      assert.equal((await localized.goto(url.href,{waitUntil:'domcontentloaded'})).status(),200);
+      assert.equal(await localized.locator('html').getAttribute('lang'),lang);
+      assert.equal(await localized.locator('link[rel="canonical"]').getAttribute('href'),'https://vuelosrd.pages.dev/'+lang+'/');
+      assert.equal(await localized.locator('#airlineCards .airline-card').count(),28);
+      assert.equal(await localized.locator('#airlineCards img').count(),0);
+      await localized.locator('#journeyAirport').selectOption('STI');
+      assert.equal(await localized.locator('#airport').inputValue(),'STI');
+      await localized.close();
+    }
     // Journey assistant in real system Chrome: airport, airline, stage, external sources and privacy.
     assert.equal(await page.locator('#journeyAirport option').count(),7);
     assert.equal(await page.locator('#journeyAirline option').count(),29);
@@ -141,8 +164,7 @@ const {chromium} = require('playwright');
     });
     console.log('Airline logo browser results:',JSON.stringify(imageResults,null,2));
     for (const item of imageResults) {
-      if(item.name==='Air Canada'||item.name==='Sun Country Airlines')assert.equal(item.state,'text-only',item.name+' uses text-only branding');
-      else assert.equal(item.state,'loaded',item.name+' logo failed browser load');
+      assert.equal(item.state,'text-only',item.name+' must not load unverified branding');
     }
     assert.equal(await page.locator('#flightAirlineShortcutButtons button[data-airline]').count(),28);
     assert.equal(await page.locator('#flightAirlineShortcutTitle').innerText(),'Flug mit Airline-Code suchen');
@@ -341,6 +363,6 @@ const {chromium} = require('playwright');
     assert.deepEqual(desktopAudits.flatMap(item=>item.violations.filter(v=>['serious','critical'].includes(v.impact))),[],'Axe serious/critical WCAG failure in desktop flight or airline sections');
 
     assert.deepEqual(errors,[],'JS runtime errors');
-    console.log('PASS: desktop/mobile logo loads, inputs, translations, keyboard-accessible cards.');
+    console.log('PASS: desktop/mobile rights-safe airline codes, inputs, translations, keyboard-accessible cards.');
   } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
