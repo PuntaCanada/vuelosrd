@@ -121,6 +121,26 @@
         "confirmed-missing": 0,
         "other-http": 0
       }
+    },
+    {
+      "checkedAt": "2026-11-26T18:32:38.286Z",
+      "monitorStatus": "partial-or-complete",
+      "total": 47,
+      "ok": 34,
+      "uncertain": 13,
+      "broken": 0,
+      "actionableAlertCount": 0,
+      "monitorLimitationCount": 13,
+      "warningCategories": {
+        "access-restricted": 10,
+        "temporary-server": 0,
+        "dns-failure": 0,
+        "tls-failure": 0,
+        "timeout": 0,
+        "network-error": 3,
+        "confirmed-missing": 0,
+        "other-http": 0
+      }
     }
   ]
 }
