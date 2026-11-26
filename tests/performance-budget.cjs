@@ -35,7 +35,9 @@ for(const lang of languages.filter(x=>x!=='es')){
  const path=lang+'/index.html',document=fs.readFileSync(path,'utf8');
  // Locale routes now provide the same complete application, not static guides.
  assert.ok(bytes(document)<250*1024,'Interactive locale exceeds same 250KiB budget '+path);
- assert.equal(document.slice(document.indexOf('<style>')),html.slice(html.indexOf('<style>')),'identical application body across locale routes '+path);
+ const normalizeLocaleBody=s=>s.slice(s.indexOf('<style>')).replace(/(<span id="project-network-label">)[^<]*(<\/span>)/g,'$1LOCALIZED$2').replace(/(<a id="project-network-link" href=")[^"]*(">)[^<]*(<\/a>)/g,'$1LOCALIZED$2LOCALIZED$3');
+ assert.equal(normalizeLocaleBody(document),normalizeLocaleBody(html),'identical application body except localized static network link '+path);
+ assert.ok(document.includes('id="project-network-link" href="/'+lang+'/partners.html"'),'localized static network link '+path);
  const scripts=[...document.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/g)];
  assert.ok(scripts.length<=1,'same deferred dependency budget '+path);
  for(const script of scripts)assert.ok(script[0].includes(' defer')&&script[1].startsWith('/js/'),'only deferred local JS '+path);
