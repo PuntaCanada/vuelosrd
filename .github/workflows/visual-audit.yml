@@ -1,0 +1,52 @@
+name: Read-only visual audit
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install chromium
+      - run: |
+          node --input-type=module <<'JS'
+          import {chromium} from 'playwright';
+          import {createServer} from 'node:http';
+          import {readFileSync,mkdirSync,writeFileSync,statSync} from 'node:fs';
+          import {resolve,extname,sep} from 'node:path';
+          const root=resolve('.');
+          const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.json':'application/json','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.woff2':'font/woff2'};
+          const server=createServer((req,res)=>{try{if(!['GET','HEAD'].includes(req.method)){res.writeHead(405).end();return}const u=new URL(req.url,'http://localhost');let p=resolve(root,'.'+decodeURIComponent(u.pathname));if(p!==root&&!p.startsWith(root+sep))throw Error('path');if(statSync(p).isDirectory())p=resolve(p,'index.html');res.setHeader('Content-Type',mime[extname(p)]||'application/octet-stream');res.end(readFileSync(p))}catch{res.writeHead(404).end()}});
+          await new Promise(r=>server.listen(0,'127.0.0.1',r));
+          const origin='http://127.0.0.1:'+server.address().port;
+          const browser=await chromium.launch();mkdirSync('visual-audit',{recursive:true});const reports=[];
+          try{for(const lang of ["es","en","de","fr","ht"])for(const width of [375,1440]){
+            const ctx=await browser.newContext({viewport:{width,height:900},locale:lang==='es'?'es-DO':lang,serviceWorkers:'block'});
+            const p=await ctx.newPage(),errors=[],requests=[],blocked=[],bad=[],pending=[];
+            await ctx.route('**/*',route=>{const req=route.request();if(!req.url().startsWith(origin+'/')||!['GET','HEAD'].includes(req.method())){blocked.push({url:req.url(),method:req.method()});return route.abort()}return route.continue()});
+            p.on('pageerror',e=>errors.push(e.message));
+            p.on('requestfailed',r=>bad.push({url:r.url(),failure:r.failure()?.errorText}));
+            p.on('response',r=>{const item={url:r.url(),type:r.request().resourceType(),status:r.status()};requests.push(item);pending.push(r.request().sizes().then(s=>Object.assign(item,s)).catch(()=>{}))});
+            const url=origin+(lang==='es'?'/':'/'+lang+'/');
+            const response=await p.goto(url,{waitUntil:'load',timeout:30000});await p.waitForTimeout(800);
+            await p.screenshot({path:'visual-audit/'+lang+'-'+width+'.png'});
+            const top=await p.evaluate(()=>({title:document.title,lang:document.documentElement.lang,heading:document.querySelector('h1')?.textContent,scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth,nav:performance.getEntriesByType('navigation').map(n=>({domContentLoaded:n.domContentLoadedEventEnd,load:n.loadEventEnd,transferSize:n.transferSize})),images:[...document.images].map(i=>({src:i.getAttribute('src'),complete:i.complete,width:i.naturalWidth,height:i.naturalHeight,renderedWidth:i.width,renderedHeight:i.height,loading:i.loading,alt:i.alt}))}));
+            await p.screenshot({path:'visual-audit/'+lang+'-'+width+'-full.png',fullPage:true});
+            await Promise.allSettled(pending);reports.push({lang,width,status:response.status(),top,requests,blocked,bad,errors});await ctx.close();
+          }}finally{await browser.close();server.close();writeFileSync('visual-audit/report.json',JSON.stringify(reports,null,2))}
+          console.log(JSON.stringify(reports.map(r=>({lang:r.lang,width:r.width,status:r.status,overflow:r.top.scrollWidth-r.top.viewport,requests:r.requests.length,images:r.requests.filter(x=>x.type==='image').length,errors:r.errors,blocked:r.blocked.length}))));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-audit
+          path: visual-audit
