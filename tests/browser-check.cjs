@@ -72,7 +72,7 @@ const {chromium} = require('playwright');
     const modeResults=[];
     for(const lite of [false,true]){
       const ctx=await browser.newContext({viewport:{width:390,height:844}});
-      await ctx.addInitScript(value=>{localStorage.setItem('vuelosrd_lite',value?'1':'0')},lite);
+      await ctx.addInitScript(value=>{if(localStorage.getItem('vuelosrd_lite')===null)localStorage.setItem('vuelosrd_lite',value?'1':'0')},lite);
       const p=await ctx.newPage();const artResponses=[];
       p.on('response',res=>{if(new URL(res.url()).pathname==='/assets/airport-illustration.svg')artResponses.push(res)});
       await p.goto(new URL('/de/',base).href,{waitUntil:'load'});
