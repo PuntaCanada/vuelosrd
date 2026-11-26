@@ -48,11 +48,4 @@ jobs:
         env:
           VUELOSRD_URL: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:8765/' || 'https://vuelosrd.pages.dev/' }}
         run: node tests/browser-check.cjs
-      - name: Upload screenshots for inspection
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: vuelosrd-browser-screenshots
-          path: airlines-*.png
-          if-no-files-found: ignore
-          retention-days: 3
+      # Browser assertions and logs remain mandatory; screenshots stay on the runner.
